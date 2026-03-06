@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPV II · Cuenca Pluvial · Área bajo una curva</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --agua: #0277BD; --agua2: #039BE5; --agua3: #E1F5FE;
+  --tierra: #4E342E; --tierra2: #795548; --tierra3: #EFEBE9;
+  --verde: #2E7D32; --verde3: #E8F5E9;
+  --am: #F57F17; --am3: #FFF8E1;
+  --r: #B71C1C; --r3: #FFEBEE;
+  --gris: #546E7A; --gris2: #CFD8DC; --gris3: #F5F7F8;
+  --dark: #102027;
+  --card: #FFFFFF;
+  --radio: 14px;
+  --sombra: 0 3px 18px rgba(2,119,189,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #EEF4F8;
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(2,119,189,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(46,125,50,0.06) 0%, transparent 55%);
+  color: var(--dark);
+  min-height: 100vh;
+  padding: 16px 12px 48px;
+}
+
+.wrap { max-width: 680px; margin: 0 auto; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(150deg, #102027 0%, #01579B 60%, #0277BD 100%);
+  border-radius: var(--radio);
+  padding: 24px 22px 20px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.header::after {
+  content: '';
+  position: absolute; bottom: -20px; right: -20px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(3,155,229,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.header-tag { font-size: .7rem; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 6px; }
+.header-tit { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: #fff; line-height: 1.15; margin-bottom: 5px; }
+.header-sub { font-size: .85rem; color: rgba(255,255,255,.68); line-height: 1.6; }
+.header-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { font-size: .64rem; font-weight: 700; letter-spacing: .5px; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); }
+
+/* PROGRESO */
+.prog-wrap { background: var(--card); border-radius: var(--radio); padding: 11px 16px; margin-bottom: 14px; box-shadow: var(--sombra); }
+.prog-label { display: flex; justify-content: space-between; font-size: .76rem; font-weight: 700; color: var(--gris); margin-bottom: 7px; }
+.prog-bar { height: 7px; background: var(--gris2); border-radius: 10px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--agua), var(--verde)); border-radius: 10px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+/* CARDS */
+.card { background: var(--card); border-radius: var(--radio); padding: 20px 18px; margin-bottom: 14px; box-shadow: var(--sombra); display: none; }
+.card.active { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.card-tag { font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gris); margin-bottom: 4px; }
+.card-tit { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: var(--agua); margin-bottom: 12px; line-height: 1.2; }
+.card-tit.v { color: var(--verde); }
+.card-tit.t { color: var(--tierra); }
+
+/* BLOQUES */
+.bloque { border-radius: 10px; padding: 13px 15px; margin-bottom: 12px; }
+.bloque.agua { background: var(--agua3); border-left: 4px solid var(--agua); }
+.bloque.tierra { background: var(--tierra3); border-left: 4px solid var(--tierra2); }
+.bloque.verde { background: var(--verde3); border-left: 4px solid var(--verde); }
+.bloque.am { background: var(--am3); border-left: 4px solid var(--am); }
+.bloque.r { background: var(--r3); border-left: 4px solid var(--r); }
+.bloque p, .bloque li { font-size: .88rem; line-height: 1.75; color: var(--dark); }
+.bloque ul, .bloque ol { padding-left: 18px; }
+.bloque h4 { font-size: .92rem; font-weight: 700; margin-bottom: 7px; }
+.bloque strong { color: inherit; }
+
+/* TABLA */
+.tbl { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: .87rem; }
+.tbl th { background: var(--agua); color: #fff; padding: 8px 10px; text-align: center; font-weight: 700; }
+.tbl td { padding: 7px 10px; border-bottom: 1px solid var(--gris2); text-align: center; }
+.tbl tr:nth-child(even) td { background: var(--agua3); }
+.tbl .hl { font-weight: 800; color: var(--agua); }
+
+/* FRACCIÓN */
+.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 2px; line-height: 1.2; }
+.frac .num { border-bottom: 2px solid currentColor; padding: 0 4px 2px; font-size: .93em; }
+.frac .den { padding: 2px 4px 0; font-size: .93em; }
+
+/* MATH */
+.math { background: #102027; color: #80DEEA; border-radius: 6px; padding: 2px 8px; font-family: 'DM Serif Display', serif; font-size: 1rem; display: inline-block; }
+.math-block { background: #102027; color: #80DEEA; border-radius: 10px; padding: 13px 16px; font-size: 1rem; text-align: center; margin: 10px 0; line-height: 2.6; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+.math-block .frac .num, .math-block .frac .den { color: #80DEEA; }
+.sigma-block { background: #102027; color: #80DEEA; border-radius: 10px; padding: 12px 20px; font-size: 1.15rem; font-weight: 700; text-align: center; margin: 10px 0; letter-spacing: .5px; }
+
+/* CANVAS */
+canvas { border-radius: 10px; display: block; margin: 12px auto; max-width: 100%; }
+
+/* LEYENDA */
+.leyenda { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 8px; }
+.ley-item { display: flex; align-items: center; gap: 5px; font-size: .74rem; font-weight: 600; }
+.ley-box { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; flex-shrink: 0; }
+
+/* INPUT / VERIFICACIÓN */
+.veri-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+.veri-inp { border: 2px solid var(--gris2); border-radius: 8px; padding: 9px 12px; font-size: 1rem; width: 110px; font-family: 'DM Sans', sans-serif; font-weight: 700; text-align: center; background: var(--gris3); transition: border .2s; }
+.veri-inp:focus { outline: none; border-color: var(--agua); background: #fff; }
+.veri-msg { font-size: .82rem; font-weight: 600; padding: 7px 12px; border-radius: 8px; display: none; line-height: 1.5; }
+.veri-msg.ok { background: var(--verde3); color: var(--verde); display: block; }
+.veri-msg.err { background: var(--r3); color: var(--r); display: block; }
+
+/* BOTONES */
+.btn { display: inline-flex; align-items: center; gap: 7px; background: linear-gradient(135deg, var(--agua), var(--agua2)); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: .94rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 3px 12px rgba(2,119,189,.3); margin-top: 10px; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(2,119,189,.38); }
+.btn:active { transform: translateY(0); }
+.btn.v { background: linear-gradient(135deg, var(--verde), #43A047); box-shadow: 0 3px 12px rgba(46,125,50,.3); }
+.btn.am { background: linear-gradient(135deg, var(--am), #FFB300); box-shadow: 0 3px 12px rgba(245,127,23,.3); color: #102027; }
+.btn.sm { padding: 8px 16px; font-size: .82rem; }
+.btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+
+/* PISTA */
+.pista-btn { font-size: .78rem; font-weight: 700; color: var(--am); cursor: pointer; background: none; border: none; text-decoration: underline; margin-top: 4px; }
+.pista { display: none; margin-top: 6px; }
+.pista.show { display: block; }
+
+/* RETRO */
+.retro { font-size: .83rem; font-weight: 600; border-radius: 8px; padding: 10px 13px; margin-top: 8px; display: none; line-height: 1.6; }
+.retro.ok  { background: var(--verde3); color: var(--verde); border-left: 3px solid var(--verde); display: block; }
+.retro.err { background: var(--r3); color: var(--r); border-left: 3px solid var(--r); display: block; }
+.retro.info{ background: var(--am3); color: #5a3a00; border-left: 3px solid var(--am); display: block; }
+
+/* OPCIONES */
+.opt-grid { display: grid; gap: 8px; margin: 10px 0; }
+.opt { border: 2px solid var(--gris2); border-radius: 10px; padding: 11px 14px; cursor: pointer; font-size: .87rem; font-weight: 500; transition: all .18s; background: var(--gris3); line-height: 1.5; }
+.opt:hover { border-color: var(--agua); background: var(--agua3); }
+.opt.correct { border-color: var(--verde); background: var(--verde3); color: var(--verde); }
+.opt.wrong   { border-color: var(--r); background: var(--r3); color: var(--r); }
+
+/* PANEL FLOTANTE */
+.panel-ac { position: sticky; top: 10px; z-index: 100; background: #102027; border-radius: var(--radio); padding: 12px 15px; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.25); display: none; }
+.panel-ac.show { display: block; }
+.panel-ac .pa-tit { font-size: .72rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.38); margin-bottom: 8px; font-weight: 700; }
+.pa-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.pa-item { background: rgba(255,255,255,.07); border-radius: 8px; padding: 7px 10px; text-align: center; }
+.pa-item .pa-lbl { font-size: .6rem; color: rgba(255,255,255,.4); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.pa-item .pa-val { font-size: 1.1rem; font-weight: 700; color: #80DEEA; margin-top: 2px; }
+.pa-item.ok .pa-val { color: #A5D6A7; }
+
+/* TEXTAREA */
+textarea { width: 100%; min-height: 85px; border: 2px solid var(--gris2); border-radius: 8px; padding: 10px 13px; font-size: .88rem; font-family: 'DM Sans', sans-serif; resize: vertical; background: var(--gris3); transition: border .2s; }
+textarea:focus { outline: none; border-color: var(--agua); background: #fff; }
+.char-count { font-size: .74rem; color: var(--gris); text-align: right; margin-top: 3px; }
+
+/* CÓDIGOS */
+.cod-grid { display: grid; gap: 10px; }
+.cod-item { border-radius: 10px; padding: 13px 16px; display: flex; justify-content: space-between; align-items: center; }
+.cod-item.izq { background: var(--agua3); border: 2px solid var(--agua); }
+.cod-item.der { background: var(--am3); border: 2px solid var(--am); }
+.cod-item.trap { background: var(--verde3); border: 2px solid var(--verde); }
+.cod-lbl { font-size: .8rem; font-weight: 700; }
+.cod-num { font-size: 1.9rem; font-weight: 700; letter-spacing: 5px; }
+.cod-item.izq .cod-num { color: var(--agua); }
+.cod-item.der .cod-num { color: var(--am); }
+.cod-item.trap .cod-num { color: var(--verde); }
+
+/* RESUMEN ALUMNO */
+.res-seccion { margin-bottom: 18px; }
+.res-titulo { font-size: .68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gris); margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid var(--gris2); }
+.res-fila { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; font-size: .85rem; }
+.res-fila.ok  { background: var(--verde3); }
+.res-fila.err { background: var(--r3); }
+.res-fila.neu { background: var(--am3); }
+.res-ico { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.res-body { flex: 1; line-height: 1.6; }
+.res-label { font-weight: 700; font-size: .78rem; margin-bottom: 2px; }
+.res-val-ok  { color: var(--verde); font-weight: 700; }
+.res-val-err { color: var(--r); font-weight: 700; }
+.res-esperado { font-size: .76rem; color: var(--gris); margin-top: 3px; font-style: italic; }
+.res-texto-alumno { background: rgba(0,0,0,.04); border-radius: 6px; padding: 6px 9px; font-size: .82rem; margin-top: 4px; line-height: 1.65; color: var(--dark); }
+.res-criterio { font-size: .78rem; color: #5a3a00; background: var(--am3); border-left: 3px solid var(--am); border-radius: 0 6px 6px 0; padding: 5px 9px; margin-top: 5px; line-height: 1.6; }
+
+/* PANEL DOCENTE DEDICADO */
+.doc-wrap { max-width: 900px; }
+.doc-header { background: #102027; border-radius: var(--radio); padding: 18px 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.doc-header h2 { font-family: 'DM Serif Display',serif; color: #80DEEA; font-size: 1.2rem; }
+.doc-header p { font-size: .76rem; color: rgba(255,255,255,.45); margin-top: 3px; }
+.doc-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+.doc-stat { background: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: var(--sombra); text-align: center; }
+.doc-stat .ds-val { font-size: 1.4rem; font-weight: 700; color: var(--agua); }
+.doc-stat .ds-lbl { font-size: .65rem; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.tbl-doc { width: 100%; border-collapse: collapse; font-size: .76rem; }
+.tbl-doc th { background: #102027; color: rgba(255,255,255,.8); padding: 8px 7px; text-align: center; font-weight: 700; position: sticky; top: 0; }
+.tbl-doc td { padding: 6px 7px; border-bottom: 1px solid var(--gris2); text-align: center; }
+.tbl-doc tr:hover td { background: var(--agua3); }
+.tbl-doc .nombre { text-align: left; font-size: .72rem; max-width: 120px; }
+.badge-c { display: inline-block; background: #102027; color: #80DEEA; border-radius: 5px; padding: 1px 7px; font-weight: 700; font-size: .8rem; }
+.c-izq { color: var(--agua); font-weight: 800; }
+.c-der { color: var(--am); font-weight: 800; }
+.c-trap { color: var(--verde); font-weight: 800; }
+.btn-salir { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); color: #fff; border-radius: 8px; padding: 7px 16px; font-size: .82rem; font-weight: 700; font-family: 'DM Sans',sans-serif; cursor: pointer; }
+.btn-salir:hover { background: rgba(255,255,255,.2); }
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,.55); backdrop-filter: blur(3px); align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: #fff; border-radius: var(--radio); padding: 26px 22px; max-width: 320px; width: 90%; box-shadow: 0 8px 40px rgba(0,0,0,.25); animation: fadeUp .22s ease; }
+.modal-tit { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--agua); margin-bottom: 5px; }
+.modal-sub { font-size: .8rem; color: var(--gris); margin-bottom: 14px; line-height: 1.5; }
+.modal-inp { width: 100%; border: 2px solid var(--gris2); border-radius: 8px; padding: 10px 14px; font-size: 1.2rem; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 4px; text-align: center; background: var(--gris3); margin-bottom: 8px; }
+.modal-inp:focus { outline: none; border-color: var(--agua); background: #fff; }
+.modal-err { font-size: .79rem; color: var(--r); font-weight: 700; display: none; margin-bottom: 8px; }
+.modal-btns { display: flex; gap: 8px; }
+.modal-cancel { background: var(--gris3); color: var(--gris); border: none; border-radius: 8px; padding: 10px 18px; font-size: .87rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+/* BARRA DOCENTE FLOTANTE */
+.doc-bar { display: none; position: fixed; bottom: 16px; right: 16px; z-index: 200; flex-direction: column; gap: 8px; align-items: flex-end; }
+.doc-bar.show { display: flex; }
+.doc-bar-btn { display: flex; align-items: center; gap: 6px; background: #102027; color: #80DEEA; border: 1.5px solid rgba(128,222,234,.3); border-radius: 10px; padding: 9px 16px; font-size: .82rem; font-weight: 700; font-family: 'DM Sans',sans-serif; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.35); white-space: nowrap; transition: background .15s; }
+.doc-bar-btn:hover { background: #1a3040; }
+.doc-bar-btn.skip { background: linear-gradient(135deg,#0277BD,#039BE5); color:#fff; border-color:transparent; }
+
+/* MODAL TABLA GRUPO */
+.modal-grupo { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); overflow-y: auto; padding: 20px 10px; }
+.modal-grupo.show { display: block; }
+.modal-grupo-box { background: #fff; border-radius: var(--radio); max-width: 980px; margin: 0 auto; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+.mg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.mg-tit { font-family: 'DM Serif Display',serif; font-size: 1.15rem; color: var(--agua); }
+.mg-sub { font-size: .76rem; color: var(--gris); margin-top: 2px; }
+.mg-close { background: var(--gris3); border: none; border-radius: 8px; padding: 8px 16px; font-size: .85rem; font-weight: 700; font-family: 'DM Sans',sans-serif; cursor: pointer; color: var(--dark); }
+.mg-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+.mg-stat { background: var(--gris3); border-radius: 8px; padding: 9px 12px; text-align: center; }
+.mg-stat .msv { font-size: 1.25rem; font-weight: 700; color: var(--agua); }
+.mg-stat .msl { font-size: .62rem; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.divider { height: 2px; background: linear-gradient(90deg, var(--agua3), var(--gris2), var(--verde3)); border-radius: 2px; margin: 16px 0; }
+
+/* CURIOSIDAD */
+.curiosidad { background: linear-gradient(135deg, #102027 0%, #0a2a18 100%); border-radius: 10px; padding: 14px 16px; margin: 12px 0; }
+.cur-tag { font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.3); margin-bottom: 5px; }
+.cur-txt { font-size: .87rem; color: rgba(255,255,255,.82); line-height: 1.75; }
+
+/* LOGRO */
+.logro { display: flex; gap: 10px; align-items: center; background: linear-gradient(135deg,#102027,#01303a); border-radius: 10px; padding: 12px 15px; margin: 10px 0; }
+.logro-ico { font-size: 1.5rem; }
+.logro-txt .lt { font-size: .62rem; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.35); font-weight: 700; }
+.logro-txt .lv { font-size: .97rem; font-weight: 700; color: #80DEEA; }
+
+/* PIE ACCESO */
+.pie-acceso { text-align: center; margin-top: 18px; }
+.pie-acceso span { font-size: .63rem; color: #ccc; cursor: pointer; transition: color .2s; }
+.pie-acceso span:hover { color: var(--gris); }
+
+p { font-size: .9rem; line-height: 1.75; margin-bottom: 8px; }
+hr { border: none; border-top: 1px solid var(--gris2); margin: 14px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- MODAL DOCENTE -->
+<div class="modal-overlay" id="modal-docente">
+  <div class="modal-box">
+    <div class="modal-tit">🔑 Acceso verificado</div>
+    <div class="modal-sub">Ingresa el código para continuar en modo supervisión.</div>
+    <input class="modal-inp" id="modal-inp" type="password" maxlength="6" placeholder="_ _ _ _"
+           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+           onkeydown="if(event.key==='Enter') confirmarDocente()">
+    <div class="modal-err" id="modal-err">Código incorrecto.</div>
+    <div class="modal-btns">
+      <button class="btn sm" onclick="confirmarDocente()">Confirmar</button>
+      <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-tag">TPV II · P4 · Integral Definida · Prof. Adrián Cruz</div>
+  <div class="header-tit">El fondo de la cuenca</div>
+  <div class="header-sub">¿Cuánta agua puede almacenar esta cuenca pluvial? Estima el área bajo una curva.</div>
+  <div class="header-chips">
+    <span class="chip">💧 Cuenca pluvial CDMX</span>
+    <span class="chip">📐 Σf(xᵢ)Δx</span>
+    <span class="chip">📊 Rect. + Trapecio</span>
+    <span class="chip">⏱ ~45 min</span>
+  </div>
+</div>
+
+<!-- PROGRESO -->
+<div class="prog-wrap">
+  <div class="prog-label"><span id="prog-texto">Inicio</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- PANEL FLOTANTE -->
+<div class="panel-ac" id="panel-ac">
+  <div class="pa-tit">📊 Alumno: <span id="pa-nombre">?</span></div>
+  <div class="pa-grid">
+    <div class="pa-item" id="pa-izq"><div class="pa-lbl">Rect. Izq. (m²)</div><div class="pa-val" id="pa-izq-val">—</div></div>
+    <div class="pa-item" id="pa-der"><div class="pa-lbl">Rect. Der. (m²)</div><div class="pa-val" id="pa-der-val">—</div></div>
+    <div class="pa-item" id="pa-trap"><div class="pa-lbl">Trapecio (m²)</div><div class="pa-val" id="pa-trap-val">—</div></div>
+  </div>
+</div>
+
+<!-- BARRA FLOTANTE DOCENTE -->
+<div class="doc-bar" id="doc-bar">
+  <button class="doc-bar-btn skip" onclick="saltarResultados()">⚡ Ir a resultados</button>
+  <button class="doc-bar-btn" onclick="abrirTablaGrupo()">📋 Ver tabla del grupo</button>
+</div>
+
+<!-- MODAL TABLA GRUPO -->
+<div class="modal-grupo" id="modal-grupo">
+  <div class="modal-grupo-box">
+    <div class="mg-header">
+      <div>
+        <div class="mg-tit">📋 Resultados esperados — Grupo completo</div>
+        <div class="mg-sub">TPV II · P4 · Prof. Adrián Cruz · f(x) = x² − 2x + c · 26 alumnos + 4 invitados</div>
+      </div>
+      <button class="mg-close" onclick="cerrarTablaGrupo()">✕ Cerrar</button>
+    </div>
+    <div class="mg-stats" id="mg-stats"></div>
+    <div style="overflow-x:auto;border-radius:8px;box-shadow:var(--sombra);">
+      <table class="tbl-doc" id="tbl-grupo-modal"></table>
+    </div>
+    <p style="font-size:.72rem;color:var(--gris);margin-top:10px;text-align:center;">Los invitados (I1–I4) pueden asignarse a alumnos nuevos o grupos de control.</p>
+  </div>
+</div>
+
+<!-- ═══ B0: LOGIN ═══ -->
+<div class="card active" id="b0">
+  <div class="card-tag">Identificación</div>
+  <div class="card-tit">¿Quién eres?</div>
+  <div class="bloque agua">
+    <p>Esta actividad genera una función cuadrática <strong>única</strong> para cada alumno. Elige tu nombre correctamente — tus cálculos y códigos dependen de él.</p>
+  </div>
+  <select class="sel" id="sel-alumno" style="width:100%;max-width:420px;border:2px solid var(--gris2);border-radius:8px;padding:10px 13px;font-size:.95rem;font-family:'DM Sans',sans-serif;background:var(--gris3);cursor:pointer;margin-top:10px;">
+    <option value="">— Elige tu nombre —</option>
+    <option value="1">1 · ANGELES REYES LENIN RAUL</option>
+    <option value="2">2 · AREVALO RODRIGUEZ ABIGAIL PAULINA</option>
+    <option value="3">3 · AVILA CRUZ IRVIN GIOVANNI</option>
+    <option value="4">4 · BRAVO VALADEZ DANA PAOLA</option>
+    <option value="5">5 · CARMONA MARTINEZ MONTSERRAT ARANZA</option>
+    <option value="6">6 · CASTRO MIGUEL ANGEL</option>
+    <option value="7">7 · CERVANTES CHAVEZ RAFAEL</option>
+    <option value="8">8 · DE JESUS BALLADO MARIANA</option>
+    <option value="9">9 · DE LA ROSA GORDILLO KATYA GUADALUPE</option>
+    <option value="10">10 · FLORES MORALES JENNIFER</option>
+    <option value="11">11 · GOMEZ CRUZ NATALIA MONTSERRAT</option>
+    <option value="12">12 · GONZALEZ ISLAS ANGEL IVAN</option>
+    <option value="13">13 · GONZALEZ RIVAS LUIS ANGEL</option>
+    <option value="14">14 · HINOJOSA BARRIOS HELLEN</option>
+    <option value="15">15 · JIMENEZ CRUZ MARIANA SARAHI</option>
+    <option value="16">16 · MARTINEZ CARMONA DANNA XIMENA</option>
+    <option value="17">17 · MIRANDA VALENCIA REGINA</option>
+    <option value="18">18 · MUNGUIA VALDEZ YSAEL ALBERTO</option>
+    <option value="19">19 · MYSONSLEY JEAN LOUIS</option>
+    <option value="20">20 · NAVARRO SEGUNDO CITLALLI ALONDRA</option>
+    <option value="21">21 · PALOMARES HERNANDEZ EVELYN MONSERRAT</option>
+    <option value="22">22 · PEREZ LOZANO SOFIA</option>
+    <option value="23">23 · RAMIREZ SALVADOR MAYBELINE</option>
+    <option value="24">24 · REDONDA SARMIENTO ERICK IVAN</option>
+    <option value="25">25 · URBINA GUTIERREZ SANTIAGO</option>
+    <option value="26">26 · VILLALPANDO MARQUEZ MICHELLE</option>
+    <optgroup label="── Invitados ──">
+      <option value="27">I1 · INVITADO 1</option>
+      <option value="28">I2 · INVITADO 2</option>
+      <option value="29">I3 · INVITADO 3</option>
+      <option value="30">I4 · INVITADO 4</option>
+    </optgroup>
+  </select>
+  <div class="retro err" id="login-err" style="display:none;">Por favor selecciona tu nombre.</div>
+  <button class="btn" onclick="iniciarSesion()">Comenzar →</button>
+  <div class="pie-acceso"><span onclick="abrirModal()">v1.0</span></div>
+</div>
+
+<!-- ═══ B1: APERTURA ═══ -->
+<div class="card" id="b1">
+  <div class="card-tag">Bloque 1 · Apertura</div>
+  <div class="card-tit">La cuenca pluvial del Bordo Poniente</div>
+
+  <div class="bloque agua">
+    <p>En la Ciudad de México existen cuencas de captación de agua pluvial para evitar inundaciones. El perfil transversal de una de ellas sigue una curva matemática. Un ingeniero hidráulico necesita calcular el <strong>área de esa sección</strong> para estimar cuántos metros cúbicos de agua puede almacenar por cada metro de largo.</p>
+  </div>
+
+  <canvas id="grafica-apertura" width="580" height="220"></canvas>
+
+  <div class="bloque tierra">
+    <h4>📐 El perfil de tu cuenca</h4>
+    <p>La curva que describe el fondo es: <span class="math" id="formula-display">f(x) = x² − 2x + c</span></p>
+    <p style="margin-top:6px;">El área útil está entre <strong>x = 0</strong> y <strong>x = 4</strong> metros. Los 4 puntos de la base están en x = 0, 1, 2, 3 y 4 m.</p>
+  </div>
+
+  <table class="tbl" id="tabla-fx"></table>
+  <p style="font-size:.79rem;color:var(--gris);margin-bottom:8px;">f(x) representa la <strong>altura del perfil</strong> en cada punto (metros). El área bajo la curva = capacidad de almacenamiento (m²).</p>
+
+  <div class="bloque am">
+    <h4>🤔 Tu primera estimación — antes de calcular</h4>
+    <p>Mirando la gráfica y la tabla: ¿el área bajo esta curva te parece más cerca de 10 m², de 20 m² o de 35 m²? ¿Por qué lo piensas?</p>
+    <div class="opt-grid" id="opts-apertura"></div>
+    <div class="retro" id="retro-apertura"></div>
+  </div>
+
+  <button class="btn" id="btn-b1" onclick="avanzar(1,2)" disabled>Calcular con rectángulos →</button>
+</div>
+
+<!-- ═══ B2: RECTÁNGULOS IZQUIERDOS ═══ -->
+<div class="card" id="b2">
+  <div class="card-tag">Bloque 2 · Suma de Riemann</div>
+  <div class="card-tit">Rectángulos izquierdos — Σf(xᵢ)Δx</div>
+
+  <div class="bloque agua">
+    <h4>La estrategia: rellenar la cuenca con rectángulos</h4>
+    <p>Dividimos el intervalo [0, 4] en <strong>4 subintervalos</strong> de Δx = 1 m cada uno. En cada uno colocamos un rectángulo cuya <strong>base = Δx = 1 m</strong> y cuya <strong>altura = f(x) en el extremo izquierdo</strong> de ese tramo.</p>
+    <p style="margin-top:6px;">El área de cada rectángulo = base × altura = 1 × f(xᵢ). La suma de las 4 áreas es Sᵢ.</p>
+  </div>
+
+  <div class="sigma-block">Σ f(xᵢ) · Δx</div>
+
+  <canvas id="grafica-izq" width="580" height="240"></canvas>
+  <div class="leyenda" id="leyenda-izq"></div>
+
+  <div class="bloque am">
+    <h4>✏️ Paso a paso — completa la tabla en tu cuaderno</h4>
+    <p>Tu función es <strong id="formula-izq-display">f(x) = x² − 2x + c</strong>. Evalúala en cada punto y calcula el área del rectángulo correspondiente.</p>
+
+    <table class="tbl" style="margin:12px 0;">
+      <thead><tr>
+        <th>Rect.</th>
+        <th>Intervalo</th>
+        <th>Base (Δx)</th>
+        <th>Extremo izq. (x)</th>
+        <th>Altura = f(x) = ?</th>
+        <th>Área = base × altura</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>1</td><td>[0, 1]</td><td>1 m</td><td>x = 0</td><td><input type="number" class="veri-inp" id="h-izq-0" placeholder="f(0)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-izq-0" style="color:var(--agua);font-weight:700;">—</td></tr>
+        <tr><td>2</td><td>[1, 2]</td><td>1 m</td><td>x = 1</td><td><input type="number" class="veri-inp" id="h-izq-1" placeholder="f(1)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-izq-1" style="color:var(--agua);font-weight:700;">—</td></tr>
+        <tr><td>3</td><td>[2, 3]</td><td>1 m</td><td>x = 2</td><td><input type="number" class="veri-inp" id="h-izq-2" placeholder="f(2)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-izq-2" style="color:var(--agua);font-weight:700;">—</td></tr>
+        <tr><td>4</td><td>[3, 4]</td><td>1 m</td><td>x = 3</td><td><input type="number" class="veri-inp" id="h-izq-3" placeholder="f(3)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-izq-3" style="color:var(--agua);font-weight:700;">—</td></tr>
+      </tbody>
+    </table>
+    <button class="btn sm" onclick="verificarTablaIzq()">Verificar alturas</button>
+    <div class="retro" id="retro-tabla-izq"></div>
+  </div>
+
+  <div class="bloque am" id="suma-izq-bloque" style="display:none;">
+    <h4>✏️ Ahora suma las 4 áreas</h4>
+    <p>Suma los cuatro valores de la columna "Área" y escribe el total:</p>
+    <div class="veri-row">
+      <input type="number" class="veri-inp" id="inp-izq" placeholder="Sᵢ = ?" step="0.5">
+      <button class="btn sm" onclick="verificar('izq')">Verificar Sᵢ</button>
+      <button class="pista-btn" onclick="mostrarPista('pista-izq')">¿Necesitas una pista?</button>
+    </div>
+    <div class="pista" id="pista-izq">
+      <div class="bloque tierra"><p>💡 Como Δx = 1, el área de cada rectángulo es igual a su altura. Solo suma los cuatro valores de f(x) que calculaste.</p></div>
+    </div>
+    <div class="veri-msg ok" id="veri-izq-ok">✅ ¡Correcto! Sᵢ = <strong><span id="val-izq">?</span> m²</strong>.</div>
+    <div class="veri-msg err" id="veri-izq-err">❌ Revisa la suma. Asegúrate de usar los valores que calculaste en la tabla.</div>
+  </div>
+
+  <button class="btn" id="btn-b2" onclick="avanzar(2,3)" disabled>Rectángulos derechos →</button>
+</div>
+
+<!-- ═══ B3: RECTÁNGULOS DERECHOS ═══ -->
+<div class="card" id="b3">
+  <div class="card-tag">Bloque 3 · Suma de Riemann</div>
+  <div class="card-tit">Rectángulos derechos — Σf(xᵢ)Δx</div>
+
+  <div class="bloque am" style="border-color:var(--am);">
+    <h4>La misma idea, distinta elección</h4>
+    <p>Ahora la altura de cada rectángulo es f(x) evaluada en el extremo <strong>derecho</strong> del intervalo: x = 1, 2, 3 y 4. Usa tu función para calcular cada valor.</p>
+  </div>
+
+  <canvas id="grafica-der" width="580" height="240"></canvas>
+  <div class="leyenda" id="leyenda-der"></div>
+
+  <div class="bloque am">
+    <h4>✏️ Completa la tabla — rectángulos derechos</h4>
+    <p>Evalúa <strong id="formula-der-display">f(x) = x² − 2x + c</strong> en cada extremo derecho y calcula el área.</p>
+
+    <table class="tbl" style="margin:12px 0;">
+      <thead><tr>
+        <th>Rect.</th>
+        <th>Intervalo</th>
+        <th>Base (Δx)</th>
+        <th>Extremo der. (x)</th>
+        <th>Altura = f(x) = ?</th>
+        <th>Área = base × altura</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>1</td><td>[0, 1]</td><td>1 m</td><td>x = 1</td><td><input type="number" class="veri-inp" id="h-der-0" placeholder="f(1)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-der-0" style="color:var(--am);font-weight:700;">—</td></tr>
+        <tr><td>2</td><td>[1, 2]</td><td>1 m</td><td>x = 2</td><td><input type="number" class="veri-inp" id="h-der-1" placeholder="f(2)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-der-1" style="color:var(--am);font-weight:700;">—</td></tr>
+        <tr><td>3</td><td>[2, 3]</td><td>1 m</td><td>x = 3</td><td><input type="number" class="veri-inp" id="h-der-2" placeholder="f(3)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-der-2" style="color:var(--am);font-weight:700;">—</td></tr>
+        <tr><td>4</td><td>[3, 4]</td><td>1 m</td><td>x = 4</td><td><input type="number" class="veri-inp" id="h-der-3" placeholder="f(4)" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td><td id="area-der-3" style="color:var(--am);font-weight:700;">—</td></tr>
+      </tbody>
+    </table>
+    <button class="btn sm" onclick="verificarTablaDer()">Verificar alturas</button>
+    <div class="retro" id="retro-tabla-der"></div>
+  </div>
+
+  <div class="bloque am" id="suma-der-bloque" style="display:none;">
+    <h4>✏️ Suma las 4 áreas</h4>
+    <div class="veri-row">
+      <input type="number" class="veri-inp" id="inp-der" placeholder="Sᵈ = ?" step="0.5">
+      <button class="btn sm" onclick="verificar('der')">Verificar Sᵈ</button>
+      <button class="pista-btn" onclick="mostrarPista('pista-der')">¿Necesitas una pista?</button>
+    </div>
+    <div class="pista" id="pista-der">
+      <div class="bloque tierra"><p>💡 Suma los cuatro valores de f(x) que calculaste en la tabla — como Δx = 1, son directamente las áreas.</p></div>
+    </div>
+    <div class="veri-msg ok" id="veri-der-ok">✅ ¡Correcto! Sᵈ = <strong><span id="val-der">?</span> m²</strong>.</div>
+    <div class="veri-msg err" id="veri-der-err">❌ Revisa. Suma los cuatro valores de altura que calculaste.</div>
+  </div>
+
+  <div class="bloque verde" id="cmp-bloque" style="display:none;">
+    <h4>🔍 Compara tus dos resultados</h4>
+    <p>Sᵢ = <strong><span id="cmp-izq">?</span> m²</strong> · Sᵈ = <strong><span id="cmp-der">?</span> m²</strong></p>
+    <p style="margin-top:8px;">¿Son iguales? Mira la gráfica — ¿la curva está subiendo, bajando o las dos cosas a lo largo del intervalo? ¿Eso explica cuál de los dos es mayor?</p>
+  </div>
+
+  <button class="btn" id="btn-b3" onclick="avanzar(3,4)" disabled>Mejorar con trapecios →</button>
+</div>
+
+<!-- ═══ B4: CONFLICTO + TRAPECIO ═══ -->
+<div class="card" id="b4">
+  <div class="card-tag">Bloque 4 · Conflicto y trapecio</div>
+  <div class="card-tit t">¿Qué tan buena es la estimación?</div>
+
+  <div class="bloque r">
+    <h4>⚡ El problema de elegir un solo extremo</h4>
+    <p>Tienes <strong>Sᵢ = <span id="conf-izq">?</span> m²</strong> y <strong>Sᵈ = <span id="conf-der">?</span> m²</strong>. Son diferentes porque la curva no es horizontal — en los tramos donde sube, el rectángulo izquierdo se queda corto; donde baja, se pasa de largo.</p>
+  </div>
+
+  <div class="opt-grid">
+    <p style="font-weight:700;font-size:.9rem;margin-bottom:4px;">¿Qué estrategia mejoraría más la estimación?</p>
+    <div class="opt" onclick="elegirMejora(this,true)">A) Usar muchos rectángulos muy delgados — dividir en 100 o más subintervalos</div>
+    <div class="opt" onclick="elegirMejora(this,true)">B) Conectar los puntos con líneas inclinadas en vez de techos planos — usar trapecios</div>
+    <div class="opt" onclick="elegirMejora(this,false)">C) Quedarse con el promedio de Sᵢ y Sᵈ sin cambiar la figura</div>
+    <div class="opt" onclick="elegirMejora(this,false)">D) La estimación ya no puede mejorar con estos 4 puntos</div>
+  </div>
+  <div class="retro" id="retro-mejora"></div>
+
+  <div class="divider"></div>
+
+  <div id="trap-reveal" style="display:none;">
+    <div class="bloque agua">
+      <h4>🔺 El trapecio: techo inclinado</h4>
+      <p>En lugar de un techo plano (rectángulo), conectamos los dos puntos de la curva con una línea recta. La figura resultante es un <strong>trapecio</strong> — sus dos bases son las alturas en los extremos del intervalo.</p>
+      <p style="margin-top:8px;">Área de un trapecio con bases <em>a</em> y <em>b</em> y altura <em>h</em>:</p>
+      <div class="math-block">
+        Área = <span class="frac"><span class="num">a + b</span><span class="den">2</span></span> · h
+      </div>
+    </div>
+
+    <div class="bloque tierra">
+      <p>Para cada subintervalo de tu cuenca:</p>
+      <ul style="margin-top:6px;">
+        <li><strong>base a</strong> = f(x) en el extremo izquierdo del intervalo</li>
+        <li><strong>base b</strong> = f(x) en el extremo derecho del intervalo</li>
+        <li><strong>altura h</strong> = Δx = 1 m</li>
+      </ul>
+      <p style="margin-top:8px;">La fórmula general sumando los 4 trapecios:</p>
+      <div class="math-block" style="font-size:.88rem;">
+        S<sub style="font-size:.68em">trap</sub> =
+        <span class="frac"><span class="num">f(0)+f(1)</span><span class="den">2</span></span>·1 +
+        <span class="frac"><span class="num">f(1)+f(2)</span><span class="den">2</span></span>·1 +
+        <span class="frac"><span class="num">f(2)+f(3)</span><span class="den">2</span></span>·1 +
+        <span class="frac"><span class="num">f(3)+f(4)</span><span class="den">2</span></span>·1
+      </div>
+    </div>
+
+    <button class="btn" id="btn-b4" onclick="avanzar(4,5)" disabled>Calcular con mis valores →</button>
+  </div>
+</div>
+
+<!-- ═══ B5: CÁLCULO TRAPECIO ═══ -->
+<div class="card" id="b5">
+  <div class="card-tag">Bloque 5 · Método del Trapecio</div>
+  <div class="card-tit v">Calcula el área con trapecios</div>
+
+  <canvas id="grafica-trap" width="580" height="240"></canvas>
+  <div class="leyenda" id="leyenda-trap"></div>
+
+  <p>Observa cómo las líneas inclinadas siguen mejor el perfil de la cuenca que los techos planos.</p>
+
+  <div class="bloque agua" style="margin-top:10px;">
+    <h4>Recuerda la fórmula del trapecio (Bloque 4):</h4>
+    <div class="math-block" style="font-size:.9rem;">
+      Área de un trapecio = <span class="frac"><span class="num">a + b</span><span class="den">2</span></span> · h
+    </div>
+    <p style="margin-top:6px;">Donde <strong>a</strong> y <strong>b</strong> son las dos bases (alturas en cada extremo) y <strong>h = Δx = 1 m</strong>.</p>
+  </div>
+
+  <div class="bloque am">
+    <h4>✏️ Calcula el área de cada trapecio</h4>
+    <p>Los lados de cada trapecio son los valores de tu función: <strong>f(0), f(1), f(2), f(3) y f(4)</strong> — los mismos que calculaste en los bloques anteriores. Aplica la fórmula a cada uno de los 4 intervalos y anota el área en tu cuaderno:</p>
+
+    <table class="tbl" style="margin:12px 0;">
+      <thead><tr>
+        <th>Trapecio</th>
+        <th>Intervalo</th>
+        <th>Base izq. (a)</th>
+        <th>Base der. (b)</th>
+        <th>h</th>
+        <th>Área = <span class="frac" style="display:inline-flex;font-size:.8em;"><span class="num">a+b</span><span class="den">2</span></span>·h</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>1</td><td>[0,1]</td><td>f(0)</td><td>f(1)</td><td>1</td><td><input type="number" class="veri-inp" id="t-area-0" placeholder="?" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td></tr>
+        <tr><td>2</td><td>[1,2]</td><td>f(1)</td><td>f(2)</td><td>1</td><td><input type="number" class="veri-inp" id="t-area-1" placeholder="?" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td></tr>
+        <tr><td>3</td><td>[2,3]</td><td>f(2)</td><td>f(3)</td><td>1</td><td><input type="number" class="veri-inp" id="t-area-2" placeholder="?" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td></tr>
+        <tr><td>4</td><td>[3,4]</td><td>f(3)</td><td>f(4)</td><td>1</td><td><input type="number" class="veri-inp" id="t-area-3" placeholder="?" step="0.5" style="width:70px;font-size:.85rem;padding:5px 6px;"></td></tr>
+      </tbody>
+    </table>
+    <button class="btn sm v" onclick="verificarTablaTrap()">Verificar áreas</button>
+    <div class="retro" id="retro-tabla-trap"></div>
+  </div>
+
+  <div class="bloque am" id="suma-trap-bloque" style="display:none;">
+    <h4>✏️ Suma las 4 áreas de los trapecios</h4>
+    <div class="veri-row">
+      <input type="number" class="veri-inp" id="inp-trap" placeholder="S_trap = ?" step="0.5">
+      <button class="btn sm v" onclick="verificar('trap')">Verificar S_trap</button>
+      <button class="pista-btn" onclick="mostrarPista('pista-trap')">¿Necesitas una pista?</button>
+    </div>
+    <div class="pista" id="pista-trap">
+      <div class="bloque verde"><p>💡 Suma los cuatro valores de área que calculaste arriba. También puedes verificar con el atajo: (Sᵢ + Sᵈ) ÷ 2.</p></div>
+    </div>
+    <div class="veri-msg ok" id="veri-trap-ok">✅ ¡Excelente! S_trap = <strong><span id="val-trap">?</span> m²</strong>. Queda exactamente entre Sᵢ y Sᵈ.</div>
+    <div class="veri-msg err" id="veri-trap-err">❌ Revisa la suma de las cuatro áreas.</div>
+  </div>
+
+  <div class="logro" id="logro" style="display:none;">
+    <div class="logro-ico">🏆</div>
+    <div class="logro-txt">
+      <div class="lt">Logro desbloqueado</div>
+      <div class="lv">Tres estimaciones del área de la cuenca</div>
+    </div>
+  </div>
+
+  <button class="btn v" id="btn-b5" onclick="avanzar(5,6)" disabled>Ver el cierre →</button>
+</div>
+
+<!-- ═══ B6: CIERRE ═══ -->
+<div class="card" id="b6">
+  <div class="card-tag">Bloque 6 · Cierre</div>
+  <div class="card-tit">¿Qué nos dicen los tres resultados?</div>
+
+  <canvas id="grafica-comp" width="580" height="260"></canvas>
+
+  <div class="bloque agua" id="resumen-bloque">
+    <h4>📊 Tus tres estimaciones del área</h4>
+    <p id="resumen-txt"></p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="bloque agua">
+    <h4>✏️ Interpretación 1 — ¿Quién se pasa y quién se queda corto?</h4>
+    <p>Mira la gráfica de los rectángulos izquierdos. En los tramos donde la curva <strong>sube</strong>, el rectángulo izquierdo tiene un techo más bajo que la curva real — le falta área. En los tramos donde la curva <strong>baja</strong>, el techo queda por encima — le sobra.</p>
+    <p style="margin-top:8px;">Con tus valores: ¿Sᵢ quedó <em>por debajo</em> o <em>por encima</em> del área real estimada por el trapecio? ¿Eso coincide con lo que ves en la gráfica — la curva sube más de lo que baja, o al revés?</p>
+    <textarea id="ta-r1" placeholder="Escribe lo que observas en la gráfica y conecta con tus números..." oninput="contarChars(this,'ch-r1')"></textarea>
+    <div class="char-count" id="ch-r1">0 / mínimo 40 caracteres</div>
+  </div>
+
+  <div class="bloque verde">
+    <h4>✏️ Interpretación 2 — ¿Qué tan grande es el error?</h4>
+    <p>La diferencia entre Sᵢ y Sᵈ muestra cuánto cambia la curva de un extremo al otro del intervalo. Si esa diferencia es grande, significa que la curva tiene una pendiente pronunciada y los rectángulos se equivocan bastante. Si es pequeña, la curva es casi plana y los rectángulos se aproximan bien.</p>
+    <p style="margin-top:8px;">Con tus datos: ¿cuánto vale |Sᵢ − Sᵈ|? Compáralo con el área total estimada por el trapecio — ¿es un error grande o pequeño en proporción? ¿Qué parte de la gráfica explica ese error?</p>
+    <textarea id="ta-r2" placeholder="Calcula la diferencia, compárala con S_trap y explica lo que ves..." oninput="contarChars(this,'ch-r2')"></textarea>
+    <div class="char-count" id="ch-r2">0 / mínimo 40 caracteres</div>
+  </div>
+
+  <div class="curiosidad">
+    <div class="cur-tag">🔭 Para pensar — no entra en el examen</div>
+    <div class="cur-txt">
+      Existe un tercer método: evaluar f(x) en el <strong>punto medio</strong> de cada intervalo — f(0.5), f(1.5), f(2.5) y f(3.5) — en lugar de los extremos. A veces ese resultado es más preciso que el trapecio. ¿Por qué crees que pasa eso? Quédate con la pregunta. La retomamos en la siguiente sesión.
+    </div>
+  </div>
+
+  <button class="btn" id="btn-b6" onclick="avanzar(6,7)" disabled>Ver mis códigos →</button>
+</div>
+
+<!-- ═══ B7: REPORTE FINAL ═══ -->
+<div class="card" id="b7">
+  <div class="card-tag">Reporte final</div>
+  <div class="card-tit">Tu reporte de resultados</div>
+  <p style="margin-bottom:14px;">Revisa tus respuestas, toma captura y sube la imagen a Google Classroom junto con la foto de tus cálculos.</p>
+
+  <!-- Sección: datos del alumno -->
+  <div class="res-seccion">
+    <div class="res-titulo">📌 Identificación</div>
+    <div id="rep-identificacion"></div>
+  </div>
+
+  <!-- Sección: estimación inicial -->
+  <div class="res-seccion">
+    <div class="res-titulo">Bloque 1 · Estimación inicial</div>
+    <div id="rep-apertura"></div>
+  </div>
+
+  <!-- Sección: rectángulos izquierdos -->
+  <div class="res-seccion">
+    <div class="res-titulo">Bloque 2 · Rectángulos izquierdos</div>
+    <div id="rep-izq"></div>
+  </div>
+
+  <!-- Sección: rectángulos derechos -->
+  <div class="res-seccion">
+    <div class="res-titulo">Bloque 3 · Rectángulos derechos</div>
+    <div id="rep-der"></div>
+  </div>
+
+  <!-- Sección: trapecio -->
+  <div class="res-seccion">
+    <div class="res-titulo">Bloque 5 · Método del Trapecio</div>
+    <div id="rep-trap"></div>
+  </div>
+
+  <!-- Sección: códigos de verificación -->
+  <div class="res-seccion">
+    <div class="res-titulo">🔐 Códigos de verificación</div>
+    <div class="cod-grid" id="cod-grid"></div>
+  </div>
+
+  <!-- Sección: reflexiones escritas -->
+  <div class="res-seccion">
+    <div class="res-titulo">Bloque 6 · Interpretaciones escritas</div>
+    <div id="rep-reflexiones"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;padding:13px;background:var(--gris3);border-radius:10px;">
+    <p style="font-size:.8rem;color:var(--gris);">TPV II · P4 · Prof. Adrián Cruz · MCCEMS 2025</p>
+    <p style="font-size:.75rem;color:var(--gris);margin-top:2px;">Cuenca pluvial CDMX · Sumas de Riemann y Trapecio</p>
+  </div>
+</div>
+
+</div>
+<script>
+// ══ ALUMNOS ══
+const ALUMNOS = {
+  1:"ANGELES REYES LENIN RAUL",2:"AREVALO RODRIGUEZ ABIGAIL PAULINA",
+  3:"AVILA CRUZ IRVIN GIOVANNI",4:"BRAVO VALADEZ DANA PAOLA",
+  5:"CARMONA MARTINEZ MONTSERRAT ARANZA",6:"CASTRO MIGUEL ANGEL",
+  7:"CERVANTES CHAVEZ RAFAEL",8:"DE JESUS BALLADO MARIANA",
+  9:"DE LA ROSA GORDILLO KATYA GUADALUPE",10:"FLORES MORALES JENNIFER",
+  11:"GOMEZ CRUZ NATALIA MONTSERRAT",12:"GONZALEZ ISLAS ANGEL IVAN",
+  13:"GONZALEZ RIVAS LUIS ANGEL",14:"HINOJOSA BARRIOS HELLEN",
+  15:"JIMENEZ CRUZ MARIANA SARAHI",16:"MARTINEZ CARMONA DANNA XIMENA",
+  17:"MIRANDA VALENCIA REGINA",18:"MUNGUIA VALDEZ YSAEL ALBERTO",
+  19:"MYSONSLEY JEAN LOUIS",20:"NAVARRO SEGUNDO CITLALLI ALONDRA",
+  21:"PALOMARES HERNANDEZ EVELYN MONSERRAT",22:"PEREZ LOZANO SOFIA",
+  23:"RAMIREZ SALVADOR MAYBELINE",24:"REDONDA SARMIENTO ERICK IVAN",
+  25:"URBINA GUTIERREZ SANTIAGO",26:"VILLALPANDO MARQUEZ MICHELLE",
+  27:"INVITADO 1",28:"INVITADO 2",29:"INVITADO 3",30:"INVITADO 4"
+};
+const N_ALUMNOS = 26; // alumnos regulares; 27-30 son invitados
+
+const PROGRESO = [0,14,28,44,58,72,86,100];
+let nLista=0, nombre="", fx=[], cte=0;
+let resIzq=0, resDer=0, resTrap=0;
+let mejoraOk=false, intentos={izq:0,der:0,trap:0};
+let DOCENTE=false;
+
+// ══ SEMILLA ══
+function sr(s){ const x=Math.sin(s*91.3+177.7)*43758.5453; return x-Math.floor(x); }
+function cod(v,n,s){ const r=Math.round(v*10); return ((r*37+n*83+s*61)%9000+9000)%9000+1000; }
+
+// La constante varía por alumno: c va de 4 a 8 (enteros), garantizando f(x)>0 en [0,4]
+// f(x) = x² - 2x + c  →  f(0)=c, f(1)=c-1, f(2)=c-2, f(3)=c+1, f(4)=c+8
+// Para c=4: f = 4,3,4,7,12 → Sᵢ=18, Sᵈ=26, Strap=22
+// Para c=5: f = 5,4,5,8,13 → Sᵢ=22, Sᵈ=30, Strap=26
+// Para c=6: f = 6,5,6,9,14 → Sᵢ=26, Sᵈ=34, Strap=30
+// Todos enteros, siempre positivos, diferencia clara entre Sᵢ y Sᵈ
+function generarFuncion(n){
+  const opciones = [4,5,6,7,8];
+  const idx = Math.floor(sr(n*13+7)*opciones.length);
+  return opciones[idx];
+}
+// Todos los registros (alumnos + invitados) usan la misma lógica de semilla.
+// Invitados 27-30 reciben c diferente gracias a su n distinto.
+
+function evalFx(x, c){ return x*x - 2*x + c; }
+
+// ══ MODAL ══
+function abrirModal(){ document.getElementById('modal-docente').classList.add('show'); setTimeout(()=>document.getElementById('modal-inp').focus(),100); }
+function cerrarModal(){ document.getElementById('modal-docente').classList.remove('show'); document.getElementById('modal-inp').value=''; document.getElementById('modal-err').style.display='none'; }
+function confirmarDocente(){
+  if(document.getElementById('modal-inp').value.trim()==='890'){
+    cerrarModal(); DOCENTE=true; nLista=890; nombre="DOCENTE (demo)";
+    cte=4; fx=[4,3,4,7,12];
+    calcularResultados();
+    document.getElementById('pa-nombre').textContent='DOCENTE';
+    document.getElementById('panel-ac').classList.add('show');
+    document.getElementById('doc-bar').classList.add('show');
+    avanzar(0,1);
+  } else {
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('modal-inp').value='';
+    document.getElementById('modal-inp').focus();
+  }
+}
+document.getElementById('modal-docente').addEventListener('click',function(e){ if(e.target===this) cerrarModal(); });
+
+// Saltar directamente al reporte sin contestar (solo docente)
+function saltarResultados(){
+  // Avanza a B7 desde cualquier bloque activo
+  const activo=document.querySelector('.card.active');
+  if(activo){ activo.classList.remove('active'); }
+  document.getElementById('b7').classList.add('active');
+  actualizarProgreso(7);
+  window.scrollTo({top:0,behavior:'smooth'});
+  llenarCodigos();
+}
+
+// Modal tabla grupo
+function abrirTablaGrupo(){
+  const fmt=v=>v%1===0?v:v.toFixed(1);
+  // Stats
+  const todos=[...Array(30)].map((_,i)=>i+1);
+  const sis=[],sds=[],sts=[];
+  todos.forEach(n=>{
+    const c=generarFuncion(n); const f=[0,1,2,3,4].map(x=>evalFx(x,c));
+    const si=f[0]+f[1]+f[2]+f[3], sd=f[1]+f[2]+f[3]+f[4], st=(si+sd)/2;
+    sis.push(si); sds.push(sd); sts.push(st);
+  });
+  const minSi=Math.min(...sis.slice(0,26)), maxSi=Math.max(...sis.slice(0,26));
+  const minSt=Math.min(...sts.slice(0,26)), maxSt=Math.max(...sts.slice(0,26));
+  document.getElementById('mg-stats').innerHTML=`
+    <div class="mg-stat"><div class="msv">30</div><div class="msl">Total (grupo+inv.)</div></div>
+    <div class="mg-stat"><div class="msv">${minSi}–${maxSi}</div><div class="msl">Rango Sᵢ grupo</div></div>
+    <div class="mg-stat"><div class="msv">${minSt}–${maxSt}</div><div class="msl">Rango S_trap grupo</div></div>
+    <div class="mg-stat"><div class="msv">5</div><div class="msl">Variantes de c</div></div>`;
+
+  // Tabla
+  let html=`<thead><tr>
+    <th>#</th><th>Nombre</th><th style="background:#1a2a35;">c</th>
+    <th>f(0)</th><th>f(1)</th><th>f(2)</th><th>f(3)</th><th>f(4)</th>
+    <th style="color:#80DEEA;">Sᵢ</th><th style="color:#FFB300;">Sᵈ</th><th style="color:#A5D6A7;">S_trap</th>
+    <th style="color:#80DEEA;">Cód. Sᵢ</th><th style="color:#FFB300;">Cód. Sᵈ</th><th style="color:#A5D6A7;">Cód. S_T</th>
+  </tr></thead><tbody>`;
+  todos.forEach(n=>{
+    const c=generarFuncion(n); const f=[0,1,2,3,4].map(x=>evalFx(x,c));
+    const si=sis[n-1], sd=sds[n-1], st=sts[n-1];
+    const ci=cod(si,n,1), cd=cod(sd,n,2), ct=cod(st,n,3);
+    const ap=ALUMNOS[n].split(' ');
+    const esInv=n>26;
+    const rowBg=esInv?'background:var(--am3);':'';
+    html+=`<tr style="${rowBg}">
+      <td>${n<=26?n:'I'+(n-26)}</td>
+      <td class="nombre">${esInv?'⭐ '+ALUMNOS[n]:ap[0]+' '+ap[1]}</td>
+      <td><span class="badge-c">${c}</span></td>
+      <td>${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td><td>${f[4]}</td>
+      <td class="c-izq">${fmt(si)}</td><td class="c-der">${fmt(sd)}</td><td class="c-trap">${fmt(st)}</td>
+      <td class="c-izq">${ci}</td><td class="c-der">${cd}</td><td class="c-trap">${ct}</td>
+    </tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('tbl-grupo-modal').innerHTML=html;
+  document.getElementById('modal-grupo').classList.add('show');
+}
+
+function cerrarTablaGrupo(){
+  document.getElementById('modal-grupo').classList.remove('show');
+}
+document.getElementById('modal-grupo').addEventListener('click',function(e){ if(e.target===this) cerrarTablaGrupo(); });
+
+// salirDocente ya no aplica — el docente usa el flujo normal
+
+// ══ LOGIN ══
+function iniciarSesion(){
+  const v=parseInt(document.getElementById('sel-alumno').value);
+  if(!v){ document.getElementById('login-err').style.display='block'; return; }
+  nLista=v; DOCENTE=false; nombre=ALUMNOS[v];
+  cte=generarFuncion(v);
+  fx=[0,1,2,3,4].map(x=>evalFx(x,cte));
+  calcularResultados();
+  document.getElementById('pa-nombre').textContent=nombre.split(' ')[0];
+  document.getElementById('panel-ac').classList.add('show');
+  actualizarFormulaDisplay();
+  avanzar(0,1);
+}
+
+function calcularResultados(){
+  resIzq = fx[0]+fx[1]+fx[2]+fx[3];
+  resDer = fx[1]+fx[2]+fx[3]+fx[4];
+  resTrap = (resIzq+resDer)/2;
+}
+
+function actualizarFormulaDisplay(){
+  document.getElementById('formula-display').textContent = `f(x) = x² − 2x + ${cte}`;
+}
+
+// ══ TABLA ══
+function llenarTabla(){
+  const t=document.getElementById('tabla-fx');
+  t.innerHTML=`<thead><tr><th>x (m)</th><th>f(x) (m)</th><th>Interpretación</th></tr></thead><tbody>`+
+    [0,1,2,3,4].map(x=>`<tr><td>${x}</td><td class="hl">${evalFx(x,cte)}</td><td style="font-size:.78rem;color:var(--gris);">altura en x=${x} m</td></tr>`).join('')+
+    `</tbody>`;
+}
+
+// ══ OPCIONES APERTURA ══
+function llenarOptsApertura(){
+  const real = resTrap;
+  const opts=[
+    {txt:`Cerca de 10 m²`, ok: Math.abs(10-real)<Math.abs(20-real) && Math.abs(10-real)<Math.abs(35-real)},
+    {txt:`Cerca de 20 m²`, ok: Math.abs(20-real)<Math.abs(10-real) && Math.abs(20-real)<Math.abs(35-real)},
+    {txt:`Cerca de 35 m²`, ok: Math.abs(35-real)<Math.abs(10-real) && Math.abs(35-real)<Math.abs(20-real)}
+  ];
+  const g=document.getElementById('opts-apertura'); g.innerHTML='';
+  opts.forEach(o=>{
+    const d=document.createElement('div'); d.className='opt'; d.textContent=o.txt;
+    d.onclick=()=>elegirApertura(d,o.ok); g.appendChild(d);
+  });
+}
+
+function elegirApertura(el,ok){
+  document.querySelectorAll('#opts-apertura .opt').forEach(o=>o.onclick=null);
+  el.className='opt '+(ok?'correct':'wrong');
+  const r=document.getElementById('retro-apertura');
+  r.className='retro '+(ok?'ok':'info');
+  r.textContent=ok
+    ?'✅ ¡Buena intuición! Vamos a verificarlo con cálculos.'
+    :`💡 La intuición visual no siempre alcanza — por eso necesitamos calcular. Veamos qué da el método de los rectángulos.`;
+  document.getElementById('btn-b1').disabled=false;
+}
+
+// ══ COLORES ══
+const C={agua:'#0277BD',am:'#F57F17',verde:'#2E7D32',r:'#B71C1C',gris:'#90A4AE',dark:'#102027'};
+
+// ══ CANVAS UTILS ══
+function escalar(canvas,ys){
+  const maxY=Math.max(...ys)*1.22, minY=0;
+  const pd={l:46,r:16,t:24,b:38};
+  const W=canvas.width-pd.l-pd.r, H=canvas.height-pd.t-pd.b;
+  const xs=[0,1,2,3,4];
+  const tx=i=>pd.l+(i/4)*W;
+  const ty=v=>pd.t+H-((v-minY)/(maxY-minY))*H;
+  return {tx,ty,W,H,pd,maxY};
+}
+
+function dibujarBase(ctx,canvas,sc,ys){
+  const {tx,ty,W,H,pd,maxY}=sc;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#F9FAFB'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // cuadrícula
+  ctx.strokeStyle='#E8EDF0'; ctx.lineWidth=1;
+  for(let g=1;g<=4;g++){ const yg=ty(maxY*g/4); ctx.beginPath();ctx.moveTo(pd.l,yg);ctx.lineTo(pd.l+W,yg);ctx.stroke(); }
+  // ejes
+  ctx.strokeStyle='#607D8B'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,pd.t+H);ctx.lineTo(pd.l+W,pd.t+H);ctx.stroke();
+  // labels Y
+  ctx.fillStyle='#607D8B';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='right';
+  for(let g=0;g<=4;g++) ctx.fillText(Math.round(maxY*g/4),pd.l-5,ty(maxY*g/4)+4);
+  // labels X
+  ctx.textAlign='center';ctx.fillStyle='#607D8B';
+  [0,1,2,3,4].forEach(i=>ctx.fillText(i+'m',tx(i),pd.t+H+16));
+  // títulos
+  ctx.fillStyle='#455A64';ctx.font='bold 9px DM Sans,sans-serif';
+  ctx.save();ctx.translate(11,pd.t+H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('f(x) (m)',0,0);ctx.restore();
+  ctx.textAlign='center';ctx.fillText('x (m)',pd.l+W/2,canvas.height-2);
+}
+
+function dibujarCurva(ctx,sc,ys,mostrarLabels){
+  const {tx,ty}=sc;
+  // área rellena bajo la curva
+  ctx.beginPath();
+  ctx.moveTo(tx(0),ty(0));
+  [0,1,2,3,4].forEach((v,i)=>ctx.lineTo(tx(i),ty(ys[i])));
+  ctx.lineTo(tx(4),ty(0)); ctx.closePath();
+  ctx.fillStyle='rgba(2,119,189,0.07)'; ctx.fill();
+  // curva suave
+  ctx.strokeStyle=C.agua; ctx.lineWidth=2.8; ctx.setLineDash([]);
+  ctx.beginPath();
+  for(let xi=0;xi<=400;xi++){
+    const xv=xi/100; const yv=xv*xv-2*xv+cte;
+    const px=sc.pd.l+(xv/4)*sc.W; const py=ty(yv);
+    xi===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+  // puntos — solo marcadores, sin etiquetas de valor
+  [0,1,2,3,4].forEach((v,i)=>{
+    ctx.beginPath();ctx.arc(tx(i),ty(ys[i]),5,0,Math.PI*2);
+    ctx.fillStyle=C.agua;ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(tx(i),ty(ys[i]),3,0,Math.PI*2);ctx.fill();
+    // Solo mostrar etiqueta x, no el valor f(x)
+    ctx.fillStyle='#607D8B';ctx.font='9px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('x='+i,tx(i),ty(ys[i])-11);
+    // Mostrar valores solo en gráfica de apertura y comparación final
+    if(mostrarLabels){
+      ctx.fillStyle=C.dark;ctx.font='bold 10px DM Sans,sans-serif';
+      ctx.fillText('f('+i+')='+ys[i],tx(i),ty(ys[i])-11);
+    }
+  });
+}
+
+function dibujarRects(canvasId,ys,tipo){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const sc=escalar(canvas,ys);
+  const {tx,ty,pd}=sc; const y0=ty(0);
+  dibujarBase(ctx,canvas,sc,ys);
+  for(let i=0;i<4;i++){
+    const hi=tipo==='izq'?ys[i]:ys[i+1];
+    const mid=(ys[i]+ys[i+1])/2;
+    const excede=hi>mid;
+    const fc=excede?C.agua+'55':C.am+'55';
+    const sc2=excede?C.agua:C.am;
+    ctx.fillStyle=fc; ctx.fillRect(tx(i),ty(hi),tx(i+1)-tx(i),y0-ty(hi));
+    ctx.strokeStyle=sc2;ctx.lineWidth=1.8;ctx.setLineDash([]);
+    ctx.strokeRect(tx(i),ty(hi),tx(i+1)-tx(i),y0-ty(hi));
+    // Sin etiqueta de altura — el alumno la calcula
+  }
+  dibujarCurva(ctx,sc,ys,false);
+  const legId=canvasId.replace('grafica','leyenda');
+  const le=document.getElementById(legId);if(!le)return;
+  const lbl=tipo==='izq'?'izquierdo':'derecho';
+  le.innerHTML=`
+    <div class="ley-item"><div class="ley-box" style="background:${C.agua}55;border-color:${C.agua}"></div><span style="color:${C.agua}">Rect. ${lbl} — excede la curva</span></div>
+    <div class="ley-item"><div class="ley-box" style="background:${C.am}55;border-color:${C.am}"></div><span style="color:${C.am}">Rect. ${lbl} — queda bajo la curva</span></div>
+    <div class="ley-item"><div class="ley-box" style="background:transparent;border-color:${C.agua}"></div><span style="color:${C.agua}">Perfil de la cuenca</span></div>`;
+}
+
+function dibujarTrapecios(canvasId,ys){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const sc=escalar(canvas,ys);
+  const {tx,ty}=sc; const y0=ty(0);
+  dibujarBase(ctx,canvas,sc,ys);
+  for(let i=0;i<4;i++){
+    const x1=tx(i),x2=tx(i+1),y1=ty(ys[i]),y2=ty(ys[i+1]);
+    ctx.beginPath();ctx.moveTo(x1,y0);ctx.lineTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x2,y0);ctx.closePath();
+    ctx.fillStyle=C.verde+'55';ctx.fill();
+    ctx.strokeStyle=C.verde;ctx.lineWidth=2;ctx.setLineDash([]);ctx.stroke();
+    const area=((ys[i]+ys[i+1])/2).toFixed(1);
+    ctx.fillStyle=C.verde;ctx.font='bold 11px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText(area,(x1+x2)/2,(Math.min(y1,y2)+y0)/2+4);
+  }
+  dibujarCurva(ctx,sc,ys,false);
+  const le=document.getElementById('leyenda-trap');if(!le)return;
+  le.innerHTML=`
+    <div class="ley-item"><div class="ley-box" style="background:${C.verde}55;border-color:${C.verde}"></div><span style="color:${C.verde}">Área del trapecio</span></div>
+    <div class="ley-item"><div class="ley-box" style="background:transparent;border-color:${C.agua}"></div><span style="color:${C.agua}">Perfil de la cuenca</span></div>`;
+}
+
+function dibujarComparacion(ys){
+  const canvas=document.getElementById('grafica-comp');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const sc=escalar(canvas,ys);
+  const {tx,ty,W,H,pd}=sc; const y0=ty(0);
+  dibujarBase(ctx,canvas,sc,ys);
+  for(let i=0;i<4;i++){
+    const x1=tx(i),x2=tx(i+1),y1=ty(ys[i]),y2=ty(ys[i+1]);
+    ctx.beginPath();ctx.moveTo(x1,y0);ctx.lineTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x2,y0);ctx.closePath();
+    ctx.fillStyle=C.verde+'44';ctx.fill();
+    ctx.strokeStyle=C.verde;ctx.lineWidth=2;ctx.setLineDash([]);ctx.stroke();
+  }
+  // En la comparación final sí mostramos los valores
+  dibujarCurva(ctx,sc,ys,true);
+  const fmt=v=>v%1===0?v:v.toFixed(1);
+  const items=[{l:'Sᵢ='+fmt(resIzq)+'m²',c:C.agua},{l:'Sᵈ='+fmt(resDer)+'m²',c:C.am},{l:'S_T='+fmt(resTrap)+'m²',c:C.verde}];
+  ctx.font='bold 10px DM Sans,sans-serif';
+  items.forEach((it,i)=>{
+    const bx=pd.l+i*(W/3)+4;
+    ctx.fillStyle=it.c;ctx.fillRect(bx,pd.t+5,12,10);
+    ctx.fillStyle=C.dark;ctx.textAlign='left';ctx.fillText(it.l,bx+15,pd.t+14);
+  });
+}
+
+function dibujarApertura(){
+  const canvas=document.getElementById('grafica-apertura');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const sc=escalar(canvas,fx);
+  dibujarBase(ctx,canvas,sc,fx);
+  // Apertura: solo la curva sin valores para mantener la conjetura
+  dibujarCurva(ctx,sc,fx,false);
+}
+
+// ══ VERIFICACIÓN ══
+function verificar(tipo){
+  const tol=0.15;
+  const map={izq:{inp:'inp-izq',cor:resIzq,ok:'veri-izq-ok',err:'veri-izq-err',val:'val-izq',pa:'pa-izq',paval:'pa-izq-val',btn:'btn-b2'},
+             der:{inp:'inp-der',cor:resDer,ok:'veri-der-ok',err:'veri-der-err',val:'val-der',pa:'pa-der',paval:'pa-der-val',btn:'btn-b3'},
+             trap:{inp:'inp-trap',cor:resTrap,ok:'veri-trap-ok',err:'veri-trap-err',val:'val-trap',pa:'pa-trap',paval:'pa-trap-val',btn:'btn-b5'}};
+  const m=map[tipo]; const inp=parseFloat(document.getElementById(m.inp).value);
+  const fmt=v=>v%1===0?v:v.toFixed(1);
+  intentos[tipo]++;
+  const ok=Math.abs(inp-m.cor)<=tol;
+  document.getElementById(m.ok).style.display=ok?'block':'none';
+  document.getElementById(m.err).style.display=ok?'none':'block';
+  if(ok){
+    document.getElementById(m.val).textContent=fmt(m.cor);
+    document.getElementById(m.paval).textContent=fmt(m.cor);
+    document.getElementById(m.pa).classList.add('ok');
+    if(tipo==='der'){
+      document.getElementById('cmp-izq').textContent=fmt(resIzq);
+      document.getElementById('cmp-der').textContent=fmt(resDer);
+      document.getElementById('cmp-bloque').style.display='block';
+    }
+    if(tipo==='trap'){
+      document.getElementById('logro').style.display='flex';
+    }
+    document.getElementById(m.btn).disabled=false;
+  } else if(intentos[tipo]>=3){
+    document.getElementById(m.err).innerHTML=`❌ La respuesta correcta es <strong>${fmt(m.cor)}</strong>. Anótala y continúa.`;
+    if(tipo==='der'){ document.getElementById('cmp-izq').textContent=fmt(resIzq);document.getElementById('cmp-der').textContent=fmt(resDer);document.getElementById('cmp-bloque').style.display='block'; }
+    if(tipo==='trap') document.getElementById('logro').style.display='flex';
+    document.getElementById(m.paval).textContent=fmt(m.cor);
+    document.getElementById(m.btn).disabled=false;
+  }
+}
+
+// ══ MEJORA ══
+function elegirMejora(el,ok){
+  if(mejoraOk&&!ok||document.querySelector('#b4 .opt.correct'))return;
+  document.querySelectorAll('#b4 .opt').forEach(o=>o.onclick=null);
+  el.className='opt '+(ok?'correct':'wrong');
+  const r=document.getElementById('retro-mejora');
+  r.className='retro '+(ok?'ok':'info');
+  r.textContent=ok
+    ?'✅ ¡Exacto! Ambas son estrategias reales: la A lleva a la integral definida (infinitos subintervalos), la B es el método del trapecio. Hoy practicamos la B.'
+    :'💡 Las opciones A y B son las correctas. El promedio de Sᵢ y Sᵈ es equivalente a usar trapecios — verás por qué ahora.';
+  document.getElementById('trap-reveal').style.display='block';
+  document.getElementById('conf-izq').textContent=(resIzq%1===0?resIzq:resIzq.toFixed(1));
+  document.getElementById('conf-der').textContent=(resDer%1===0?resDer:resDer.toFixed(1));
+  document.getElementById('btn-b4').disabled=false;
+}
+
+// ══ FÓRMULA TRAPECIO ══
+// ══ VERIFICACIÓN TABLAS ══
+function verificarTablaIzq(){
+  const xs=[0,1,2,3]; let errores=0;
+  xs.forEach((x,i)=>{
+    const inp=parseFloat(document.getElementById('h-izq-'+i).value);
+    const correcto=fx[x];
+    const ok=!isNaN(inp)&&Math.abs(inp-correcto)<=0.15;
+    const cel=document.getElementById('area-izq-'+i);
+    if(ok){ cel.textContent=correcto+' m²'; document.getElementById('h-izq-'+i).style.borderColor='var(--verde)'; }
+    else { errores++; document.getElementById('h-izq-'+i).style.borderColor='var(--r)'; cel.textContent='—'; }
+  });
+  const r=document.getElementById('retro-tabla-izq');
+  if(errores===0){
+    r.className='retro ok';
+    r.textContent='✅ Todas las alturas correctas. Ahora suma las cuatro áreas.';
+    document.getElementById('suma-izq-bloque').style.display='block';
+  } else {
+    r.className='retro err';
+    r.textContent=`❌ ${errores} valor(es) incorrecto(s). Evalúa f(x) = x² − 2x + ${cte} en cada punto y revisa.`;
+  }
+}
+
+function verificarTablaDer(){
+  const xs=[1,2,3,4]; let errores=0;
+  xs.forEach((x,i)=>{
+    const inp=parseFloat(document.getElementById('h-der-'+i).value);
+    const correcto=fx[x];
+    const ok=!isNaN(inp)&&Math.abs(inp-correcto)<=0.15;
+    const cel=document.getElementById('area-der-'+i);
+    if(ok){ cel.textContent=correcto+' m²'; document.getElementById('h-der-'+i).style.borderColor='var(--verde)'; }
+    else { errores++; document.getElementById('h-der-'+i).style.borderColor='var(--r)'; cel.textContent='—'; }
+  });
+  const r=document.getElementById('retro-tabla-der');
+  if(errores===0){
+    r.className='retro ok';
+    r.textContent='✅ Todas las alturas correctas. Ahora suma las cuatro áreas.';
+    document.getElementById('suma-der-bloque').style.display='block';
+  } else {
+    r.className='retro err';
+    r.textContent=`❌ ${errores} valor(es) incorrecto(s). Evalúa f(x) = x² − 2x + ${cte} en x=1, 2, 3 y 4.`;
+  }
+}
+
+function verificarTablaTrap(){
+  // Áreas correctas de cada trapecio
+  const areasCorrectas=[
+    (fx[0]+fx[1])/2,
+    (fx[1]+fx[2])/2,
+    (fx[2]+fx[3])/2,
+    (fx[3]+fx[4])/2
+  ];
+  let errores=0;
+  areasCorrectas.forEach((ac,i)=>{
+    const inp=parseFloat(document.getElementById('t-area-'+i).value);
+    const ok=!isNaN(inp)&&Math.abs(inp-ac)<=0.15;
+    document.getElementById('t-area-'+i).style.borderColor=ok?'var(--verde)':'var(--r)';
+    if(!ok) errores++;
+  });
+  const r=document.getElementById('retro-tabla-trap');
+  if(errores===0){
+    r.className='retro ok';
+    r.textContent='✅ Las cuatro áreas son correctas. Ahora súmalas para obtener S_trap.';
+    document.getElementById('suma-trap-bloque').style.display='block';
+  } else {
+    r.className='retro err';
+    r.textContent=`❌ ${errores} área(s) incorrecta(s). Recuerda: área = (base_izq + base_der) ÷ 2 × 1. Las bases son los valores f(x) que ya calculaste.`;
+  }
+}
+
+// ══ RESUMEN ══
+function llenarResumen(){
+  const fmt=v=>v%1===0?v:v.toFixed(1);
+  const dif=Math.abs(resIzq-resDer);
+  const pct=((dif/resTrap)*100).toFixed(0);
+  document.getElementById('resumen-txt').innerHTML=
+    `Sᵢ (izquierdos): <strong>${fmt(resIzq)} m²</strong><br>
+     Sᵈ (derechos): <strong>${fmt(resDer)} m²</strong><br>
+     S_trap (trapecios): <strong>${fmt(resTrap)} m²</strong><br><br>
+     |Sᵢ − Sᵈ| = <strong>${fmt(dif)} m²</strong> — representa el ~${pct}% del área total estimada.`;
+  document.getElementById('btn-b6').disabled=true;
+  setTimeout(()=>{
+    ['ta-r1','ta-r2'].forEach(id=>document.getElementById(id).addEventListener('input',chkRef));
+  },300);
+}
+
+function chkRef(){
+  const ok=document.getElementById('ta-r1').value.trim().length>=40 && document.getElementById('ta-r2').value.trim().length>=40;
+  document.getElementById('btn-b6').disabled=!ok;
+}
+
+// ══ REPORTE ALUMNO ══
+// Rastreo de respuestas del alumno durante la actividad
+let respAlumno = {
+  apertura: null,       // true/false
+  hIzq: [null,null,null,null],   // valores ingresados
+  sIzq: null,
+  hDer: [null,null,null,null],
+  sDer: null,
+  tTrap: [null,null,null,null],
+  sTrap: null,
+  mejora: null,         // true/false
+  r1: '',
+  r2: ''
+};
+
+function llenarCodigos(){
+  const fmt=v=>v%1===0?v:v.toFixed(1);
+  const ci=cod(resIzq,nLista,1), cd=cod(resDer,nLista,2), ct=cod(resTrap,nLista,3);
+
+  // Captura respuestas al momento de llegar a B7
+  respAlumno.sIzq = parseFloat(document.getElementById('inp-izq').value)||null;
+  respAlumno.sDer = parseFloat(document.getElementById('inp-der').value)||null;
+  respAlumno.sTrap = parseFloat(document.getElementById('inp-trap').value)||null;
+  for(let i=0;i<4;i++){
+    respAlumno.hIzq[i] = parseFloat(document.getElementById('h-izq-'+i).value)||null;
+    respAlumno.hDer[i] = parseFloat(document.getElementById('h-der-'+i).value)||null;
+    respAlumno.tTrap[i] = parseFloat(document.getElementById('t-area-'+i).value)||null;
+  }
+  respAlumno.r1 = document.getElementById('ta-r1').value.trim();
+  respAlumno.r2 = document.getElementById('ta-r2').value.trim();
+
+  const esInvitado = nLista > 26 && nLista <= 30;
+  const etiqueta = DOCENTE ? 'DOCENTE (demo · c=4)' : esInvitado ? `${nombre} — asignado como invitado` : nombre;
+
+  // ── Identificación ──
+  document.getElementById('rep-identificacion').innerHTML=`
+    <div class="res-fila neu">
+      <div class="res-ico">${esInvitado?'⭐':'👤'}</div>
+      <div class="res-body">
+        <div class="res-label">${etiqueta}</div>
+        <div style="font-size:.8rem;color:var(--gris);">f(x) = x² − 2x + ${cte} &nbsp;·&nbsp; intervalo [0, 4] m &nbsp;·&nbsp; f(0)=${fx[0]}, f(1)=${fx[1]}, f(2)=${fx[2]}, f(3)=${fx[3]}, f(4)=${fx[4]}</div>
+      </div>
+    </div>`;
+
+  // ── Apertura ──
+  const apEl=document.querySelector('#opts-apertura .opt.correct')||document.querySelector('#opts-apertura .opt.wrong');
+  const apOk=apEl&&apEl.classList.contains('correct');
+  const apTxt=apEl?apEl.textContent:'Sin respuesta';
+  document.getElementById('rep-apertura').innerHTML=filaReporte(
+    apOk,'Estimación visual',
+    `Elegiste: "${apTxt}"`,
+    apOk?'Coincide con el rango del área real.':'El área real estimada con trapecios es '+fmt(resTrap)+' m². La opción más cercana era la correcta.'
+  );
+
+  // ── Rectángulos izquierdos — alturas ──
+  const labIzq=['f(0)','f(1)','f(2)','f(3)'];
+  const xsIzq=[0,1,2,3];
+  let repIzq='';
+  xsIzq.forEach((x,i)=>{
+    const v=respAlumno.hIzq[i]; const cor=fx[x]; const ok=v!==null&&Math.abs(v-cor)<=0.15;
+    repIzq+=filaReporte(ok,labIzq[i]+' (altura rect. izq. '+i+')',
+      v!==null?'Tu respuesta: '+v+' m':'Sin respuesta',
+      ok?'Correcto.':'Valor correcto: f('+x+') = '+x+'² − 2('+x+') + '+cte+' = '+cor+' m');
+  });
+  // suma Sᵢ
+  const okSi=respAlumno.sIzq!==null&&Math.abs(respAlumno.sIzq-resIzq)<=0.15;
+  repIzq+=filaReporte(okSi,'Suma Sᵢ',
+    respAlumno.sIzq!==null?'Tu respuesta: '+respAlumno.sIzq+' m²':'Sin respuesta',
+    okSi?'Correcto.':'Sᵢ = f(0)+f(1)+f(2)+f(3) = '+fx[0]+'+'+fx[1]+'+'+fx[2]+'+'+fx[3]+' = '+fmt(resIzq)+' m²');
+  document.getElementById('rep-izq').innerHTML=repIzq;
+
+  // ── Rectángulos derechos — alturas ──
+  const labDer=['f(1)','f(2)','f(3)','f(4)'];
+  const xsDer=[1,2,3,4];
+  let repDer='';
+  xsDer.forEach((x,i)=>{
+    const v=respAlumno.hDer[i]; const cor=fx[x]; const ok=v!==null&&Math.abs(v-cor)<=0.15;
+    repDer+=filaReporte(ok,labDer[i]+' (altura rect. der. '+i+')',
+      v!==null?'Tu respuesta: '+v+' m':'Sin respuesta',
+      ok?'Correcto.':'Valor correcto: f('+x+') = '+x+'² − 2('+x+') + '+cte+' = '+cor+' m');
+  });
+  const okSd=respAlumno.sDer!==null&&Math.abs(respAlumno.sDer-resDer)<=0.15;
+  repDer+=filaReporte(okSd,'Suma Sᵈ',
+    respAlumno.sDer!==null?'Tu respuesta: '+respAlumno.sDer+' m²':'Sin respuesta',
+    okSd?'Correcto.':'Sᵈ = f(1)+f(2)+f(3)+f(4) = '+fx[1]+'+'+fx[2]+'+'+fx[3]+'+'+fx[4]+' = '+fmt(resDer)+' m²');
+  document.getElementById('rep-der').innerHTML=repDer;
+
+  // ── Trapecio — áreas ──
+  const arCor=[(fx[0]+fx[1])/2,(fx[1]+fx[2])/2,(fx[2]+fx[3])/2,(fx[3]+fx[4])/2];
+  const labTrap=['Trapecio 1 [0,1]','Trapecio 2 [1,2]','Trapecio 3 [2,3]','Trapecio 4 [3,4]'];
+  const basesTrap=[[0,1],[1,2],[2,3],[3,4]];
+  let repTrap='';
+  arCor.forEach((ac,i)=>{
+    const v=respAlumno.tTrap[i]; const ok=v!==null&&Math.abs(v-ac)<=0.15;
+    const b=basesTrap[i];
+    repTrap+=filaReporte(ok,labTrap[i],
+      v!==null?'Tu respuesta: '+v+' m²':'Sin respuesta',
+      ok?'Correcto.':'Área = (f('+b[0]+')+f('+b[1]+')) ÷ 2 = ('+fx[b[0]]+'+'+fx[b[1]]+') ÷ 2 = '+fmt(ac)+' m²');
+  });
+  const okSt=respAlumno.sTrap!==null&&Math.abs(respAlumno.sTrap-resTrap)<=0.15;
+  repTrap+=filaReporte(okSt,'Suma S_trap',
+    respAlumno.sTrap!==null?'Tu respuesta: '+respAlumno.sTrap+' m²':'Sin respuesta',
+    okSt?'Correcto.':'S_trap = '+arCor.map(v=>fmt(v)).join(' + ')+' = '+fmt(resTrap)+' m²');
+  document.getElementById('rep-trap').innerHTML=repTrap;
+
+  // ── Códigos ──
+  document.getElementById('cod-grid').innerHTML=`
+    <div class="cod-item izq"><div><div class="cod-lbl">Rectángulos Izquierdos</div><div style="font-size:.76rem;color:var(--agua)">Sᵢ = ${fmt(resIzq)} m²</div></div><div class="cod-num">${ci}</div></div>
+    <div class="cod-item der"><div><div class="cod-lbl">Rectángulos Derechos</div><div style="font-size:.76rem;color:var(--am)">Sᵈ = ${fmt(resDer)} m²</div></div><div class="cod-num">${cd}</div></div>
+    <div class="cod-item trap"><div><div class="cod-lbl">Método del Trapecio</div><div style="font-size:.76rem;color:var(--verde)">S_T = ${fmt(resTrap)} m²</div></div><div class="cod-num">${ct}</div></div>`;
+
+  // ── Reflexiones ──
+  document.getElementById('rep-reflexiones').innerHTML=
+    filaReflexion('Interpretación 1 — ¿Quién se pasa y quién se queda corto?',
+      respAlumno.r1,
+      'Se espera que el alumno identifique si Sᵢ quedó por debajo o por encima de S_trap y lo relacione con que la curva sube más de lo que baja en [0,4]. Para esta función, la curva tiene un mínimo en x=1 y luego crece, por lo que los rectángulos izquierdos subestiman en los últimos tramos.')+
+    filaReflexion('Interpretación 2 — ¿Qué tan grande es el error?',
+      respAlumno.r2,
+      'Se espera que calcule |Sᵢ−Sᵈ| = '+fmt(Math.abs(resIzq-resDer))+' m², lo compare con S_trap = '+fmt(resTrap)+' m² (~'+Math.round(Math.abs(resIzq-resDer)/resTrap*100)+'% de error) y lo relacione con la pronunciada subida de la curva en el tramo [2,4].');
+}
+
+function filaReporte(ok, label, respuesta, esperado){
+  return `<div class="res-fila ${ok?'ok':'err'}">
+    <div class="res-ico">${ok?'✅':'❌'}</div>
+    <div class="res-body">
+      <div class="res-label">${label}</div>
+      <span class="${ok?'res-val-ok':'res-val-err'}">${respuesta}</span>
+      ${!ok?`<div class="res-esperado">→ ${esperado}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function filaReflexion(label, texto, criterio){
+  const tiene=texto&&texto.length>=40;
+  return `<div class="res-fila neu" style="flex-direction:column;align-items:stretch;">
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      <div class="res-ico">📝</div>
+      <div class="res-label" style="padding-top:2px;">${label}</div>
+    </div>
+    <div class="res-texto-alumno">${tiene?texto:'<em style="color:var(--gris);">Sin respuesta registrada.</em>'}</div>
+    <div class="res-criterio">📋 <strong>Criterio docente:</strong> ${criterio}</div>
+  </div>`;
+}
+
+// ══ AVANZAR ══
+function avanzar(de,a){
+  if(de===6){
+    if(document.getElementById('ta-r1').value.trim().length<40||document.getElementById('ta-r2').value.trim().length<40){
+      ['ta-r1','ta-r2'].forEach(id=>{ if(document.getElementById(id).value.trim().length<40) document.getElementById(id).style.borderColor='var(--r)'; }); return;
+    }
+  }
+  document.getElementById('b'+de).classList.remove('active');
+  document.getElementById('b'+a).classList.add('active');
+  actualizarProgreso(a);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(a===1){ llenarTabla(); setTimeout(()=>{ actualizarFormulaDisplay(); dibujarApertura(); llenarOptsApertura(); llenarFormulaTablas(); },100); }
+  if(a===2){ setTimeout(()=>dibujarRects('grafica-izq',fx,'izq'),100); }
+  if(a===3){ setTimeout(()=>dibujarRects('grafica-der',fx,'der'),100); }
+  if(a===4){ document.getElementById('conf-izq').textContent=resIzq%1===0?resIzq:resIzq.toFixed(1); document.getElementById('conf-der').textContent=resDer%1===0?resDer:resDer.toFixed(1); }
+  if(a===5){ setTimeout(()=>dibujarTrapecios('grafica-trap',fx),100); }
+  if(a===6){ llenarResumen(); setTimeout(()=>dibujarComparacion(fx),100); }
+  if(a===7){ llenarCodigos(); }
+}
+
+function llenarFormulaTablas(){
+  const fd='f(x) = x² − 2x + '+cte;
+  const el1=document.getElementById('formula-izq-display');
+  const el2=document.getElementById('formula-der-display');
+  if(el1) el1.textContent=fd;
+  if(el2) el2.textContent=fd;
+}
+
+function actualizarProgreso(b){
+  const pct=PROGRESO[b]||0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  const et=['','Apertura','Rect. Izq.','Rect. Der.','Conflicto','Trapecio','Cierre','Finalizado'];
+  document.getElementById('prog-texto').textContent=et[b]||'';
+}
+
+// ══ UTILS ══
+function contarChars(ta,id){
+  const n=ta.value.trim().length; const min=40;
+  const el=document.getElementById(id);
+  el.textContent=n+' / mínimo '+min+' caracteres';
+  el.style.color=n>=min?'var(--verde)':'var(--gris)';
+  ta.style.borderColor=n>=min?'var(--verde)':'';
+}
+function mostrarPista(id){ const p=document.getElementById(id);if(p)p.classList.toggle('show'); }
+</script>
+</body>
+</html>
