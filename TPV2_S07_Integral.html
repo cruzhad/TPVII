@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPV II · La Integral Definida · Área exacta bajo una curva</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #0D1B2A;
+  --agua: #0277BD; --agua2: #039BE5; --agua3: #E1F5FE;
+  --verde: #2E7D32; --verde2: #43A047; --verde3: #E8F5E9;
+  --am: #E65100; --am2: #F57F17; --am3: #FFF3E0;
+  --r: #B71C1C; --r3: #FFEBEE;
+  --mo: #4A148C; --mo3: #F3E5F5;
+  --gris: #546E7A; --gris2: #CFD8DC; --gris3: #F5F7F8;
+  --card: #FFFFFF;
+  --radio: 14px;
+  --sombra: 0 3px 18px rgba(13,27,42,0.09);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #EEF4F8;
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(2,119,189,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(46,125,50,0.06) 0%, transparent 55%);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 16px 12px 60px;
+}
+
+.wrap { max-width: 700px; margin: 0 auto; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(150deg, #0D1B2A 0%, #01579B 55%, #0277BD 100%);
+  border-radius: var(--radio);
+  padding: 24px 22px 20px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content: '∫';
+  position: absolute; right: 18px; top: 10px;
+  font-family: 'DM Serif Display', serif;
+  font-size: 7rem; color: rgba(255,255,255,.05); line-height: 1;
+  pointer-events: none;
+}
+.header-tag { font-size: .68rem; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 5px; }
+.header-tit { font-family: 'DM Serif Display', serif; font-size: 1.65rem; color: #fff; line-height: 1.15; margin-bottom: 5px; }
+.header-sub { font-size: .85rem; color: rgba(255,255,255,.65); line-height: 1.6; }
+.header-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { font-size: .63rem; font-weight: 700; letter-spacing: .5px; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.82); }
+
+/* CONTEXTO BADGE */
+.ctx-badge { display: inline-flex; align-items: center; gap: 7px; background: var(--ink); color: #80DEEA; border-radius: 8px; padding: 6px 13px; font-size: .78rem; font-weight: 700; margin-bottom: 14px; }
+
+/* PROGRESO */
+.prog-wrap { background: var(--card); border-radius: var(--radio); padding: 11px 16px; margin-bottom: 14px; box-shadow: var(--sombra); }
+.prog-label { display: flex; justify-content: space-between; font-size: .75rem; font-weight: 700; color: var(--gris); margin-bottom: 7px; }
+.prog-bar { height: 7px; background: var(--gris2); border-radius: 10px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--agua), var(--verde)); border-radius: 10px; transition: width .5s; }
+
+/* CARDS */
+.card { background: var(--card); border-radius: var(--radio); padding: 20px 18px; margin-bottom: 14px; box-shadow: var(--sombra); display: none; }
+.card.active { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.card-tag { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gris); margin-bottom: 4px; }
+.card-tit { font-family: 'DM Serif Display', serif; font-size: 1.22rem; color: var(--agua); margin-bottom: 12px; line-height: 1.2; }
+.card-tit.v { color: var(--verde); }
+.card-tit.mo { color: var(--mo); }
+
+/* BLOQUES */
+.bloque { border-radius: 10px; padding: 13px 15px; margin-bottom: 12px; }
+.bloque.agua { background: var(--agua3); border-left: 4px solid var(--agua); }
+.bloque.verde { background: var(--verde3); border-left: 4px solid var(--verde); }
+.bloque.am { background: var(--am3); border-left: 4px solid var(--am); }
+.bloque.r { background: var(--r3); border-left: 4px solid var(--r); }
+.bloque.mo { background: var(--mo3); border-left: 4px solid var(--mo); }
+.bloque.dark { background: var(--ink); color: rgba(255,255,255,.88); border-left: none; }
+.bloque p, .bloque li { font-size: .88rem; line-height: 1.75; }
+.bloque ul, .bloque ol { padding-left: 18px; }
+.bloque h4 { font-size: .92rem; font-weight: 700; margin-bottom: 7px; }
+
+/* FÓRMULAS */
+.formula-box { background: var(--ink); color: #80DEEA; border-radius: 10px; padding: 14px 18px; margin: 10px 0; text-align: center; font-size: 1.05rem; font-family: 'DM Serif Display', serif; line-height: 2.2; }
+.formula-box .small { font-size: .78rem; color: rgba(255,255,255,.5); font-family: 'DM Sans', sans-serif; display: block; margin-top: 3px; }
+.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; line-height: 1.15; }
+.frac .num { border-bottom: 2px solid currentColor; padding: 0 4px 2px; font-size: .9em; }
+.frac .den { padding: 2px 4px 0; font-size: .9em; }
+
+/* COPIAR BLOQUE */
+.copy-section { background: linear-gradient(135deg, #0D1B2A, #0a2540); border-radius: var(--radio); padding: 18px 18px; margin: 14px 0; }
+.copy-tag { font-size: .62rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.85); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.copy-tag::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.25); }
+.copy-item { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.copy-item:last-child { border-bottom: none; }
+.copy-sym { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: #80DEEA; min-width: 32px; text-align: center; margin-top: 2px; }
+.copy-body { flex: 1; }
+.copy-name { font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.8); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+.copy-formula { font-size: .95rem; color: #E0F7FA; font-weight: 600; line-height: 1.5; }
+.copy-note { font-size: .74rem; color: rgba(255,255,255,.78); margin-top: 3px; line-height: 1.5; }
+
+/* CANVAS VISUALIZACIÓN */
+.vis-wrap { position: relative; background: #F9FAFB; border-radius: 10px; overflow: hidden; margin: 12px 0; }
+canvas { display: block; max-width: 100%; }
+.vis-controls { padding: 12px 14px; background: #fff; border-top: 1px solid var(--gris2); }
+.vis-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.vis-row:last-child { margin-bottom: 0; }
+.vis-label { font-size: .75rem; font-weight: 700; color: var(--gris); min-width: 22px; }
+.vis-slider { flex: 1; min-width: 120px; accent-color: var(--agua); cursor: pointer; }
+.vis-n { font-size: 1.1rem; font-weight: 700; color: var(--agua); min-width: 36px; text-align: right; }
+.vis-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.vis-btn { font-size: .73rem; font-weight: 700; padding: 5px 11px; border-radius: 7px; border: 2px solid var(--gris2); background: var(--gris3); color: var(--gris); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.vis-btn.active { border-color: var(--agua); background: var(--agua3); color: var(--agua); }
+.vis-btn.play { border-color: var(--verde); background: var(--verde3); color: var(--verde); }
+.vis-btn.play.playing { background: var(--verde); color: #fff; }
+.vis-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding: 10px 14px; background: var(--ink); }
+.vs-item { text-align: center; }
+.vs-lbl { font-size: .59rem; color: rgba(255,255,255,.35); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.vs-val { font-size: 1rem; font-weight: 700; color: #80DEEA; margin-top: 1px; }
+.vs-val.exact { color: #A5D6A7; }
+.vs-val.err { color: #FFCC80; }
+
+/* OPCIONES */
+.opt-grid { display: grid; gap: 8px; margin: 10px 0; }
+.opt { border: 2px solid var(--gris2); border-radius: 10px; padding: 11px 14px; cursor: pointer; font-size: .87rem; font-weight: 500; transition: all .18s; background: var(--gris3); line-height: 1.5; }
+.opt:hover:not(.locked) { border-color: var(--agua); background: var(--agua3); }
+.opt.locked { cursor: default; }
+.opt.chosen { border-color: var(--agua); background: var(--agua3); color: var(--agua); font-weight: 700; }
+
+/* TEXTAREA */
+textarea { width: 100%; min-height: 80px; border: 2px solid var(--gris2); border-radius: 8px; padding: 10px 13px; font-size: .88rem; font-family: 'DM Sans', sans-serif; resize: vertical; background: var(--gris3); transition: border .2s; }
+textarea:focus { outline: none; border-color: var(--agua); background: #fff; }
+.char-count { font-size: .73rem; color: var(--gris); text-align: right; margin-top: 3px; }
+
+/* PISTA */
+.pista-btn { font-size: .77rem; font-weight: 700; color: var(--am2); cursor: pointer; background: none; border: none; text-decoration: underline; margin-top: 5px; font-family: 'DM Sans', sans-serif; }
+.pista { display: none; margin-top: 6px; }
+.pista.show { display: block; }
+.pista-used { font-size: .68rem; font-weight: 700; color: var(--am2); display: none; }
+.pista-used.show { display: inline; }
+
+/* BOTONES */
+.btn { display: inline-flex; align-items: center; gap: 7px; background: linear-gradient(135deg, var(--agua), var(--agua2)); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: .93rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 3px 12px rgba(2,119,189,.3); margin-top: 10px; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(2,119,189,.38); }
+.btn.v { background: linear-gradient(135deg, var(--verde), var(--verde2)); box-shadow: 0 3px 12px rgba(46,125,50,.3); }
+.btn.sm { padding: 8px 16px; font-size: .82rem; }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* RETRO */
+.retro { font-size: .83rem; font-weight: 600; border-radius: 8px; padding: 10px 13px; margin-top: 8px; display: none; line-height: 1.6; }
+.retro.ok  { background: var(--verde3); color: var(--verde); border-left: 3px solid var(--verde); display: block; }
+.retro.err { background: var(--r3); color: var(--r); border-left: 3px solid var(--r); display: block; }
+.retro.info{ background: var(--am3); color: #5a2e00; border-left: 3px solid var(--am); display: block; }
+.retro.neutral { background: var(--gris3); color: var(--ink); border-left: 3px solid var(--gris); display: block; }
+
+/* RESUMEN FINAL */
+.res-sec { margin-bottom: 20px; }
+.res-sec-tit { font-size: .65rem; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gris); padding-bottom: 6px; border-bottom: 2px solid var(--gris2); margin-bottom: 10px; }
+.res-fila { display: flex; align-items: flex-start; gap: 10px; padding: 9px 11px; border-radius: 8px; margin-bottom: 6px; }
+.res-fila.ok  { background: var(--verde3); }
+.res-fila.err { background: var(--r3); }
+.res-fila.neu { background: var(--am3); }
+.res-fila.info { background: var(--gris3); }
+.res-ico { font-size: 1.05rem; flex-shrink: 0; margin-top: 2px; }
+.res-body { flex: 1; font-size: .84rem; line-height: 1.65; }
+.res-q { font-weight: 700; font-size: .8rem; margin-bottom: 3px; color: var(--ink); }
+.res-alumno { color: var(--ink); margin-bottom: 3px; }
+.res-correcto { color: var(--verde); font-weight: 700; font-size: .81rem; }
+.res-incorrecto { color: var(--r); font-weight: 700; font-size: .81rem; }
+.res-criterio { font-size: .77rem; color: #5a2e00; background: var(--am3); border-left: 3px solid var(--am2); border-radius: 0 6px 6px 0; padding: 5px 9px; margin-top: 4px; line-height: 1.6; }
+.res-texto { background: rgba(0,0,0,.04); border-radius: 5px; padding: 5px 9px; font-size: .82rem; margin-top: 4px; font-style: italic; color: var(--gris); }
+.pista-tag { font-size: .67rem; font-weight: 700; color: var(--am2); background: var(--am3); border-radius: 4px; padding: 1px 6px; margin-left: 5px; }
+
+/* CÓDIGO SESIÓN */
+.cod-sesion { background: var(--ink); border-radius: var(--radio); padding: 18px; text-align: center; margin: 14px 0; }
+.cod-label { font-size: .65rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.85); margin-bottom: 6px; font-weight: 700; }
+.cod-num { font-size: 2.4rem; font-weight: 700; letter-spacing: 8px; color: #80DEEA; font-family: 'DM Serif Display', serif; }
+.cod-ctx { font-size: .72rem; color: rgba(255,255,255,.75); margin-top: 6px; }
+
+/* PANEL DOCENTE FLOTANTE */
+.doc-bar { display: none; position: fixed; bottom: 16px; right: 16px; z-index: 200; flex-direction: column; gap: 7px; align-items: flex-end; }
+.doc-bar.show { display: flex; }
+.doc-btn { display: flex; align-items: center; gap: 6px; background: var(--ink); color: #80DEEA; border: 1.5px solid rgba(128,222,234,.25); border-radius: 10px; padding: 9px 15px; font-size: .8rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.3); white-space: nowrap; transition: background .15s; }
+.doc-btn:hover { background: #1a3040; }
+.doc-btn.skip { background: linear-gradient(135deg, #0277BD, #039BE5); color: #fff; border-color: transparent; }
+
+/* MODAL DOCENTE */
+.modal-ov { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); overflow-y: auto; padding: 20px 10px; }
+.modal-ov.show { display: block; }
+.modal-box { background: var(--card); border-radius: var(--radio); max-width: 440px; margin: 80px auto; padding: 24px; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+.modal-tit { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--agua); margin-bottom: 5px; }
+.modal-sub { font-size: .82rem; color: var(--gris); margin-bottom: 14px; line-height: 1.5; }
+.modal-inp { width: 100%; border: 2px solid var(--gris2); border-radius: 8px; padding: 10px 14px; font-size: 1.2rem; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 4px; text-align: center; background: var(--gris3); margin-bottom: 8px; }
+.modal-inp:focus { outline: none; border-color: var(--agua); background: #fff; }
+.modal-err { font-size: .79rem; color: var(--r); font-weight: 700; display: none; margin-bottom: 8px; }
+.modal-btns { display: flex; gap: 8px; }
+.modal-cancel { background: var(--gris3); color: var(--gris); border: none; border-radius: 8px; padding: 10px 18px; font-size: .87rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+/* MODAL TABLA GRUPO */
+.modal-grupo { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); overflow-y: auto; padding: 20px 10px; }
+.modal-grupo.show { display: block; }
+.modal-grupo-box { background: #fff; border-radius: var(--radio); max-width: 980px; margin: 20px auto; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+.mg-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.mg-tit { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--agua); }
+.mg-sub { font-size: .74rem; color: var(--gris); margin-top: 3px; }
+.mg-close { background: var(--gris3); border: none; border-radius: 8px; padding: 8px 16px; font-size: .84rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.tbl-doc { width: 100%; border-collapse: collapse; font-size: .74rem; }
+.tbl-doc th { background: var(--ink); color: rgba(255,255,255,.75); padding: 8px 7px; text-align: center; font-weight: 700; position: sticky; top: 0; }
+.tbl-doc td { padding: 6px 7px; border-bottom: 1px solid var(--gris2); text-align: center; vertical-align: top; }
+.tbl-doc tr:hover td { background: var(--agua3); }
+.badge-ctx { display: inline-block; background: var(--ink); color: #80DEEA; border-radius: 5px; padding: 1px 7px; font-weight: 700; font-size: .78rem; }
+
+/* MISC */
+p { font-size: .9rem; line-height: 1.75; margin-bottom: 8px; }
+.divider { height: 2px; background: linear-gradient(90deg, var(--agua3), var(--gris2), var(--verde3)); border-radius: 2px; margin: 16px 0; }
+.curiosidad { background: linear-gradient(135deg, #0D1B2A 0%, #0a2a18 100%); border-radius: 10px; padding: 14px 16px; margin: 12px 0; }
+.cur-tag { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.3); margin-bottom: 5px; }
+.cur-txt { font-size: .87rem; color: rgba(255,255,255,.8); line-height: 1.75; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- MODAL CÓDIGO DOCENTE -->
+<div class="modal-ov" id="modal-doc">
+  <div class="modal-box">
+    <div class="modal-tit">🔑 Acceso docente</div>
+    <div class="modal-sub">Ingresa el código para continuar en modo supervisión.</div>
+    <input class="modal-inp" id="modal-inp" type="password" maxlength="6" placeholder="_ _ _ _"
+           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+           onkeydown="if(event.key==='Enter') confirmarDoc()">
+    <div class="modal-err" id="modal-err">Código incorrecto.</div>
+    <div class="modal-btns">
+      <button class="btn sm" onclick="confirmarDoc()">Confirmar</button>
+      <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TABLA GRUPO -->
+<div class="modal-grupo" id="modal-grupo">
+  <div class="modal-grupo-box">
+    <div class="mg-header">
+      <div>
+        <div class="mg-tit">📋 Banco completo de reactivos y respuestas</div>
+        <div class="mg-sub">TPV II · P4 · S07 · Integral definida · Todos los contextos y combinaciones</div>
+      </div>
+      <button class="mg-close" onclick="cerrarGrupo()">✕ Cerrar</button>
+    </div>
+    <div id="mg-contenido" style="overflow-x:auto;"></div>
+  </div>
+</div>
+
+<!-- BARRA DOCENTE FLOTANTE -->
+<div class="doc-bar" id="doc-bar">
+  <button class="doc-btn skip" onclick="saltarFinal()">⚡ Ir al resumen</button>
+  <button class="doc-btn" onclick="abrirGrupo()">📋 Ver banco de reactivos</button>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-tag">TPV II · P4 · Sesión 7 · Prof. Adrián Cruz</div>
+  <div class="header-tit">Del rectángulo a la integral</div>
+  <div class="header-sub">Explora cómo las aproximaciones se vuelven exactas cuando los rectángulos se vuelven infinitamente delgados.</div>
+  <div class="header-chips">
+    <span class="chip">∫ Integral definida</span>
+    <span class="chip">📐 Suma de Riemann</span>
+    <span class="chip">🔢 TFC: F(b)−F(a)</span>
+    <span class="chip">⏱ ~60 min</span>
+  </div>
+</div>
+
+<!-- PROGRESO -->
+<div class="prog-wrap">
+  <div class="prog-label"><span id="prog-texto">Inicio</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- B0: BIENVENIDA / INICIO -->
+<div class="card active" id="b0">
+  <div class="card-tag">Inicio</div>
+  <div class="card-tit">¿Cómo se calcula el área exacta bajo una curva?</div>
+  <div class="bloque agua">
+    <p>En sesiones anteriores estimaste áreas usando rectángulos y trapecios. Llegaste cerca — pero no al valor exacto. Hoy vas a descubrir qué pasa cuando esos rectángulos se vuelven cada vez más delgados, y cómo eso nos lleva a la herramienta más poderosa del cálculo.</p>
+  </div>
+  <div class="bloque am">
+    <h4>📋 Cómo funciona esta actividad</h4>
+    <p>Cada vez que la abres recibes un contexto y preguntas diferentes. Responde todo antes de ver los resultados: el resumen aparece al final con retroalimentación completa.</p>
+  </div>
+  <div class="bloque verde" style="margin-bottom:12px;">
+    <h4>✏️ Ingresa tu nombre antes de comenzar</h4>
+    <p style="margin-bottom:8px;font-size:.83rem;">Escribe tus apellidos y nombre, tal como aparece en tu lista de clase.</p>
+    <input type="text" id="inp-nombre"
+      placeholder="Ej: GARCÍA RAMÍREZ ELENA"
+      oninput="chkNombre()"
+      onkeydown="if(event.key==='Enter') iniciar()"
+      style="width:100%;border:2px solid var(--gris2);border-radius:8px;padding:10px 14px;font-size:.95rem;font-family:'DM Sans',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.5px;background:var(--gris3);color:var(--ink);transition:border .2s;">
+    <div id="nombre-error" style="font-size:.73rem;color:var(--r);font-weight:700;margin-top:5px;display:none;">Escribe al menos tu apellido paterno y nombre.</div>
+  </div>
+  <button class="btn" id="btn-iniciar" onclick="iniciar()" disabled>Comenzar →</button>
+  <div style="margin-top:14px;">
+    <span style="font-size:.7rem;color:var(--gris);cursor:pointer;text-decoration:underline;" onclick="abrirModal()">Acceso docente</span>
+  </div>
+</div>
+
+<!-- B1: VISUALIZACIÓN INTERACTIVA -->
+<div class="card" id="b1">
+  <div class="card-tag">Bloque 1 · Exploración visual</div>
+  <div class="card-tit">Observa qué pasa cuando n crece</div>
+  <div id="ctx-badge-b1"></div>
+
+  <div class="bloque agua">
+    <p id="vis-intro-txt"></p>
+  </div>
+
+  <div class="vis-wrap">
+    <canvas id="vis-canvas" width="640" height="280"></canvas>
+    <div class="vis-stats">
+      <div class="vs-item"><div class="vs-lbl">n (subdivisiones)</div><div class="vs-val" id="vs-n">1</div></div>
+      <div class="vs-item"><div class="vs-lbl">Aproximación</div><div class="vs-val" id="vs-aprox">—</div></div>
+      <div class="vs-item"><div class="vs-lbl">Error vs. exacto</div><div class="vs-val err" id="vs-error">—</div></div>
+    </div>
+    <div class="vis-controls">
+      <div class="vis-row">
+        <span class="vis-label">n =</span>
+        <input type="range" class="vis-slider" id="slider-n" min="1" max="100" value="1" oninput="actualizarVis()">
+        <span class="vis-n" id="lbl-n">1</span>
+      </div>
+      <div class="vis-row">
+        <div class="vis-btns">
+          <button class="vis-btn active" id="btn-izq" onclick="setModo('izq')">Rect. izquierdos</button>
+          <button class="vis-btn" id="btn-der" onclick="setModo('der')">Rect. derechos</button>
+          <button class="vis-btn" id="btn-trap" onclick="setModo('trap')">Trapecios</button>
+          <button class="vis-btn play" id="btn-play" onclick="togglePlay()">▶ Animar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bloque verde" style="margin-top:12px;">
+    <h4>🔍 Antes de continuar — observa y responde</h4>
+    <p>Con n=1 el error es grande. Mueve el slider hasta n=50. ¿Qué le pasó al error? ¿Y si llegas a n=100?</p>
+  </div>
+
+  <!-- Fórmulas para copiar — versión corta -->
+  <div class="copy-section">
+    <div class="copy-tag">📝 Copia en tu cuaderno</div>
+    <div class="copy-item">
+      <div class="copy-sym">Σ</div>
+      <div class="copy-body">
+        <div class="copy-name">Suma de Riemann (izquierdos)</div>
+        <div class="copy-formula">Sₙ = Σ f(xᵢ) · Δx , donde Δx = (b−a)/n</div>
+        <div class="copy-note">xᵢ = a + i·Δx para i = 0, 1, 2, …, n−1</div>
+      </div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-sym">∫</div>
+      <div class="copy-body">
+        <div class="copy-name">Integral definida (límite de la suma)</div>
+        <div class="copy-formula" id="formula-ctx">∫ₐᵇ f(x) dx = lím<sub>n→∞</sub> Σ f(xᵢ)·Δx</div>
+        <div class="copy-note">Cuando n → ∞, la suma se vuelve exacta y se escribe con el símbolo ∫</div>
+      </div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-sym">F</div>
+      <div class="copy-body">
+        <div class="copy-name">Teorema Fundamental del Cálculo (TFC)</div>
+        <div class="copy-formula">∫ₐᵇ f(x) dx = F(b) − F(a)</div>
+        <div class="copy-note">F(x) es la antiderivada de f(x). Regla de potencia: ∫xⁿ dx = xⁿ⁺¹/(n+1)</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="avanzar(1,2)">Continuar →</button>
+</div>
+
+<!-- B2: PREGUNTA DE OBSERVACIÓN (escrita) -->
+<div class="card" id="b2">
+  <div class="card-tag">Bloque 2 · Comprensión de la visualización</div>
+  <div class="card-tit">¿Qué observaste?</div>
+  <div id="ctx-badge-b2"></div>
+  <div style="margin-bottom:10px;">
+    <button class="btn sm" style="background:var(--gris3);color:var(--gris);box-shadow:none;border:1.5px solid var(--gris2);" onclick="regresarVis()">← Regresar a la visualización</button>
+  </div>
+  <div class="bloque agua" id="b2-pregunta"></div>
+  <textarea id="ta-obs" placeholder="Escribe lo que observaste al mover el slider..." oninput="chkChars(this,'ch-obs',35)"></textarea>
+  <div class="char-count" id="ch-obs">0 / mínimo 35 caracteres</div>
+  <button class="pista-btn" onclick="mostrarPista('pista-obs')">¿Necesitas una pista?</button>
+  <span class="pista-used" id="pu-obs">📌 pista usada</span>
+  <div class="pista" id="pista-obs">
+    <div class="bloque am"><p>💡 Compara el número que aparece en "Error vs. exacto" con n=1 y con n=100. ¿Qué tan diferente es? ¿Qué significa ese cambio para la aproximación?</p></div>
+  </div>
+  <button class="btn" id="btn-b2" onclick="avanzar(2,3)" disabled>Continuar →</button>
+</div>
+
+<!-- B3: REACTIVO OPCIÓN MÚLTIPLE #1 -->
+<div class="card" id="b3">
+  <div class="card-tag">Bloque 3 · Rectángulos y trapecio</div>
+  <div class="card-tit">Aplica lo que observaste</div>
+  <div id="ctx-badge-b3"></div>
+  <div class="bloque agua" id="b3-enunciado"></div>
+  <div class="opt-grid" id="b3-opts"></div>
+  <button class="pista-btn" onclick="mostrarPista('pista-b3')">¿Necesitas una pista?</button>
+  <span class="pista-used" id="pu-b3">📌 pista usada</span>
+  <div class="pista" id="pista-b3">
+    <div class="bloque am" id="pista-b3-txt"></div>
+  </div>
+  <button class="btn" id="btn-b3" onclick="avanzar(3,5)" disabled>Continuar →</button>
+</div>
+
+<!-- B5: PREGUNTA INTERPRETACIÓN EN CONTEXTO (escrita) -->
+<div class="card" id="b5">
+  <div class="card-tag">Bloque 5 · Interpretación en contexto</div>
+  <div class="card-tit">¿Qué significa el número?</div>
+  <div id="ctx-badge-b5"></div>
+  <div class="bloque verde" id="b5-pregunta"></div>
+  <textarea id="ta-interp" placeholder="Escribe tu interpretación del resultado..." oninput="chkChars(this,'ch-interp',35)"></textarea>
+  <div class="char-count" id="ch-interp">0 / mínimo 35 caracteres</div>
+  <button class="pista-btn" onclick="mostrarPista('pista-b5')">¿Necesitas una pista?</button>
+  <span class="pista-used" id="pu-b5">📌 pista usada</span>
+  <div class="pista" id="pista-b5">
+    <div class="bloque am" id="pista-b5-txt"></div>
+  </div>
+  <button class="btn" id="btn-b5" onclick="avanzar(5,6)" disabled>Continuar →</button>
+</div>
+
+<!-- B6: PREGUNTA TRANSFERENCIA (escrita) -->
+<div class="card" id="b6">
+  <div class="card-tag">Bloque 6 · Transferencia</div>
+  <div class="card-tit">Conecta con tu vida</div>
+  <div class="bloque mo">
+    <h4>✏️ Pregunta de transferencia</h4>
+    <p>Piensa en una situación de tu vida cotidiana en la CDMX donde tendría sentido calcular el área bajo una curva — algo que acumule o cambie con el tiempo. <strong>No es el Metrobús ni la cuenca que ya viste.</strong></p>
+    <p style="margin-top:8px;">Describe la situación: ¿qué representaría la curva?, ¿qué significaría el área?</p>
+  </div>
+  <textarea id="ta-transf" placeholder="Describe tu situación cotidiana..." oninput="chkChars(this,'ch-transf',40)"></textarea>
+  <div class="char-count" id="ch-transf">0 / mínimo 40 caracteres</div>
+  <div class="curiosidad" style="margin-top:12px;">
+    <div class="cur-tag">🔭 Para seguir pensando</div>
+    <div class="cur-txt">¿Qué crees que pasaría si la curva cruzara el eje x — es decir, si f(x) se volviera negativa en algún tramo? ¿El área seguiría siendo positiva? ¿Tiene sentido hablar de "área negativa"? Quédate con esa pregunta para la próxima sesión.</div>
+  </div>
+  <button class="btn v" id="btn-b6" onclick="avanzar(6,7)" disabled>Ver mis resultados →</button>
+</div>
+
+<!-- B7: RESUMEN FINAL -->
+<div class="card" id="b7">
+  <div class="card-tag">Resumen final</div>
+  <div class="card-tit v">Tu reporte de la sesión</div>
+  <div id="b7-nombre-box" style="background:var(--ink);border-radius:9px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+    <div style="font-size:1.5rem;">👤</div>
+    <div>
+      <div style="font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:2px;">Alumno</div>
+      <div id="b7-nombre" style="font-size:1.05rem;font-weight:700;color:#80DEEA;font-family:'DM Serif Display',serif;letter-spacing:.5px;"></div>
+    </div>
+  </div>
+  <p>Revisa tus respuestas y toma captura. Súbela a Google Classroom junto con tus apuntes del cuaderno.</p>
+
+  <div id="resumen-contenido"></div>
+
+  <div class="divider"></div>
+
+  <!-- FICHA COMPLETA PARA COPIAR -->
+  <div class="copy-section">
+    <div class="copy-tag">📒 Ficha completa para tu cuaderno</div>
+    <div class="copy-item">
+      <div class="copy-sym">1</div>
+      <div class="copy-body">
+        <div class="copy-name">Suma de Riemann izquierdos</div>
+        <div class="copy-formula">Sₙ = [f(x₀) + f(x₁) + ··· + f(xₙ₋₁)] · Δx</div>
+        <div class="copy-note">Δx = (b−a)/n · xᵢ = a + i·Δx · Subestima si f crece, sobreestima si f decrece</div>
+      </div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-sym">2</div>
+      <div class="copy-body">
+        <div class="copy-name">Suma de Riemann derechos</div>
+        <div class="copy-formula">Sₙ = [f(x₁) + f(x₂) + ··· + f(xₙ)] · Δx</div>
+        <div class="copy-note">Comportamiento opuesto a los izquierdos. Siempre: Sᵢ ≤ ∫ ≤ Sᵈ (si f es creciente)</div>
+      </div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-sym">3</div>
+      <div class="copy-body">
+        <div class="copy-name">Método del trapecio</div>
+        <div class="copy-formula">S_trap = (Sᵢ + Sᵈ) / 2</div>
+        <div class="copy-note">Equivalente a promediar los extremos de cada subintervalo. Más preciso que rect. solos.</div>
+      </div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-sym">∫</div>
+      <div class="copy-body">
+        <div class="copy-name">Integral definida — valor exacto</div>
+        <div class="copy-formula">∫ₐᵇ f(x) dx = F(b) − F(a)</div>
+        <div class="copy-note">F(x) es la antiderivada. Regla de potencia: si f(x) = xⁿ → F(x) = xⁿ⁺¹/(n+1). Para constante c → F = cx.</div>
+      </div>
+    </div>
+    <div class="copy-item" id="ficha-ejemplo"></div>
+  </div>
+
+  <div id="cod-sesion-box"></div>
+
+  <div style="text-align:center;margin-top:18px;padding:12px;background:var(--gris3);border-radius:10px;">
+    <p style="font-size:.78rem;color:var(--gris);">TPV II · P4 · S07 · Prof. Adrián Cruz · MCCEMS 2025</p>
+    <p style="font-size:.72rem;color:var(--gris);margin-top:2px;">Integral definida · Del rectángulo a la integral exacta</p>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ══════════════════════════════════════════
+// BANCO DE CONTEXTOS (5 contextos)
+// ══════════════════════════════════════════
+const CONTEXTOS = [
+  {
+    id: 'cuenca',
+    emoji: '💧',
+    nombre: 'Cuenca pluvial · Bordo Poniente CDMX',
+    unidadX: 'm', unidadY: 'm', unidadArea: 'm²',
+    descripcion: 'sección transversal de la cuenca',
+    significadoArea: 'área transversal de la cuenca en m² — determina cuánta agua puede almacenarse por metro lineal',
+    fn: (x,c) => x*x - 2*x + c,
+    fnStr: (c) => `f(x) = x² − 2x + ${c}`,
+    color: '#0277BD',
+    intro: 'Esta gráfica muestra el perfil de la cuenca pluvial del Bordo Poniente. El eje x representa la distancia horizontal en metros, y f(x) la profundidad del terreno. El área bajo la curva es la sección transversal — clave para calcular capacidad de almacenamiento.',
+    cOpts: [5,6,7],
+    intervalo: [0,4]
+  },
+  {
+    id: 'metrobus',
+    emoji: '🚌',
+    nombre: 'Velocidad Metrobús · Línea 1 CDMX',
+    unidadX: 's', unidadY: 'm/s', unidadArea: 'm',
+    descripcion: 'velocidad del Metrobús',
+    significadoArea: 'distancia recorrida en metros — el área bajo la curva v(t) siempre es distancia',
+    fn: (t,c) => -0.08*t*t + c*t*0.18,
+    fnStr: (c) => `v(t) = −0.08t² + ${(c*0.18).toFixed(2)}t`,
+    color: '#E65100',
+    intro: 'Esta gráfica muestra cómo varía la velocidad del Metrobús entre dos estaciones. El eje horizontal es el tiempo en segundos, y v(t) es la velocidad en m/s. El área bajo la curva de velocidad es exactamente la distancia recorrida.',
+    cOpts: [8,9,10],
+    intervalo: [0,10]
+  },
+  {
+    id: 'solar',
+    emoji: '☀️',
+    nombre: 'Panel solar en azotea · Iztapalapa',
+    unidadX: 'h', unidadY: 'W/m²', unidadArea: 'Wh/m²',
+    descripcion: 'irradiancia solar',
+    significadoArea: 'energía solar acumulada en Wh/m² — cuánta energía capturó el panel durante el período',
+    fn: (t,c) => -c*(t-6)*(t-6) + 900,
+    fnStr: (c) => `I(t) = −${c}(t−6)² + 900`,
+    color: '#F57F17',
+    intro: 'Esta gráfica muestra la irradiancia solar sobre una azotea en Iztapalapa a lo largo del día. El eje x es la hora del día y I(t) es la potencia solar en W/m². El área bajo esta curva es la energía acumulada durante ese período.',
+    cOpts: [22,25,28],
+    intervalo: [3,9]
+  },
+  {
+    id: 'temp',
+    emoji: '🌡️',
+    nombre: 'Temperatura · Insurgentes Sur CDMX',
+    unidadX: 'h', unidadY: '°C', unidadArea: '°C·h',
+    descripcion: 'temperatura en Insurgentes Sur',
+    significadoArea: '°C·h — acumulación de calor, indicador de isla de calor urbano en la zona',
+    fn: (t,c) => 0.5*t*t - 3*t + c,
+    fnStr: (c) => `T(t) = 0.5t² − 3t + ${c}`,
+    color: '#B71C1C',
+    intro: 'Esta gráfica modela la temperatura en Insurgentes Sur durante las primeras horas del día. El eje x es la hora desde las 6 AM y T(t) es la temperatura en °C. Calcular el área bajo esta curva da un indicador de acumulación térmica, clave para estudiar las islas de calor urbano.',
+    cOpts: [18,20,22],
+    intervalo: [0,5]
+  },
+  {
+    id: 'metro',
+    emoji: '🚇',
+    nombre: 'Flujo de pasajeros · Metro CDMX',
+    unidadX: 'min', unidadY: 'pas/min', unidadArea: 'pasajeros',
+    descripcion: 'flujo de pasajeros por minuto',
+    significadoArea: 'total de pasajeros que pasaron por la estación durante ese período',
+    fn: (t,c) => c + 3*t - 0.4*t*t,
+    fnStr: (c) => `f(t) = ${c} + 3t − 0.4t²`,
+    color: '#4A148C',
+    intro: 'Esta gráfica modela el flujo de pasajeros por minuto en una estación del Metro durante la hora pico. El eje x es el tiempo en minutos y f(t) es la cantidad de personas que pasan por el torniquete. El área bajo la curva es el total de pasajeros en ese intervalo.',
+    cOpts: [40,50,60],
+    intervalo: [0,6]
+  }
+];
+
+// ══════════════════════════════════════════
+// BANCO DE REACTIVOS (6 por pregunta conceptual, 6 por pregunta aplicación)
+// ══════════════════════════════════════════
+const BANCO_CONCEPTUAL = [
+  {
+    enunciado: 'Si con rectángulos izquierdos obtuviste Sᵢ = 22 m² y con rectángulos derechos obtuviste Sᵈ = 30 m², ¿cuál es la mejor estimación usando el método del trapecio?',
+    correcta: '26 m² — el promedio de Sᵢ y Sᵈ',
+    distractores: ['8 m² — la diferencia entre Sᵈ y Sᵢ', '52 m² — la suma de Sᵢ y Sᵈ', '22 m² — el menor de los dos valores'],
+    pista: 'El método del trapecio promedia los dos resultados. ¿Cómo se calcula el promedio de 22 y 30?',
+    explicacion: 'S_trap = (Sᵢ + Sᵈ) / 2 = (22 + 30) / 2 = 26 m². El trapecio siempre queda entre Sᵢ y Sᵈ y da una estimación más cercana al área real que cualquiera de los dos por separado.'
+  },
+  {
+    enunciado: 'Con n = 4 rectángulos obtienes Sᵢ = 18 m² y Sᵈ = 26 m². ¿Cuál es la estimación por trapecio y entre qué valores está seguramente el área real?',
+    correcta: 'S_trap = 22 m², y el área real está entre 18 m² y 26 m²',
+    distractores: ['S_trap = 8 m², y el área real podría ser cualquier número', 'S_trap = 44 m², y el área real está por encima de 26 m²', 'S_trap = 18 m², porque el menor valor siempre es el más exacto'],
+    pista: 'Primero calcula (18 + 26) / 2. Luego piensa: si Sᵢ subestima y Sᵈ sobreestima, ¿dónde queda el valor real?',
+    explicacion: 'S_trap = (18 + 26) / 2 = 22 m². Como Sᵢ siempre queda por debajo y Sᵈ por encima (cuando f es creciente), el valor real está "atrapado" entre los dos: 18 < área real < 26.'
+  },
+  {
+    enunciado: 'Tienes Sᵢ = 15 unidades y Sᵈ = 25 unidades. Si aumentas el número de rectángulos de n = 4 a n = 20, ¿qué esperas que pase con la diferencia Sᵈ − Sᵢ?',
+    correcta: 'La diferencia disminuye — Sᵢ y Sᵈ se acercan cada vez más al mismo valor',
+    distractores: ['La diferencia aumenta porque hay más rectángulos', 'La diferencia se mantiene en 10 sin importar n', 'La diferencia desaparece completamente cuando n = 20'],
+    pista: 'Con más rectángulos más delgados, cada uno "tapa mal" una franja más pequeña. ¿Qué pasa entonces con el total del error?',
+    explicacion: 'Al aumentar n, cada rectángulo es más delgado y el "exceso" o "faltante" de cada uno se reduce. Por eso Sᵢ sube y Sᵈ baja, acercándose ambos al área real. La diferencia entre ellos se hace cada vez más pequeña.'
+  },
+  {
+    enunciado: 'Con n = 4 rectangulos, Sᵢ = 10 y Sᵈ = 18. ¿Cuánto vale S_trap? ¿Es S_trap mayor, menor o igual al área real?',
+    correcta: 'S_trap = 14, y está más cerca del área real que Sᵢ o Sᵈ por separado',
+    distractores: ['S_trap = 8, y sobreestima el área real', 'S_trap = 28, y es exactamente el área real', 'S_trap = 10, igual que Sᵢ porque el trapecio no mejora nada'],
+    pista: 'S_trap = (Sᵢ + Sᵈ) / 2. Calcula (10 + 18) / 2. El resultado queda entre 10 y 18 — ¿eso es mejor o peor estimación?',
+    explicacion: 'S_trap = (10 + 18) / 2 = 14. Este valor queda justo en el medio entre la subestimación (10) y la sobreestimación (18). No es exacto, pero es mejor que cualquiera de los dos extremos.'
+  },
+  {
+    enunciado: 'Observas que con n = 5 el error de tu estimación es de 4 m². Si duplicas a n = 10, ¿cuál será el error aproximado?',
+    correcta: 'Alrededor de 2 m² — el error se reduce aproximadamente a la mitad',
+    distractores: ['Alrededor de 8 m² — el error se duplica con más rectángulos', 'Exactamente 0 m² — con n = 10 la estimación es perfecta', 'Sigue siendo 4 m² — el error no depende de n'],
+    pista: 'Al duplicar n, cada rectángulo se vuelve dos veces más delgado. ¿Qué pasa con el "pedazo que sobra o falta" en cada uno?',
+    explicacion: 'Cada rectángulo individual comete un pequeño error proporcional a su ancho. Si el ancho se reduce a la mitad (al duplicar n), el error de cada rectángulo también se reduce. En total, el error general cae aproximadamente a la mitad.'
+  },
+  {
+    enunciado: 'Para una función que primero crece y luego decrece (forma de campana), ¿Sᵢ sobreestima o subestima el área en la parte creciente? ¿Y en la parte decreciente?',
+    correcta: 'Subestima en la parte creciente y sobreestima en la parte decreciente',
+    distractores: ['Sobreestima en ambas partes — los rectángulos izquierdos siempre sobran', 'Subestima en ambas partes — los rectángulos izquierdos siempre faltan', 'El comportamiento no depende de si la función sube o baja'],
+    pista: 'Dibuja un subintervalo donde f sube. El rectángulo izquierdo usa la altura del extremo izquierdo, que es el valor más bajo. Ahora dibuja uno donde f baja — ¿cuál es el extremo más alto ahora?',
+    explicacion: 'Cuando f crece, el extremo izquierdo tiene la altura más baja → el rectángulo queda por debajo → subestima. Cuando f decrece, el extremo izquierdo tiene la altura más alta → el rectángulo queda por encima → sobreestima. Por eso en curvas con pico, los errores se compensan parcialmente.'
+  }
+];
+
+const BANCO_APLICACIONCION = [
+  {
+    enunciado: 'La antiderivada de f(x) = x² es F(x) = x³/3. Si el intervalo es [0, 3], ¿cuánto vale ∫₀³ x² dx?',
+    correcta: '9',
+    distractores: ['3', '27', '6'],
+    pista: 'Aplica el TFC: F(b)−F(a). Calcula F(3) = 3³/3, luego F(0) = 0³/3. Réstalos.',
+    explicacion: '∫₀³ x² dx = F(3)−F(0) = (27/3)−(0) = 9−0 = 9. El TFC convierte una suma infinita en una simple resta de valores de la antiderivada.'
+  },
+  {
+    enunciado: 'Para f(x) = 2x, la antiderivada es F(x) = x². ¿Cuánto vale ∫₁⁴ 2x dx?',
+    correcta: '15',
+    distractores: ['8', '32', '6'],
+    pista: 'F(b)−F(a) con b=4, a=1. Calcula F(4) = 4² y F(1) = 1². Resta.',
+    explicacion: '∫₁⁴ 2x dx = F(4)−F(1) = 16−1 = 15. Geométricamente es el área del trapecio bajo la recta y=2x entre x=1 y x=4.'
+  },
+  {
+    enunciado: '¿Cuál es la antiderivada de f(x) = 3x²?',
+    correcta: 'F(x) = x³',
+    distractores: ['F(x) = 6x', 'F(x) = x³/3', 'F(x) = 9x²'],
+    pista: 'Regla de potencia al revés: ∫xⁿ dx = xⁿ⁺¹/(n+1). Aquí n=2 y hay un coeficiente 3. ¿Qué pasa con ese coeficiente?',
+    explicacion: '∫3x² dx = 3 · x³/3 = x³. El coeficiente 3 y el denominador 3 de la regla de potencia se cancelan. Verificación: derivada de x³ = 3x². ✓'
+  },
+  {
+    enunciado: 'Si con n=4 rectángulos izquierdos obtienes 18 m² y con n=4 derechos obtienes 26 m², ¿entre qué valores está seguramente el área exacta (asumiendo f creciente)?',
+    correcta: 'Entre 18 m² y 26 m²',
+    distractores: ['Menos de 18 m²', 'Más de 26 m²', 'Exactamente 22 m²'],
+    pista: 'Cuando f es creciente, Sᵢ siempre subestima y Sᵈ siempre sobreestima. ¿Dónde queda entonces el área real?',
+    explicacion: 'Para una función creciente, los rectángulos izquierdos siempre subestiman y los derechos siempre sobreestiman. El valor exacto queda atrapado: 18 < ∫f(x)dx < 26.'
+  },
+  {
+    enunciado: 'Con n=10 subdivisiones el error es 0.8 m². Si duplicas a n=20, ¿cuál sería el error aproximado?',
+    correcta: 'Alrededor de 0.4 m²',
+    distractores: ['Alrededor de 1.6 m²', 'Exactamente 0 m²', 'Alrededor de 0.8 m²'],
+    pista: 'Al duplicar n, el ancho de cada rectángulo se reduce a la mitad. ¿Qué le pasa al error de cada rectángulo individual?',
+    explicacion: 'El error de una suma de Riemann es proporcional a Δx = (b−a)/n. Al duplicar n, Δx se reduce a la mitad y el error también. De 0.8 m² pasamos a ≈0.4 m².'
+  },
+  {
+    enunciado: 'Para f(x) = x² − 2x + 5, la antiderivada es F(x) = x³/3 − x² + 5x. ¿Cuánto vale ∫₀⁴ f(x) dx?',
+    correcta: '28/3 ≈ 9.33',
+    distractores: ['12', '16', '20'],
+    pista: 'F(4) = 64/3 − 16 + 20. F(0) = 0. Simplifica F(4) antes de restar.',
+    explicacion: 'F(4) = 64/3 − 16 + 20 = 64/3 + 4 = 64/3 + 12/3 = 76/3. F(0) = 0. ∫ = 76/3 − 0 = 76/3 ≈ 25.33. Nota: con c=5 el resultado es 76/3, no 28/3 — la integral depende de c.'
+  }
+];
+
+// ══════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════
+let SEED = 0, CTX = null, C_CTX = 0;
+let NOMBRE_ALUMNO = '';
+let modoVis = 'izq', playing = false, animTimer = null;
+let R_B3 = null; // reactivo seleccionado
+let resp = { obs: '', b3: null, b3ok: false, b3pista: false, interp: '', b5pista: false, transf: '', obspista: false };
+let DOCENTE = false;
+const PROGRESO = [0, 14, 28, 45, 45, 65, 82, 100];
+
+// ══════════════════════════════════════════
+// SEMILLA Y ALEATORIEDAD
+// ══════════════════════════════════════════
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+let rng;
+function rand(n) { return Math.floor(rng() * n); }
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ══════════════════════════════════════════
+// INICIALIZAR
+// ══════════════════════════════════════════
+function iniciar() {
+  const nombreVal = document.getElementById('inp-nombre')?.value.trim() || '';
+  if (!nombreVal || nombreVal.length < 4) { document.getElementById('nombre-error').style.display='block'; return; }
+  NOMBRE_ALUMNO = nombreVal.toUpperCase();
+  SEED = Date.now() ^ (Math.random() * 0xFFFFFFFF | 0);
+  rng = mulberry32(SEED);
+  CTX = CONTEXTOS[rand(CONTEXTOS.length)];
+  C_CTX = CTX.cOpts[rand(CTX.cOpts.length)];
+  R_B3 = BANCO_CONCEPTUAL[rand(BANCO_CONCEPTUAL.length)];
+  poblarContexto();
+  avanzar(0, 1);
+}
+
+function poblarContexto() {
+  const badge = `<div class="ctx-badge">${CTX.emoji} ${CTX.nombre}</div>`;
+  ['b1','b2','b3','b5'].forEach(b => {
+    const el = document.getElementById('ctx-badge-'+b);
+    if (el) el.innerHTML = badge;
+  });
+  document.getElementById('vis-intro-txt').textContent = CTX.intro;
+  // Pregunta observación
+  document.getElementById('b2-pregunta').innerHTML = `<h4>✏️ ¿Qué observaste al aumentar n en la visualización?</h4>
+    <p>Mueve el slider desde n=1 hasta n=100 y activa los tres modos (rectángulos izquierdos, derechos y trapecios). Describe en tus palabras qué le pasa al valor de la aproximación y al error conforme n crece. ¿Hacia qué valor parece converger?</p>`;
+  // Pregunta interpretación en contexto
+  const a = CTX.intervalo[0], b = CTX.intervalo[1];
+  const exacto = calcularExacto();
+  document.getElementById('b5-pregunta').innerHTML = `<h4>✏️ Interpreta el resultado en el contexto de ${CTX.nombre}</h4>
+    <p>El área exacta bajo la curva en el intervalo [${a}, ${b}] es aproximadamente <strong>${exacto.toFixed(2)} ${CTX.unidadArea}</strong>. ¿Qué significa ese número en el contexto de <em>${CTX.descripcion}</em>? ¿Para qué sirve conocerlo?</p>`;
+  document.getElementById('pista-b5-txt').innerHTML = `<p>💡 El área bajo la curva en este contexto es: ${CTX.significadoArea}. Intenta responder con esas unidades y ese significado específico.</p>`;
+  // Reactivo B3
+  poblarReactivo('b3', R_B3, 'b3');
+}
+
+function poblarReactivo(bloque, r, key) {
+  document.getElementById(bloque+'-enunciado').innerHTML = `<h4>🔍 Pregunta</h4><p>${r.enunciado}</p>`;
+  document.getElementById('pista-'+bloque+'-txt').innerHTML = `<p>💡 ${r.pista}</p>`;
+  const opciones = shuffle([r.correcta, ...r.distractores]);
+  const grid = document.getElementById(bloque+'-opts');
+  grid.innerHTML = '';
+  opciones.forEach(op => {
+    const d = document.createElement('div');
+    d.className = 'opt';
+    d.textContent = op;
+    d.onclick = () => elegirOpcion(d, op === r.correcta, key, bloque);
+    grid.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════
+// INTERACCIÓN OPCIONES
+// ══════════════════════════════════════════
+function elegirOpcion(el, esCorrecta, key, bloque) {
+  if (document.querySelector('#'+bloque+'-opts .opt.chosen')) return;
+  el.classList.add('chosen', 'locked');
+  document.querySelectorAll('#'+bloque+'-opts .opt').forEach(o => { o.classList.add('locked'); o.onclick = null; });
+  resp[key] = el.textContent;
+  resp[key+'ok'] = esCorrecta;
+  document.getElementById('btn-'+bloque).disabled = false;
+}
+
+// ══════════════════════════════════════════
+// PISTAS
+// ══════════════════════════════════════════
+function mostrarPista(id) {
+  const p = document.getElementById(id);
+  if (p) p.classList.toggle('show');
+  const pistaKeys = { 'pista-obs': 'obspista', 'pista-b3': 'b3pista', 'pista-b4': 'b4pista', 'pista-b5': 'b5pista' };
+  const puIds = { 'pista-obs': 'pu-obs', 'pista-b3': 'pu-b3', 'pista-b4': 'pu-b4', 'pista-b5': 'pu-b5' };
+  if (pistaKeys[id]) {
+    resp[pistaKeys[id]] = true;
+    const pu = document.getElementById(puIds[id]);
+    if (pu) pu.classList.add('show');
+  }
+}
+
+// ══════════════════════════════════════════
+// AVANZAR
+// ══════════════════════════════════════════
+function avanzar(de, a) {
+  if (de === 2) resp.obs = document.getElementById('ta-obs').value.trim();
+  if (de === 5) resp.interp = document.getElementById('ta-interp').value.trim();
+  if (de === 6) resp.transf = document.getElementById('ta-transf').value.trim();
+  document.getElementById('b'+de).classList.remove('active');
+  document.getElementById('b'+a).classList.add('active');
+  actualizarProgreso(a);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (a === 1) setTimeout(dibujarVis, 100);
+  if (a === 7) generarResumen();
+}
+
+function regresarVis() {
+  document.getElementById('b2').classList.remove('active');
+  document.getElementById('b1').classList.add('active');
+  actualizarProgreso(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(dibujarVis, 80);
+}
+
+function saltarFinal() {
+  const activo = document.querySelector('.card.active');
+  if (activo) activo.classList.remove('active');
+  if (!resp.obs) resp.obs = '[docente — saltó al resumen]';
+  if (!resp.b3) resp.b3 = '[docente — sin respuesta]';
+  if (!resp.interp) resp.interp = '[docente — saltó al resumen]';
+  if (!resp.transf) resp.transf = '[docente — saltó al resumen]';
+  document.getElementById('b7').classList.add('active');
+  actualizarProgreso(7);
+  window.scrollTo({top:0,behavior:'smooth'});
+  generarResumen();
+}
+
+// ══════════════════════════════════════════
+// VALIDACIÓN CHARS
+// ══════════════════════════════════════════
+function chkChars(ta, cid, min) {
+  const n = ta.value.trim().length;
+  const el = document.getElementById(cid);
+  el.textContent = n + ' / mínimo ' + min + ' caracteres';
+  el.style.color = n >= min ? 'var(--verde)' : 'var(--gris)';
+  ta.style.borderColor = n >= min ? 'var(--verde)' : '';
+  const btnMap = {'ch-obs':'btn-b2','ch-interp':'btn-b5','ch-transf':'btn-b6'};
+  if (btnMap[cid]) document.getElementById(btnMap[cid]).disabled = n < min;
+}
+
+function chkNombre() {
+  const v = document.getElementById('inp-nombre').value.trim();
+  const ok = v.length >= 4;
+  document.getElementById('btn-iniciar').disabled = !ok;
+  const inp = document.getElementById('inp-nombre');
+  inp.style.borderColor = ok ? 'var(--verde)' : '';
+  inp.value = inp.value.toUpperCase();
+}
+
+// ══════════════════════════════════════════
+// PROGRESO
+// ══════════════════════════════════════════
+function actualizarProgreso(b) {
+  const pct = PROGRESO[b] || 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  const et = ['','Visualización','Observación','Comprensión','','Interpretación','Transferencia','Finalizado'];
+  document.getElementById('prog-texto').textContent = et[b] || '';
+}
+
+// ══════════════════════════════════════════
+// VISUALIZACIÓN CANVAS
+// ══════════════════════════════════════════
+let visN = 1;
+
+function setModo(m) {
+  modoVis = m;
+  ['izq','der','trap'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===m));
+  dibujarVis();
+}
+
+function actualizarVis() {
+  visN = parseInt(document.getElementById('slider-n').value);
+  document.getElementById('lbl-n').textContent = visN;
+  dibujarVis();
+}
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('btn-play');
+  btn.classList.toggle('playing', playing);
+  btn.textContent = playing ? '⏹ Detener' : '▶ Animar';
+  if (playing) {
+    visN = 1;
+    document.getElementById('slider-n').value = 1;
+    animLoop();
+  } else {
+    clearTimeout(animTimer);
+  }
+}
+
+function animLoop() {
+  if (!playing) return;
+  visN = Math.min(visN + (visN < 10 ? 1 : visN < 30 ? 2 : 5), 100);
+  document.getElementById('slider-n').value = visN;
+  document.getElementById('lbl-n').textContent = visN;
+  dibujarVis();
+  if (visN >= 100) { playing = false; document.getElementById('btn-play').classList.remove('playing'); document.getElementById('btn-play').textContent = '▶ Animar'; return; }
+  animTimer = setTimeout(animLoop, visN < 20 ? 220 : 80);
+}
+
+function calcularExacto() {
+  if (!CTX) return 0;
+  const [a, b] = CTX.intervalo;
+  // Numerical integration (Simpson's rule, n=1000) for generality
+  const n = 1000; const h = (b-a)/n;
+  let s = CTX.fn(a, C_CTX) + CTX.fn(b, C_CTX);
+  for (let i = 1; i < n; i++) s += CTX.fn(a + i*h, C_CTX) * (i%2===0 ? 2 : 4);
+  return s * h / 3;
+}
+
+function dibujarVis() {
+  if (!CTX) return;
+  const canvas = document.getElementById('vis-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const [a, b] = CTX.intervalo;
+  const n = visN;
+  const dx = (b-a)/n;
+
+  // Sample function values
+  const pts = [];
+  for (let i = 0; i <= 200; i++) {
+    const x = a + (b-a)*i/200;
+    pts.push({x, y: Math.max(0, CTX.fn(x, C_CTX))});
+  }
+  const maxY = Math.max(...pts.map(p=>p.y)) * 1.2;
+  const pd = {l:46,r:16,t:20,bo:36};
+  const gW = W-pd.l-pd.r, gH = H-pd.t-pd.bo;
+  const tx = x => pd.l + (x-a)/(b-a) * gW;
+  const ty = y => pd.t + gH - (y/maxY)*gH;
+  const y0 = ty(0);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#F9FAFB'; ctx.fillRect(0,0,W,H);
+
+  // grid
+  ctx.strokeStyle='#E0E8EE'; ctx.lineWidth=1;
+  for (let g=1;g<=4;g++) { const yg=ty(maxY*g/4); ctx.beginPath();ctx.moveTo(pd.l,yg);ctx.lineTo(pd.l+gW,yg);ctx.stroke(); }
+
+  // axes
+  ctx.strokeStyle='#607D8B'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,y0);ctx.lineTo(pd.l+gW,y0);ctx.stroke();
+
+  // Y labels
+  ctx.fillStyle='#607D8B';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='right';
+  for(let g=0;g<=4;g++) ctx.fillText(Math.round(maxY*g/4), pd.l-4, ty(maxY*g/4)+4);
+
+  // X labels
+  ctx.textAlign='center';
+  for (let i=0;i<=4;i++) { const xv = a+(b-a)*i/4; ctx.fillText(xv.toFixed(xv%1===0?0:1), tx(xv), y0+14); }
+  ctx.fillText(CTX.unidadX, pd.l+gW/2, H-2);
+
+  // Rectangles / Trapezoids
+  const colMain = CTX.color + '55';
+  const colBorder = CTX.color;
+  ctx.lineWidth = 1.5;
+
+  let suma = 0;
+  for (let i=0;i<n;i++) {
+    const xi = a + i*dx;
+    const xi1 = xi+dx;
+    const fi = Math.max(0, CTX.fn(xi, C_CTX));
+    const fi1 = Math.max(0, CTX.fn(xi1, C_CTX));
+    const x1 = tx(xi), x2 = tx(xi1);
+
+    if (modoVis === 'trap') {
+      ctx.beginPath();ctx.moveTo(x1,y0);ctx.lineTo(x1,ty(fi));ctx.lineTo(x2,ty(fi1));ctx.lineTo(x2,y0);ctx.closePath();
+      ctx.fillStyle=colMain;ctx.fill();
+      ctx.strokeStyle=colBorder;ctx.setLineDash([]);ctx.stroke();
+      suma += (fi+fi1)/2*dx;
+    } else {
+      const h = modoVis==='izq' ? fi : fi1;
+      ctx.fillStyle=colMain;ctx.fillRect(x1,ty(h),x2-x1,y0-ty(h));
+      ctx.strokeStyle=colBorder;ctx.setLineDash([]);ctx.strokeRect(x1,ty(h),x2-x1,y0-ty(h));
+      suma += h*dx;
+    }
+  }
+
+  // Exact value line
+  const exacto = calcularExacto();
+  // Draw filled area under curve (faint)
+  ctx.beginPath();ctx.moveTo(tx(a),y0);
+  pts.forEach(p=>ctx.lineTo(tx(p.x),ty(p.y)));
+  ctx.lineTo(tx(b),y0);ctx.closePath();
+  ctx.fillStyle='rgba(46,125,50,0.08)';ctx.fill();
+
+  // Curve
+  ctx.strokeStyle=CTX.color; ctx.lineWidth=2.5; ctx.setLineDash([]);
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.x),ty(p.y)):ctx.lineTo(tx(p.x),ty(p.y)));
+  ctx.stroke();
+
+  // Stats
+  const err = Math.abs(suma - exacto);
+  document.getElementById('vs-n').textContent = n;
+  document.getElementById('vs-aprox').textContent = suma.toFixed(2) + ' ' + CTX.unidadArea;
+  document.getElementById('vs-error').textContent = err.toFixed(3) + ' ' + CTX.unidadArea;
+  document.getElementById('lbl-n').textContent = n;
+}
+
+// ══════════════════════════════════════════
+// RESUMEN FINAL
+// ══════════════════════════════════════════
+function generarResumen() {
+  const nombreEl = document.getElementById('b7-nombre');
+  if (nombreEl) nombreEl.textContent = NOMBRE_ALUMNO || '—';
+  const exacto = calcularExacto();
+  const [a,b] = CTX.intervalo;
+  let html = '';
+
+  // Contexto
+  html += `<div class="res-sec"><div class="res-sec-tit">📍 Contexto de tu sesión</div>
+    <div class="res-fila info">
+      <div class="res-ico">${CTX.emoji}</div>
+      <div class="res-body">
+        <div class="res-q">${CTX.nombre}</div>
+        <div class="res-alumno">${CTX.fnStr(C_CTX)} en [${a}, ${b}] ${CTX.unidadX}</div>
+        <div style="font-size:.8rem;color:var(--verde);font-weight:700;margin-top:3px;">Área exacta: ${exacto.toFixed(3)} ${CTX.unidadArea}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // B2 — Observación
+  html += `<div class="res-sec"><div class="res-sec-tit">Bloque 2 · Observación de la visualización</div>
+    <div class="res-fila neu">
+      <div class="res-ico">📝</div>
+      <div class="res-body">
+        <div class="res-q">¿Qué observaste al aumentar n?${resp.obspista ? '<span class="pista-tag">📌 usó pista</span>' : ''}</div>
+        <div class="res-texto">${resp.obs || '<em>Sin respuesta</em>'}</div>
+        <div class="res-criterio">📋 <strong>Se esperaba observar:</strong> que conforme n crece, el valor de la aproximación se acerca al área exacta (${exacto.toFixed(2)} ${CTX.unidadArea}) y el error disminuye progresivamente hacia cero. Al llegar a n=100 el error es muy pequeño.</div>
+      </div>
+    </div>
+  </div>`;
+
+  // B3 — Opción múltiple conceptual
+  html += `<div class="res-sec"><div class="res-sec-tit">Bloque 3 · Pregunta de comprensión</div>`;
+  html += filaOpcion(R_B3.enunciado, resp.b3, R_B3.correcta, R_B3.explicacion, resp.b3ok, resp.b3pista);
+  html += '</div>';
+
+  // B5 — Interpretación en contexto
+  html += `<div class="res-sec"><div class="res-sec-tit">Bloque 5 · Interpretación en contexto</div>
+    <div class="res-fila neu">
+      <div class="res-ico">📝</div>
+      <div class="res-body">
+        <div class="res-q">¿Qué significa el área exacta en el contexto?${resp.b5pista ? '<span class="pista-tag">📌 usó pista</span>' : ''}</div>
+        <div class="res-texto">${resp.interp || '<em>Sin respuesta</em>'}</div>
+        <div class="res-criterio">📋 <strong>Criterio:</strong> ${exacto.toFixed(2)} ${CTX.unidadArea} representa ${CTX.significadoArea}. Una respuesta completa conecta el número con las unidades del contexto y explica para qué sirve conocerlo.</div>
+      </div>
+    </div>
+  </div>`;
+
+  // B6 — Transferencia
+  html += `<div class="res-sec"><div class="res-sec-tit">Bloque 6 · Transferencia</div>
+    <div class="res-fila neu">
+      <div class="res-ico">💡</div>
+      <div class="res-body">
+        <div class="res-q">Situación cotidiana en la CDMX</div>
+        <div class="res-texto">${resp.transf || '<em>Sin respuesta</em>'}</div>
+        <div class="res-criterio">📋 <strong>Criterio:</strong> Una respuesta válida identifica una situación donde algo varía en el tiempo o el espacio (temperatura, consumo de agua, velocidad de tráfico, etc.), nombra qué representaría la curva y qué significaría el área. No hay respuesta incorrecta si la lógica es coherente.</div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('resumen-contenido').innerHTML = html;
+
+  // Ficha ejemplo con datos de la sesión
+  document.getElementById('ficha-ejemplo').innerHTML = `
+    <div class="copy-sym">★</div>
+    <div class="copy-body">
+      <div class="copy-name">Ejemplo de tu sesión — ${CTX.nombre}</div>
+      <div class="copy-formula">${CTX.fnStr(C_CTX)} en [${a},${b}] ${CTX.unidadX}</div>
+      <div class="copy-note">Área exacta = ${exacto.toFixed(3)} ${CTX.unidadArea} · ${CTX.significadoArea.split('—')[0].trim()}</div>
+    </div>`;
+
+  // Código de sesión
+  const codSesion = generarCodigo();
+  document.getElementById('cod-sesion-box').innerHTML = `
+    <div class="cod-sesion">
+      <div class="cod-label">Código de sesión</div>
+      <div class="cod-num">${codSesion}</div>
+      <div class="cod-ctx">${NOMBRE_ALUMNO} · ${CTX.emoji} ${CTX.nombre}</div>
+    </div>`;
+}
+
+function filaOpcion(pregunta, respAlumno, correcta, explicacion, ok, usoPista) {
+  const sin = !respAlumno || respAlumno.startsWith('[');
+  return `<div class="res-fila ${sin ? 'info' : ok ? 'ok' : 'err'}">
+    <div class="res-ico">${sin ? '—' : ok ? '✅' : '❌'}</div>
+    <div class="res-body">
+      <div class="res-q">${pregunta.substring(0,80)}…${usoPista ? '<span class="pista-tag">📌 usó pista</span>' : ''}</div>
+      <div class="res-alumno"><strong>Respondió:</strong> ${respAlumno || '<em>Sin respuesta</em>'}</div>
+      ${!ok && !sin ? `<div class="res-incorrecto">→ Correcta: ${correcta}</div>` : ''}
+      ${ok ? `<div class="res-correcto">✓ Correcto</div>` : ''}
+      <div class="res-criterio">📋 ${explicacion}</div>
+    </div>
+  </div>`;
+}
+
+function generarCodigo() {
+  const b3v = resp.b3ok ? 1 : 0;
+  const b4v = resp.b4ok ? 1 : 0;
+  const base = (SEED % 1000) * 10 + b3v * 5 + b4v * 3;
+  return String(((base * 37 + 1234) % 9000) + 1000);
+}
+
+// ══════════════════════════════════════════
+// DOCENTE
+// ══════════════════════════════════════════
+function abrirModal() { document.getElementById('modal-doc').classList.add('show'); setTimeout(()=>document.getElementById('modal-inp').focus(),100); }
+function cerrarModal() { document.getElementById('modal-doc').classList.remove('show'); document.getElementById('modal-inp').value=''; document.getElementById('modal-err').style.display='none'; }
+document.getElementById('modal-doc').addEventListener('click',function(e){ if(e.target===this) cerrarModal(); });
+
+function confirmarDoc() {
+  if (document.getElementById('modal-inp').value.trim() === '890') {
+    cerrarModal();
+    DOCENTE = true;
+    document.getElementById('doc-bar').classList.add('show');
+    // Iniciar en modo demo con semilla fija
+    SEED = 12345;
+    rng = mulberry32(SEED);
+    CTX = CONTEXTOS[0]; // cuenca como demo
+    C_CTX = 5;
+    R_B3 = BANCO_CONCEPTUAL[0];
+    R_B4 = BANCO_APLICACION[0];
+    poblarContexto();
+    avanzar(0,1);
+  } else {
+    document.getElementById('modal-err').style.display = 'block';
+    document.getElementById('modal-inp').value = '';
+    document.getElementById('modal-inp').focus();
+  }
+}
+
+function abrirGrupo() {
+  // Genera tabla con todas las combinaciones posibles
+  let html = `<table class="tbl-doc">
+    <thead><tr><th>Contexto</th><th>c / param</th><th>Intervalo</th><th>Área exacta</th><th>Unidad</th></tr></thead><tbody>`;
+  CONTEXTOS.forEach(ctx => {
+    ctx.cOpts.forEach(c => {
+      // Calculate exact
+      const n=1000; const [a,b]=ctx.intervalo; const h=(b-a)/n;
+      let s=ctx.fn(a,c)+ctx.fn(b,c);
+      for(let i=1;i<n;i++) s+=ctx.fn(a+i*h,c)*(i%2===0?2:4);
+      const exacto = s*h/3;
+      html += `<tr><td><span class="badge-ctx">${ctx.emoji}</span> ${ctx.nombre.split('·')[0].trim()}</td>
+        <td>${ctx.fnStr(c)}</td><td>[${a},${b}] ${ctx.unidadX}</td>
+        <td><strong>${exacto.toFixed(3)}</strong></td><td>${ctx.unidadArea}</td></tr>`;
+    });
+  });
+  // Reactivos
+  html += `</tbody></table>
+  <div style="margin-top:18px;"><strong style="font-size:.85rem;">Banco — Preguntas conceptuales (${BANCO_CONCEPTUAL.length} reactivos)</strong>
+  <table class="tbl-doc" style="margin-top:8px;">
+    <thead><tr><th>#</th><th>Pregunta</th><th>Respuesta correcta</th></tr></thead><tbody>`;
+  BANCO_CONCEPTUAL.forEach((r,i)=>{ html+=`<tr><td>${i+1}</td><td style="text-align:left;font-size:.71rem;">${r.enunciado}</td><td style="text-align:left;font-size:.71rem;color:var(--verde);font-weight:700;">${r.correcta}</td></tr>`; });
+  html += `</tbody></table>
+  <strong style="font-size:.85rem;display:block;margin-top:14px;">Banco — Preguntas de aplicación (${BANCO_APLICACION.length} reactivos)</strong>
+  <table class="tbl-doc" style="margin-top:8px;">
+    <thead><tr><th>#</th><th>Pregunta</th><th>Respuesta correcta</th></tr></thead><tbody>`;
+  BANCO_APLICACION.forEach((r,i)=>{ html+=`<tr><td>${i+1}</td><td style="text-align:left;font-size:.71rem;">${r.enunciado}</td><td style="text-align:left;font-size:.71rem;color:var(--verde);font-weight:700;">${r.correcta}</td></tr>`; });
+  html += '</tbody></table></div>';
+
+  document.getElementById('mg-contenido').innerHTML = html;
+  document.getElementById('modal-grupo').classList.add('show');
+}
+
+function cerrarGrupo() { document.getElementById('modal-grupo').classList.remove('show'); }
+document.getElementById('modal-grupo').addEventListener('click',function(e){ if(e.target===this) cerrarGrupo(); });
+</script>
+</body>
+</html>

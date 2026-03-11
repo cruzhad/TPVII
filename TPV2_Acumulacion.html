@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPV II · ¿Qué significa el área bajo una curva?</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink:    #0E1A14;
+  --paper:  #F4F1EB;
+  --cream:  #EDE9DF;
+  --teal:   #0D7A6B;
+  --teal2:  #14A085;
+  --teal3:  #D4EDE9;
+  --amber:  #C47A1A;
+  --amber3: #FDF3E0;
+  --red:    #B03A2E;
+  --red3:   #FDECEA;
+  --slate:  #4A5568;
+  --line:   #D4CFBF;
+  --card:   #FFFFFF;
+  --r: 12px;
+  --sh: 0 2px 16px rgba(14,26,20,.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(13,122,107,.06) 0%, transparent 50%),
+    radial-gradient(circle at 85% 75%, rgba(196,122,26,.05) 0%, transparent 50%);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 16px 12px 60px;
+}
+
+.wrap { max-width: 680px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.header {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 26px 24px 22px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.header::after {
+  content: '∫';
+  position: absolute; right: 16px; bottom: -14px;
+  font-family: 'Playfair Display', serif;
+  font-size: 9rem; color: rgba(255,255,255,.04);
+  line-height: 1; pointer-events: none;
+}
+.h-tag { font-size: .62rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--teal2); margin-bottom: 8px; }
+.h-tit { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; line-height: 1.15; margin-bottom: 7px; }
+.h-sub { font-size: .84rem; color: rgba(255,255,255,.58); line-height: 1.65; }
+.h-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { font-size: .62rem; font-weight: 600; letter-spacing: .3px; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,.09); color: rgba(255,255,255,.75); }
+
+/* ── PROGRESO ── */
+.prog { background: var(--card); border-radius: var(--r); padding: 11px 16px; margin-bottom: 14px; box-shadow: var(--sh); }
+.prog-top { display: flex; justify-content: space-between; font-size: .73rem; font-weight: 700; color: var(--slate); margin-bottom: 7px; }
+.prog-bar { height: 6px; background: var(--line); border-radius: 10px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--amber)); border-radius: 10px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+/* ── CARDS ── */
+.card { background: var(--card); border-radius: var(--r); padding: 22px 20px; margin-bottom: 14px; box-shadow: var(--sh); display: none; }
+.card.active { display: block; animation: up .3s ease; }
+@keyframes up { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+.c-tag { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--slate); margin-bottom: 4px; }
+.c-tit { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--teal); margin-bottom: 13px; line-height: 1.2; }
+.c-tit.am { color: var(--amber); }
+
+/* ── BLOQUES ── */
+.blq { border-radius: 9px; padding: 13px 15px; margin-bottom: 12px; }
+.blq.teal { background: var(--teal3); border-left: 4px solid var(--teal); }
+.blq.am   { background: var(--amber3); border-left: 4px solid var(--amber); }
+.blq.red  { background: var(--red3); border-left: 4px solid var(--red); }
+.blq.dark { background: var(--ink); color: rgba(255,255,255,.88); border-left: none; border-radius: 9px; }
+.blq.cream{ background: var(--cream); border: 1.5px solid var(--line); }
+.blq p, .blq li { font-size: .87rem; line-height: 1.8; }
+.blq ul, .blq ol { padding-left: 18px; }
+.blq h4 { font-size: .9rem; font-weight: 700; margin-bottom: 7px; }
+p { font-size: .9rem; line-height: 1.75; margin-bottom: 8px; }
+
+/* ── BOTONES ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; background: var(--teal); color: #fff; border: none; border-radius: 9px; padding: 12px 22px; font-size: .92rem; font-weight: 700; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; transition: background .15s, transform .12s; margin-top: 10px; }
+.btn:hover { background: var(--teal2); transform: translateY(-1px); }
+.btn.am { background: var(--amber); }
+.btn.am:hover { background: #d98b20; }
+.btn.sm { padding: 8px 16px; font-size: .81rem; }
+.btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+
+/* ── RETRO ── */
+.retro { font-size: .82rem; font-weight: 600; border-radius: 8px; padding: 10px 13px; margin-top: 8px; display: none; line-height: 1.6; }
+.retro.ok  { background: var(--teal3); color: var(--teal); border-left: 3px solid var(--teal); display: block; }
+.retro.err { background: var(--red3); color: var(--red); border-left: 3px solid var(--red); display: block; }
+.retro.info{ background: var(--amber3); color: #7a4a00; border-left: 3px solid var(--amber); display: block; }
+
+/* ── JUEGO DE UNIDADES ── */
+.unidades-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin: 14px 0; }
+.uni-col { display: flex; flex-direction: column; gap: 7px; }
+.uni-btn { border: 2px solid var(--line); border-radius: 9px; padding: 10px 12px; cursor: pointer; font-size: .84rem; font-weight: 600; background: var(--cream); transition: all .15s; text-align: center; font-family: 'IBM Plex Sans', sans-serif; color: var(--ink); line-height: 1.4; }
+.uni-btn:hover { border-color: var(--teal); background: var(--teal3); }
+.uni-btn.sel { border-color: var(--teal); background: var(--teal); color: #fff; }
+.uni-x-sym { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--amber); text-align: center; font-weight: 700; }
+.uni-result { background: var(--ink); border-radius: 9px; padding: 14px 16px; text-align: center; min-height: 70px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 10px; transition: all .3s; }
+.uni-result .ur-label { font-size: .6rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.8); font-weight: 700; margin-bottom: 5px; }
+.uni-result .ur-calc { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #80DEEA; margin-bottom: 4px; }
+.uni-result .ur-sig { font-size: .85rem; color: #ffffff; font-weight: 600; }
+.uni-result.empty .ur-sig { color: rgba(255,255,255,.65); font-size: .8rem; }
+
+/* ── CANVAS VISUAL ── */
+.vis-wrap { border-radius: 9px; overflow: hidden; background: #F9FAFB; border: 1.5px solid var(--line); margin: 12px 0; }
+canvas { display: block; max-width: 100%; }
+.vis-ctrl { padding: 11px 14px; background: #fff; border-top: 1px solid var(--line); }
+.vc-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin-bottom: 7px; }
+.vc-row:last-child { margin-bottom: 0; }
+.vc-lbl { font-size: .71rem; font-weight: 700; color: var(--slate); min-width: 80px; }
+.vc-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+.vc-btn { font-size: .72rem; font-weight: 700; padding: 5px 11px; border-radius: 7px; border: 2px solid var(--line); background: var(--cream); color: var(--slate); cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; transition: all .13s; }
+.vc-btn.sel { border-color: var(--teal); background: var(--teal3); color: var(--teal); }
+.vis-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 14px; background: var(--ink); }
+.vs-it { text-align: center; }
+.vs-lb { font-size: .58rem; color: rgba(255,255,255,.33); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.vs-vl { font-size: .98rem; font-weight: 700; color: #80DEEA; margin-top: 1px; }
+.vs-vl.am { color: #FFD54F; }
+
+/* ── SITUACIONES ── */
+.sit-card { border: 2px solid var(--line); border-radius: 10px; padding: 14px 15px; margin-bottom: 10px; cursor: pointer; transition: all .18s; background: var(--cream); }
+.sit-card:hover { border-color: var(--teal); background: var(--teal3); }
+.sit-card.sel { border-color: var(--teal); background: var(--teal3); }
+.sit-card.done { cursor: default; }
+.sit-ico { font-size: 1.4rem; margin-bottom: 5px; }
+.sit-nom { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--teal); margin-bottom: 4px; }
+.sit-desc { font-size: .82rem; color: var(--slate); line-height: 1.6; }
+.sit-opts { display: grid; gap: 7px; margin-top: 10px; }
+.sit-opt { border: 2px solid var(--line); border-radius: 8px; padding: 9px 13px; cursor: pointer; font-size: .84rem; font-weight: 500; transition: all .15s; background: #fff; font-family: 'IBM Plex Sans', sans-serif; }
+.sit-opt:hover { border-color: var(--teal); background: var(--teal3); }
+.sit-opt.correct { border-color: var(--teal); background: var(--teal3); color: var(--teal); font-weight: 700; }
+.sit-opt.wrong   { border-color: var(--red); background: var(--red3); color: var(--red); }
+
+/* ── APUNTE PARA COPIAR ── */
+.apunte-box {
+  background: var(--cream);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--r);
+  padding: 20px 18px;
+  margin: 14px 0;
+  position: relative;
+}
+.apunte-box::before {
+  content: '📒 Copia en tu cuaderno';
+  display: block;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.apunte-tit { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--ink); margin-bottom: 8px; font-weight: 900; }
+.apunte-def { font-size: .86rem; line-height: 1.8; color: var(--ink); margin-bottom: 14px; }
+.apunte-def strong { color: var(--teal); }
+
+/* Gráfica del apunte */
+.apunte-grafica { background: #fff; border: 1.5px solid var(--line); border-radius: 8px; padding: 4px; margin: 12px 0; }
+.apunte-grafica canvas { display: block; margin: 0 auto; }
+
+/* Tabla de unidades del apunte */
+.uni-tabla { width: 100%; border-collapse: collapse; font-size: .79rem; margin-top: 10px; }
+.uni-tabla th { background: var(--ink); color: rgba(255,255,255,.8); padding: 7px 9px; text-align: center; font-weight: 700; font-size: .72rem; }
+.uni-tabla td { padding: 7px 9px; border-bottom: 1px solid var(--line); text-align: center; }
+.uni-tabla tr:nth-child(even) td { background: var(--cream); }
+.uni-tabla .res { font-weight: 700; color: var(--teal); }
+.apunte-regla { background: var(--ink); color: #80DEEA; border-radius: 8px; padding: 10px 14px; text-align: center; font-family: 'Playfair Display', serif; font-size: .98rem; margin-top: 10px; line-height: 1.8; }
+.apunte-regla .small { font-size: .72rem; color: rgba(255,255,255,.8); font-family: 'IBM Plex Sans', sans-serif; display: block; margin-top: 2px; }
+
+/* ── EVIDENCIA ── */
+textarea { width: 100%; min-height: 88px; border: 2px solid var(--line); border-radius: 8px; padding: 10px 13px; font-size: .87rem; font-family: 'IBM Plex Sans', sans-serif; resize: vertical; background: var(--cream); transition: border .2s; }
+textarea:focus { outline: none; border-color: var(--teal); background: #fff; }
+.char-c { font-size: .72rem; color: var(--slate); text-align: right; margin-top: 3px; }
+
+/* Dato numérico */
+.dato-box { background: var(--ink); border-radius: 9px; padding: 14px 16px; margin: 12px 0; display: flex; align-items: center; gap: 14px; }
+.dato-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: #FFD54F; min-width: 80px; text-align: center; }
+.dato-txt { font-size: .8rem; color: rgba(255,255,255,.65); line-height: 1.6; }
+.dato-ctx { font-size: .75rem; color: rgba(255,255,255,.35); margin-top: 3px; }
+
+/* ── CÓDIGO FINAL ── */
+.cod-box { background: var(--ink); border-radius: var(--r); padding: 20px; text-align: center; margin: 14px 0; }
+.cod-lb { font-size: .6rem; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,.8); font-weight: 700; margin-bottom: 7px; }
+.cod-num { font-family: 'Playfair Display', serif; font-size: 2.6rem; letter-spacing: 10px; color: #4DD0E1; }
+.cod-ctx { font-size: .71rem; color: rgba(255,255,255,.75); margin-top: 7px; }
+
+/* ── MODAL DOCENTE ── */
+.modal-ov { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); overflow-y: auto; padding: 20px 10px; }
+.modal-ov.show { display: block; }
+.modal-box { background: var(--card); border-radius: var(--r); max-width: 420px; margin: 80px auto; padding: 24px; box-shadow: 0 8px 40px rgba(0,0,0,.25); }
+.modal-tit { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--teal); margin-bottom: 5px; }
+.modal-sub { font-size: .81rem; color: var(--slate); margin-bottom: 14px; line-height: 1.5; }
+.modal-inp { width: 100%; border: 2px solid var(--line); border-radius: 8px; padding: 10px 14px; font-size: 1.2rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; letter-spacing: 4px; text-align: center; background: var(--cream); margin-bottom: 8px; }
+.modal-inp:focus { outline: none; border-color: var(--teal); background: #fff; }
+.modal-err { font-size: .78rem; color: var(--red); font-weight: 700; display: none; margin-bottom: 8px; }
+.modal-btns { display: flex; gap: 8px; }
+.modal-cancel { background: var(--cream); color: var(--slate); border: none; border-radius: 8px; padding: 10px 18px; font-size: .86rem; font-weight: 700; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
+
+/* ── DOC BAR FLOTANTE ── */
+.doc-bar { display: none; position: fixed; bottom: 16px; right: 16px; z-index: 200; flex-direction: column; gap: 7px; align-items: flex-end; }
+.doc-bar.show { display: flex; }
+.db-btn { display: flex; align-items: center; gap: 6px; background: var(--ink); color: #80DEEA; border: 1.5px solid rgba(128,222,234,.2); border-radius: 9px; padding: 9px 15px; font-size: .79rem; font-weight: 700; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.3); white-space: nowrap; transition: background .15s; }
+.db-btn:hover { background: #1a3040; }
+.db-btn.skip { background: var(--teal); color: #fff; border-color: transparent; }
+
+/* ── MODAL BANCO ── */
+.modal-banco { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); overflow-y: auto; padding: 20px 10px; }
+.modal-banco.show { display: block; }
+.mb-box { background: #fff; border-radius: var(--r); max-width: 860px; margin: 20px auto; padding: 22px; box-shadow: 0 8px 40px rgba(0,0,0,.25); }
+.mb-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.mb-tit { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--teal); }
+.mb-close { background: var(--cream); border: none; border-radius: 8px; padding: 7px 15px; font-size: .83rem; font-weight: 700; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; }
+.tbl { width: 100%; border-collapse: collapse; font-size: .76rem; }
+.tbl th { background: var(--ink); color: rgba(255,255,255,.78); padding: 8px 8px; text-align: left; font-weight: 700; }
+.tbl td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:hover td { background: var(--teal3); }
+.tbl .cor { color: var(--teal); font-weight: 700; }
+
+/* ── MISC ── */
+.divider { height: 1.5px; background: var(--line); border-radius: 2px; margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- MODAL DOCENTE -->
+<div class="modal-ov" id="modal-doc">
+  <div class="modal-box">
+    <div class="modal-tit">🔑 Acceso docente</div>
+    <div class="modal-sub">Ingresa el código para modo supervisión.</div>
+    <input class="modal-inp" id="modal-inp" type="password" maxlength="6" placeholder="_ _ _ _"
+           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+           onkeydown="if(event.key==='Enter') confirmarDoc()">
+    <div class="modal-err" id="modal-err">Código incorrecto.</div>
+    <div class="modal-btns">
+      <button class="btn sm" onclick="confirmarDoc()">Confirmar</button>
+      <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BANCO DOCENTE -->
+<div class="modal-banco" id="modal-banco">
+  <div class="mb-box">
+    <div class="mb-header">
+      <div>
+        <div class="mb-tit">📋 Banco completo · Situaciones y respuestas</div>
+        <div style="font-size:.73rem;color:var(--slate);margin-top:2px;">TPV II · Acumulación · Área bajo una curva · Prof. Adrián Cruz</div>
+      </div>
+      <button class="mb-close" onclick="cerrarBanco()">✕ Cerrar</button>
+    </div>
+    <div id="banco-contenido" style="overflow-x:auto;"></div>
+  </div>
+</div>
+
+<!-- BARRA DOCENTE -->
+<div class="doc-bar" id="doc-bar">
+  <button class="db-btn skip" onclick="saltarFinal()">⚡ Ir al final</button>
+  <button class="db-btn" onclick="abrirBanco()">📋 Ver banco</button>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="h-tag">TPV II · P4 · Sesión introductoria · Prof. Adrián Cruz</div>
+  <div class="h-tit">¿Qué significa el área bajo una curva?</div>
+  <div class="h-sub">Antes de calcular, hay que entender qué estamos calculando y para qué sirve.</div>
+  <div class="h-chips">
+    <span class="chip">📐 Acumulación</span>
+    <span class="chip">📏 Análisis de unidades</span>
+    <span class="chip">📊 Lectura de gráficas</span>
+    <span class="chip">⏱ ~25 min</span>
+  </div>
+</div>
+
+<!-- PROGRESO -->
+<div class="prog">
+  <div class="prog-top"><span id="prog-txt">Inicio</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- ═══ B0: INICIO ═══ -->
+<div class="card active" id="b0">
+  <div class="c-tag">Inicio</div>
+  <div class="c-tit">Una pregunta antes de empezar</div>
+  <div class="blq teal">
+    <p>Imagina que tienes una gráfica que muestra <strong>la velocidad de un Metrobús a lo largo del tiempo</strong>. La curva sube, baja, a veces es plana.</p>
+    <p style="margin-top:8px;">Alguien sombrea el área bajo esa curva y dice: <em>"eso que está sombreado es exactamente 1,240 metros."</em></p>
+    <p style="margin-top:8px;">¿Cómo puede un <strong>área</strong> en una gráfica ser una <strong>distancia</strong>? Eso es lo que vas a entender hoy.</p>
+  </div>
+  <button class="btn" onclick="avanzar(0,1)">Comenzar →</button>
+  <div style="margin-top:14px;">
+    <span style="font-size:.68rem;color:var(--slate);cursor:pointer;text-decoration:underline;" onclick="abrirModal()">Acceso docente</span>
+  </div>
+</div>
+
+<!-- ═══ B1: EL SECRETO — ACUMULACIÓN ═══ -->
+<div class="card" id="b1">
+  <div class="c-tag">Bloque 1 · El concepto central</div>
+  <div class="c-tit">El secreto: todo se acumula</div>
+
+  <div class="blq teal">
+    <h4>¿Qué es acumulación?</h4>
+    <p>Cuando algo cambia continuamente a una cierta <strong>tasa</strong> (velocidad, flujo, precio por hora…), el área bajo la curva de esa tasa representa <strong>el total acumulado</strong> de lo que está produciendo.</p>
+  </div>
+
+  <div class="blq am">
+    <h4>💡 Un ejemplo mental</h4>
+    <p>Una llave de agua deja pasar <strong>3 litros por minuto</strong>. Si la dejamos 5 minutos:</p>
+    <p style="margin-top:6px;font-size:.95rem;font-weight:700;text-align:center;">3 L/min × 5 min = <span style="color:var(--amber);font-size:1.1rem;">15 litros</span></p>
+    <p style="margin-top:8px;">En una gráfica, eso sería un <strong>rectángulo</strong> de altura 3 y base 5. Su área = 15. Ahora imagina que el flujo no es constante — que sube y baja. El área bajo <em>esa</em> curva sigue siendo el total de agua. Solo que ya no es un rectángulo simple.</p>
+  </div>
+
+  <div class="blq cream">
+    <h4>La idea en una frase:</h4>
+    <p style="font-size:.93rem;"><strong>El área bajo una curva = la acumulación total de lo que la curva está midiendo.</strong></p>
+    <p style="margin-top:6px;font-size:.83rem;color:var(--slate);">No importa si la curva es irregular — el área sigue capturando todo lo que "se juntó" en ese intervalo.</p>
+  </div>
+
+  <button class="btn" onclick="avanzar(1,2)">Entendido, seguir →</button>
+</div>
+
+<!-- ═══ B2: JUEGO DE UNIDADES ═══ -->
+<div class="card" id="b2">
+  <div class="c-tag">Bloque 2 · El truco de las unidades</div>
+  <div class="c-tit">Multiplica los ejes y descubre qué acumula</div>
+
+  <div class="blq cream">
+    <p>Hay una forma infalible de saber qué representa el área bajo cualquier curva: <strong>multiplica las unidades del eje Y por las del eje X</strong>. El resultado te dice qué se está acumulando.</p>
+    <p style="margin-top:6px;font-size:.83rem;color:var(--slate);">Elige una unidad de cada columna y observa el resultado.</p>
+  </div>
+
+  <div class="unidades-grid">
+    <div class="uni-col" id="col-y">
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--slate);text-align:center;margin-bottom:2px;">Eje Y (¿qué cambia?)</div>
+      <button class="uni-btn" data-y="m/s" data-ys="metros/segundo" onclick="selY(this)">🚌 Velocidad<br><span style="font-size:.75rem;color:var(--teal);">m/s</span></button>
+      <button class="uni-btn" data-y="L/min" data-ys="litros/minuto" onclick="selY(this)">💧 Caudal<br><span style="font-size:.75rem;color:var(--teal);">L/min</span></button>
+      <button class="uni-btn" data-y="$/h" data-ys="pesos/hora" onclick="selY(this)">💰 Ingreso<br><span style="font-size:.75rem;color:var(--teal);">$/h</span></button>
+      <button class="uni-btn" data-y="W" data-ys="Watts" onclick="selY(this)">⚡ Potencia<br><span style="font-size:.75rem;color:var(--teal);">W</span></button>
+      <button class="uni-btn" data-y="N" data-ys="Newtons" onclick="selY(this)">🔧 Fuerza<br><span style="font-size:.75rem;color:var(--teal);">N</span></button>
+    </div>
+    <div class="uni-x-sym">×</div>
+    <div class="uni-col" id="col-x">
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--slate);text-align:center;margin-bottom:2px;">Eje X (¿en función de qué?)</div>
+      <button class="uni-btn" data-x="s" data-xs="segundos" onclick="selX(this)">⏱ Tiempo<br><span style="font-size:.75rem;color:var(--amber);">segundos (s)</span></button>
+      <button class="uni-btn" data-x="min" data-xs="minutos" onclick="selX(this)">🕐 Tiempo<br><span style="font-size:.75rem;color:var(--amber);">minutos (min)</span></button>
+      <button class="uni-btn" data-x="h" data-xs="horas" onclick="selX(this)">🗓 Tiempo<br><span style="font-size:.75rem;color:var(--amber);">horas (h)</span></button>
+      <button class="uni-btn" data-x="m" data-xs="metros" onclick="selX(this)">📏 Distancia<br><span style="font-size:.75rem;color:var(--amber);">metros (m)</span></button>
+    </div>
+  </div>
+
+  <div class="uni-result empty" id="uni-result">
+    <div class="ur-label">Resultado de la multiplicación</div>
+    <div class="ur-calc" id="ur-calc">— × —</div>
+    <div class="ur-sig" id="ur-sig">Elige una unidad de cada columna</div>
+  </div>
+
+  <div id="retro-unidades" class="retro"></div>
+  <div id="btn-b2-wrap" style="display:none;">
+    <button class="btn" onclick="avanzar(2,3)">Ver gráficas →</button>
+  </div>
+</div>
+
+<!-- ═══ B3: VISUALIZACIÓN INTERACTIVA ═══ -->
+<div class="card" id="b3">
+  <div class="c-tag">Bloque 3 · Visualización</div>
+  <div class="c-tit">El área como acumulación visual</div>
+
+  <div class="blq cream" style="margin-bottom:10px;">
+    <p>Elige un contexto y una forma de curva. Observa cómo cambia el área sombreada — eso es lo que se acumula.</p>
+  </div>
+
+  <div class="vis-wrap">
+    <canvas id="vis-c" width="640" height="260"></canvas>
+    <div class="vis-stat">
+      <div class="vs-it"><div class="vs-lb">Área sombreada</div><div class="vs-vl am" id="vs-area">—</div></div>
+      <div class="vs-it"><div class="vs-lb">Unidades del área</div><div class="vs-vl" id="vs-uni">—</div></div>
+    </div>
+    <div class="vis-ctrl">
+      <div class="vc-row">
+        <span class="vc-lbl">Contexto:</span>
+        <div class="vc-btns" id="vc-ctx">
+          <button class="vc-btn sel" onclick="setCtx(0,this)">🚌 Metrobús</button>
+          <button class="vc-btn" onclick="setCtx(1,this)">💧 Caudal</button>
+          <button class="vc-btn" onclick="setCtx(2,this)">💰 Negocio</button>
+          <button class="vc-btn" onclick="setCtx(3,this)">⚡ Potencia</button>
+        </div>
+      </div>
+      <div class="vc-row">
+        <span class="vc-lbl">Forma:</span>
+        <div class="vc-btns" id="vc-forma">
+          <button class="vc-btn sel" onclick="setForma(0,this)">Constante</button>
+          <button class="vc-btn" onclick="setForma(1,this)">Creciente</button>
+          <button class="vc-btn" onclick="setForma(2,this)">Con pico</button>
+          <button class="vc-btn" onclick="setForma(3,this)">Irregular</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blq teal" id="vis-interp" style="margin-top:10px;"></div>
+
+  <button class="btn" onclick="avanzar(3,4)">Ver situaciones →</button>
+</div>
+
+<!-- ═══ B4: SITUACIONES ═══ -->
+<div class="card" id="b4">
+  <div class="c-tag">Bloque 4 · Situaciones reales</div>
+  <div class="c-tit am">¿Qué acumula cada gráfica?</div>
+
+  <div class="blq cream">
+    <p>Para cada situación: lee la descripción, observa los ejes, y elige qué representa el área sombreada. <strong>Las respuestas no se revelan hasta el resumen final.</strong></p>
+  </div>
+
+  <div id="sits-container"></div>
+
+  <button class="btn" id="btn-b4" onclick="avanzar(4,5)" disabled>Ver apunte →</button>
+</div>
+
+<!-- ═══ B5: APUNTE PARA COPIAR ═══ -->
+<div class="card" id="b5">
+  <div class="c-tag">Bloque 5 · Apunte de referencia</div>
+  <div class="c-tit">Para tu cuaderno</div>
+
+  <div class="apunte-box">
+    <div class="apunte-tit">El área bajo una curva = Acumulación</div>
+    <div class="apunte-def">
+      Cuando una función f(x) representa una <strong>tasa de cambio</strong> (velocidad, flujo, precio por hora, potencia…), el <strong>área bajo su curva</strong> en un intervalo [a, b] representa el <strong>total acumulado</strong> de la magnitud que produce esa tasa.
+    </div>
+
+    <!-- Gráfica del apunte -->
+    <div class="apunte-grafica">
+      <canvas id="apunte-c" width="560" height="200"></canvas>
+    </div>
+    <div style="font-size:.74rem;color:var(--slate);text-align:center;margin-bottom:10px;">
+      <em>Área sombreada = acumulación total en [a, b]. No importa si la curva es irregular.</em>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="apunte-tit" style="font-size:.88rem;margin-top:4px;">Truco: multiplica las unidades de los ejes</div>
+    <table class="uni-tabla">
+      <thead>
+        <tr><th>Eje Y</th><th>Eje X</th><th>Cálculo</th><th>Área representa</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>m/s (velocidad)</td><td>s (tiempo)</td><td><span class="res">m/s × s = m</span></td><td>Distancia recorrida</td></tr>
+        <tr><td>L/min (caudal)</td><td>min (tiempo)</td><td><span class="res">L/min × min = L</span></td><td>Volumen de agua</td></tr>
+        <tr><td>$/h (ingreso)</td><td>h (tiempo)</td><td><span class="res">$/h × h = $</span></td><td>Dinero acumulado</td></tr>
+        <tr><td>W (potencia)</td><td>s (tiempo)</td><td><span class="res">W × s = J</span></td><td>Energía consumida</td></tr>
+        <tr><td>N (fuerza)</td><td>m (distancia)</td><td><span class="res">N × m = J</span></td><td>Trabajo realizado</td></tr>
+      </tbody>
+    </table>
+
+    <div class="apunte-regla">
+      Unidad del área = Unidad(Y) × Unidad(X)
+      <span class="small">El resultado siempre tiene significado físico, económico o del contexto que estudias.</span>
+    </div>
+  </div>
+
+  <button class="btn" onclick="avanzar(5,6)">Continuar a la evidencia →</button>
+</div>
+
+<!-- ═══ B6: EVIDENCIA ═══ -->
+<div class="card" id="b6">
+  <div class="c-tag">Bloque 6 · Evidencia de participación</div>
+  <div class="c-tit">Dos preguntas rápidas</div>
+
+  <div class="blq am">
+    <h4>¿Por qué estas preguntas?</h4>
+    <p>El Prof. Cruz no está en clase hoy. Estas preguntas son la evidencia de que revisaste el material. No hay respuesta única perfecta — se evalúa que tu respuesta tenga sentido con lo que viste.</p>
+  </div>
+
+  <!-- Pregunta 1: escrita de interpretación (contexto aleatorio) -->
+  <div class="blq teal" id="ev-pregunta1"></div>
+  <textarea id="ta-ev1" placeholder="Escribe tu respuesta aquí..." oninput="chkC(this,'ch-ev1',40)"></textarea>
+  <div class="char-c" id="ch-ev1">0 / mínimo 40 caracteres</div>
+
+  <div class="divider"></div>
+
+  <!-- Pregunta 2: dato numérico que solo aparece en la visualización -->
+  <div class="blq cream">
+    <h4>🔢 Pregunta del dato en pantalla</h4>
+    <p id="ev-pregunta2"></p>
+    <div class="dato-box" id="dato-ref">
+      <div class="dato-num" id="dato-num">—</div>
+      <div>
+        <div class="dato-txt" id="dato-txt">Este número apareció en la visualización del Bloque 3.</div>
+        <div class="dato-ctx" id="dato-ctx"></div>
+      </div>
+    </div>
+    <p style="font-size:.83rem;margin-top:8px;" id="ev-p2-instruccion">Explica brevemente qué representa ese número en el contexto que te tocó explorar.</p>
+  </div>
+  <textarea id="ta-ev2" placeholder="Explica qué representa ese número..." oninput="chkC(this,'ch-ev2',30)"></textarea>
+  <div class="char-c" id="ch-ev2">0 / mínimo 30 caracteres</div>
+
+  <button class="btn am" id="btn-b6" onclick="avanzar(6,7)" disabled>Ver mi resumen →</button>
+</div>
+
+<!-- ═══ B7: RESUMEN FINAL ═══ -->
+<div class="card" id="b7">
+  <div class="c-tag">Resumen final</div>
+  <div class="c-tit">Tu reporte de la sesión</div>
+  <p>Toma captura de esta pantalla y súbela a Google Classroom.</p>
+
+  <div id="resumen-contenido"></div>
+
+  <div class="cod-box" id="cod-final"></div>
+
+  <div style="text-align:center;margin-top:18px;padding:12px;background:var(--cream);border-radius:9px;border:1px solid var(--line);">
+    <p style="font-size:.76rem;color:var(--slate);">TPV II · P4 · Sesión introductoria · Prof. Adrián Cruz · MCCEMS 2025</p>
+    <p style="font-size:.71rem;color:var(--slate);margin-top:2px;">¿Qué significa el área bajo una curva? · Acumulación y análisis de unidades</p>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ════════════════════════════════════════
+// SEED Y RNG
+// ════════════════════════════════════════
+let SEED = Date.now() ^ (Math.random()*0xFFFFFF|0);
+function mulberry(a){ return function(){ a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296; }; }
+let rng = mulberry(SEED);
+function rnd(n){ return Math.floor(rng()*n); }
+
+// ════════════════════════════════════════
+// ESTADO
+// ════════════════════════════════════════
+let ctxVis=0, formaVis=0;
+let sitRespuestas=[];
+let evCtxIdx=0, evDatoVal=0, evDatoCtx='';
+let DOCENTE=false;
+const PROGRESO=[0,17,33,50,67,83,95,100];
+
+// ════════════════════════════════════════
+// CONTEXTOS VISUALIZACIÓN
+// ════════════════════════════════════════
+const VIS_CTXS = [
+  { nombre:'Velocidad Metrobús', eje_y:'m/s', eje_x:'s', area_uni:'m', area_sig:'Distancia recorrida (metros)', color:'#0D7A6B',
+    fns: [(t)=>28, (t)=>t*3.2, (t)=>-0.12*(t-5)*(t-5)+40, (t)=>15+12*Math.sin(t*0.7+0.5)],
+    intervalo:[0,12] },
+  { nombre:'Caudal de agua', eje_y:'L/min', eje_x:'min', area_uni:'L', area_sig:'Volumen acumulado (litros)', color:'#0277BD',
+    fns: [(t)=>8, (t)=>t*1.4, (t)=>-0.8*(t-4)*(t-4)+20, (t)=>6+5*Math.abs(Math.sin(t*0.8))],
+    intervalo:[0,10] },
+  { nombre:'Ingreso negocio', eje_y:'$/h', eje_x:'h', area_uni:'$', area_sig:'Dinero acumulado (pesos)', color:'#C47A1A',
+    fns: [(t)=>350, (t)=>t*60, (t)=>-40*(t-5)*(t-5)+700, (t)=>200+200*Math.abs(Math.sin(t*0.9+1))],
+    intervalo:[0,10] },
+  { nombre:'Potencia máquina', eje_y:'kW', eje_x:'h', area_uni:'kWh', area_sig:'Energía consumida (kWh)', color:'#4A148C',
+    fns: [(t)=>15, (t)=>t*2.8, (t)=>-1.8*(t-4)*(t-4)+32, (t)=>10+10*Math.abs(Math.cos(t*0.7+0.3))],
+    intervalo:[0,8] }
+];
+
+// ════════════════════════════════════════
+// SITUACIONES (banco de 6, se eligen 3 aleatorias)
+// ════════════════════════════════════════
+const BANCO_SITS = [
+  { id:0, ico:'🚌', nom:'Metrobús en Insurgentes',
+    desc:'La gráfica muestra la velocidad del Metrobús entre dos estaciones. El eje X es el tiempo en segundos; el eje Y es la velocidad en m/s.',
+    ejeX:'Tiempo (segundos)', ejeY:'Velocidad (m/s)',
+    opciones:['La aceleración máxima del Metrobús','La distancia recorrida entre las dos estaciones (metros)','El número de pasajeros que viajaron'],
+    correcta:1, explicacion:'Velocidad (m/s) × Tiempo (s) = metros. El área es la distancia que recorrió el Metrobús en ese tramo.' },
+  { id:1, ico:'💧', nom:'Pipa de agua en Iztapalapa',
+    desc:'Una pipa reparte agua a una colonia. El eje X es el tiempo en minutos; el eje Y es el caudal en litros por minuto.',
+    ejeX:'Tiempo (minutos)', ejeY:'Caudal (L/min)',
+    opciones:['La presión máxima del agua','El volumen total de agua que recibió la colonia (litros)','La velocidad a la que viaja la pipa'],
+    correcta:1, explicacion:'Caudal (L/min) × Tiempo (min) = litros. El área es el total de agua repartida.' },
+  { id:2, ico:'🌮', nom:'Taquería en la Central de Abasto',
+    desc:'La gráfica muestra los ingresos por hora de una taquería. El eje X es la hora del día; el eje Y es la tasa de ingreso en $/hora.',
+    ejeX:'Hora del día', ejeY:'Ingreso ($/hora)',
+    opciones:['El precio del taco más caro','El total de dinero que ganó la taquería en el día (pesos)','El número de clientes que llegaron'],
+    correcta:1, explicacion:'Ingreso ($/h) × Tiempo (h) = pesos. El área bajo la curva de ingresos por hora es el total de dinero acumulado en el día.' },
+  { id:3, ico:'⚡', nom:'Panel solar en azotea',
+    desc:'La gráfica muestra la potencia generada por un panel solar durante el día. El eje X es la hora; el eje Y es la potencia en Watts.',
+    ejeX:'Tiempo (horas)', ejeY:'Potencia (W)',
+    opciones:['La energía total generada por el panel durante el día (Wh)','La temperatura máxima que alcanzó el panel','El número de horas con sol'],
+    correcta:0, explicacion:'Potencia (W) × Tiempo (h) = Wh (Watt-hora). El área es la energía eléctrica que generó el panel durante ese período.' },
+  { id:4, ico:'🏃', nom:'Entrenamiento en el Deportivo',
+    desc:'Un atleta entrena en el Deportivo Olímpico. La gráfica muestra su velocidad durante la carrera. El eje X es el tiempo en minutos; el eje Y es la velocidad en m/min.',
+    ejeX:'Tiempo (minutos)', ejeY:'Velocidad (m/min)',
+    opciones:['El cansancio acumulado del atleta','La distancia total que corrió el atleta (metros)','Su velocidad máxima'],
+    correcta:1, explicacion:'Velocidad (m/min) × Tiempo (min) = metros. El área bajo la curva de velocidad siempre es distancia recorrida, sin importar cómo varíe.' },
+  { id:5, ico:'💊', nom:'Medicamento en el hospital',
+    desc:'Un médico monitorea la concentración de un fármaco en la sangre de un paciente. El eje X es el tiempo en horas; el eje Y es la concentración en μg/L.',
+    ejeX:'Tiempo (horas)', ejeY:'Concentración (μg/L)',
+    opciones:['La dosis que tomó el paciente','La exposición total del cuerpo al fármaco (μg·h/L) — indica qué tan efectiva fue la dosis','La velocidad de absorción máxima'],
+    correcta:1, explicacion:'Concentración (μg/L) × Tiempo (h) = μg·h/L. Esta unidad se llama "biodisponibilidad" y mide cuánto tiempo y en qué cantidad el fármaco estuvo activo en el cuerpo.' }
+];
+
+let sitsSel = [];
+
+// ════════════════════════════════════════
+// AVANZAR
+// ════════════════════════════════════════
+function avanzar(de, a){
+  document.getElementById('b'+de).classList.remove('active');
+  document.getElementById('b'+a).classList.add('active');
+  prog(a);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(a===3){ setTimeout(dibujarVis,80); }
+  if(a===4){ poblarSituaciones(); }
+  if(a===5){ setTimeout(dibujarApunte,80); }
+  if(a===6){ poblarEvidencia(); }
+  if(a===7){ generarResumen(); }
+}
+
+function prog(b){
+  const p=PROGRESO[b]||0;
+  document.getElementById('prog-fill').style.width=p+'%';
+  document.getElementById('prog-pct').textContent=p+'%';
+  const et=['','Concepto','Unidades','Visualización','Situaciones','Apunte','Evidencia','Finalizado'];
+  document.getElementById('prog-txt').textContent=et[b]||'';
+}
+
+function saltarFinal(){
+  const ac=document.querySelector('.card.active');
+  if(ac) ac.classList.remove('active');
+  document.getElementById('b7').classList.add('active');
+  prog(7);
+  window.scrollTo({top:0,behavior:'smooth'});
+  generarResumen();
+}
+
+// ════════════════════════════════════════
+// BLOQUE 2: JUEGO DE UNIDADES
+// ════════════════════════════════════════
+let selYval=null, selXval=null, selYstr=null, selXstr=null;
+let uniCompleted=false;
+
+const UNI_MAP = {
+  'm/s+s':    {calc:'m/s × s = m',      sig:'📏 Distancia recorrida (metros)'},
+  'm/s+m':    {calc:'m/s × m = m²/s',   sig:'🔁 Unidad no cotidiana — pero tiene sentido físico'},
+  'L/min+min':{calc:'L/min × min = L',  sig:'💧 Volumen de agua (litros)'},
+  'L/min+s':  {calc:'L/min × s = L·s/min', sig:'🔁 Unidad mixta — considera cambiar a minutos'},
+  'L/min+h':  {calc:'L/min × h = L·h/min = 60L', sig:'💧 Volumen (equivale a 60 litros por cada L/min)'},
+  'L/min+m':  {calc:'L/min × m',        sig:'🔁 Unidad no usual — quizás el eje X debería ser tiempo'},
+  '$/h+h':    {calc:'$/h × h = $',      sig:'💰 Dinero acumulado (pesos)'},
+  '$/h+s':    {calc:'$/h × s = $/3600', sig:'💰 Fracción de peso — conviene usar horas en eje X'},
+  '$/h+min':  {calc:'$/h × min = $/60', sig:'💰 Fracción de peso — conviene usar horas en eje X'},
+  '$/h+m':    {calc:'$/h × m',          sig:'🔁 Combina dinero con distancia — no muy usual'},
+  'W+s':      {calc:'W × s = J',        sig:'⚡ Energía (Joules)'},
+  'W+min':    {calc:'W × min = J×60',   sig:'⚡ Energía (equivale a 60 Joules por Watt)'},
+  'W+h':      {calc:'W × h = Wh',       sig:'⚡ Energía (Watt-hora, la misma que en tu recibo de luz)'},
+  'W+m':      {calc:'W × m = W·m',      sig:'🔁 Unidad no común en este contexto'},
+  'N+m':      {calc:'N × m = J',        sig:'🔧 Trabajo mecánico (Joules — energía para mover algo)'},
+  'N+s':      {calc:'N × s = N·s',      sig:'🏃 Impulso mecánico (cantidad de movimiento)'},
+  'N+min':    {calc:'N × min = N·min',  sig:'🔁 Impulso en unidades no estándar'},
+  'N+h':      {calc:'N × h = N·h',      sig:'🔁 Impulso en unidades no estándar'}
+};
+
+function selY(el){
+  document.querySelectorAll('#col-y .uni-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  selYval=el.dataset.y; selYstr=el.dataset.ys;
+  actualizarUni();
+}
+function selX(el){
+  document.querySelectorAll('#col-x .uni-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  selXval=el.dataset.x; selXstr=el.dataset.xs;
+  actualizarUni();
+}
+
+function actualizarUni(){
+  if(!selYval||!selXval) return;
+  const key=selYval+'+'+selXval;
+  const r=UNI_MAP[key]||{calc:selYval+' × '+selXval,sig:'Unidad combinada'};
+  const box=document.getElementById('uni-result');
+  box.classList.remove('empty');
+  document.getElementById('ur-calc').textContent=r.calc;
+  document.getElementById('ur-sig').textContent=r.sig;
+  if(!uniCompleted){
+    uniCompleted=true;
+    const ret=document.getElementById('retro-unidades');
+    ret.className='retro info';
+    ret.textContent='✅ Bien. Prueba varias combinaciones — cada una revela una acumulación diferente. Cuando quieras, continúa.';
+    document.getElementById('btn-b2-wrap').style.display='block';
+  }
+}
+
+// ════════════════════════════════════════
+// BLOQUE 3: VISUALIZACIÓN
+// ════════════════════════════════════════
+function setCtx(i,el){
+  ctxVis=i;
+  document.querySelectorAll('#vc-ctx .vc-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  dibujarVis();
+}
+function setForma(i,el){
+  formaVis=i;
+  document.querySelectorAll('#vc-forma .vc-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  dibujarVis();
+}
+
+function dibujarVis(){
+  const cv=document.getElementById('vis-c');
+  if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height;
+  const c=VIS_CTXS[ctxVis];
+  const [a,b]=c.intervalo;
+  const fn=c.fns[formaVis];
+
+  // sample
+  const pts=[];
+  for(let i=0;i<=300;i++){
+    const x=a+(b-a)*i/300;
+    pts.push({x,y:Math.max(0,fn(x))});
+  }
+  const maxY=Math.max(...pts.map(p=>p.y))*1.22;
+  const pd={l:50,r:16,t:18,bo:34};
+  const gW=W-pd.l-pd.r, gH=H-pd.t-pd.bo;
+  const tx=x=>pd.l+(x-a)/(b-a)*gW;
+  const ty=y=>pd.t+gH-(y/maxY)*gH;
+  const y0=ty(0);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#F9FAFB'; ctx.fillRect(0,0,W,H);
+
+  // grid
+  ctx.strokeStyle='#E0E8EE'; ctx.lineWidth=1;
+  for(let g=1;g<=4;g++){const yg=ty(maxY*g/4);ctx.beginPath();ctx.moveTo(pd.l,yg);ctx.lineTo(pd.l+gW,yg);ctx.stroke();}
+
+  // axes
+  ctx.strokeStyle='#607D8B'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,y0);ctx.lineTo(pd.l+gW,y0);ctx.stroke();
+
+  // axis labels
+  ctx.fillStyle='#607D8B';ctx.font='10px IBM Plex Sans,sans-serif';ctx.textAlign='right';
+  for(let g=0;g<=4;g++) ctx.fillText(Math.round(maxY*g/4),pd.l-5,ty(maxY*g/4)+4);
+  ctx.textAlign='center';
+  for(let i=0;i<=4;i++){const xv=a+(b-a)*i/4;ctx.fillText(xv%1===0?xv:xv.toFixed(1),tx(xv),y0+14);}
+
+  // axis titles
+  ctx.fillStyle='#455A64';ctx.font='bold 9px IBM Plex Sans,sans-serif';
+  ctx.textAlign='center';ctx.fillText('→ '+c.eje_x,pd.l+gW/2,H-2);
+  ctx.save();ctx.translate(12,pd.t+gH/2);ctx.rotate(-Math.PI/2);ctx.fillText('↑ '+c.eje_y,0,0);ctx.restore();
+
+  // area fill
+  ctx.beginPath();ctx.moveTo(tx(a),y0);
+  pts.forEach(p=>ctx.lineTo(tx(p.x),ty(p.y)));
+  ctx.lineTo(tx(b),y0);ctx.closePath();
+  ctx.fillStyle=c.color+'40';ctx.fill();
+
+  // curve
+  ctx.strokeStyle=c.color;ctx.lineWidth=2.8;ctx.setLineDash([]);
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.x),ty(p.y)):ctx.lineTo(tx(p.x),ty(p.y)));
+  ctx.stroke();
+
+  // area label in center
+  let area=0;
+  const step=(b-a)/300;
+  pts.forEach(p=>area+=p.y*step);
+
+  // Store for evidence
+  evDatoVal=Math.round(area*10)/10;
+  evDatoCtx=c.nombre;
+
+  document.getElementById('vs-area').textContent=evDatoVal+' '+c.area_uni;
+  var uyL=c.eje_y.split('(')[0].trim(); var uxL=c.eje_x.split('(')[0].trim(); document.getElementById('vs-uni').textContent=c.area_uni+' ('+uyL+' x '+uxL+')';
+
+  // interpretation
+  document.getElementById('vis-interp').innerHTML=`<h4>📖 Interpretación</h4>
+    <p>Con esta curva y este contexto, el área sombreada es <strong>${evDatoVal} ${c.area_uni}</strong>. Eso representa: <em>${c.area_sig}</em>.</p>
+    <p style="margin-top:6px;font-size:.81rem;color:var(--slate);">Truco de unidades: ${c.eje_y} × ${c.eje_x} = ${c.area_uni}.</p>`;
+}
+
+// ════════════════════════════════════════
+// BLOQUE 4: SITUACIONES
+// ════════════════════════════════════════
+function poblarSituaciones(){
+  // Elegir 3 situaciones aleatorias sin repetir
+  const pool=[...BANCO_SITS];
+  sitsSel=[];
+  while(sitsSel.length<3 && pool.length>0){
+    const i=rnd(pool.length);
+    sitsSel.push(pool.splice(i,1)[0]);
+  }
+  sitRespuestas=new Array(3).fill(null);
+
+  const cont=document.getElementById('sits-container');
+  cont.innerHTML='';
+  sitsSel.forEach((s,idx)=>{
+    const div=document.createElement('div');
+    div.className='sit-card';
+    div.id='sit-'+idx;
+    div.innerHTML=`
+      <div class="sit-ico">${s.ico}</div>
+      <div class="sit-nom">${s.nom}</div>
+      <div class="sit-desc">${s.desc}</div>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:.76rem;color:var(--slate);">
+        <span>Eje X: <strong>${s.ejeX}</strong></span>
+        <span>Eje Y: <strong>${s.ejeY}</strong></span>
+      </div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--teal);margin-top:10px;margin-bottom:4px;">¿Qué representa el área sombreada?</div>
+      <div class="sit-opts" id="sopts-${idx}">
+        ${s.opciones.map((op,oi)=>`<button class="sit-opt" onclick="elegirSit(${idx},${oi})">${op}</button>`).join('')}
+      </div>`;
+    cont.appendChild(div);
+  });
+}
+
+function elegirSit(idx, oi){
+  if(sitRespuestas[idx]!==null) return;
+  sitRespuestas[idx]=oi;
+  document.querySelectorAll(`#sopts-${idx} .sit-opt`).forEach(b=>{b.onclick=null; b.classList.add('locked');});
+  // Solo marca la selección — sin revelar si es correcto
+  document.querySelectorAll(`#sopts-${idx} .sit-opt`)[oi].classList.add('chosen');
+  document.querySelectorAll(`#sopts-${idx} .sit-opt`)[oi].style.borderColor='var(--teal)';
+  document.querySelectorAll(`#sopts-${idx} .sit-opt`)[oi].style.background='var(--teal3)';
+  // Verificar si todas respondidas
+  if(sitRespuestas.every(r=>r!==null)){
+    document.getElementById('btn-b4').disabled=false;
+  }
+}
+
+// ════════════════════════════════════════
+// BLOQUE 5: APUNTE
+// ════════════════════════════════════════
+function dibujarApunte(){
+  const cv=document.getElementById('apunte-c');
+  if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height;
+  const pd={l:44,r:20,t:16,bo:30};
+  const gW=W-pd.l-pd.r, gH=H-pd.t-pd.bo;
+
+  // Función ejemplo: curva con forma de campana irregular
+  const fn=t=> 20+30*Math.sin(t*0.55)*Math.exp(-t*0.08)+15*Math.cos(t*0.9+1)*Math.exp(-t*0.12);
+  const pts=[];
+  for(let i=0;i<=300;i++){const t=i/300*12;pts.push({x:t,y:Math.max(0,fn(t))+5});}
+  const maxY=Math.max(...pts.map(p=>p.y))*1.25;
+  const tx=x=>pd.l+(x/12)*gW;
+  const ty=y=>pd.t+gH-(y/maxY)*gH;
+  const y0=ty(0);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+
+  // grid sutil
+  ctx.strokeStyle='#E8E4DA';ctx.lineWidth=1;
+  for(let g=1;g<=3;g++){const yg=ty(maxY*g/3);ctx.beginPath();ctx.moveTo(pd.l,yg);ctx.lineTo(pd.l+gW,yg);ctx.stroke();}
+
+  // axes
+  ctx.strokeStyle='#4A5568';ctx.lineWidth=1.5;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,y0);ctx.lineTo(pd.l+gW,y0);ctx.stroke();
+
+  // Labels ejes
+  ctx.fillStyle='#4A5568';ctx.font='bold 10px IBM Plex Sans,sans-serif';ctx.textAlign='center';
+  ctx.fillText('a',tx(0),y0+20); ctx.fillText('b',tx(12),y0+20);
+  ctx.save();ctx.translate(14,pd.t+gH/2);ctx.rotate(-Math.PI/2);ctx.fillText('f(x) = tasa de cambio',0,0);ctx.restore();
+  ctx.fillText('x (tiempo, distancia, cantidad…)',pd.l+gW/2,H-2);
+
+  // Shading del área
+  ctx.beginPath();ctx.moveTo(tx(0),y0);
+  pts.forEach(p=>ctx.lineTo(tx(p.x),ty(p.y)));
+  ctx.lineTo(tx(12),y0);ctx.closePath();
+  ctx.fillStyle='rgba(13,122,107,0.18)';ctx.fill();
+
+  // Curva
+  ctx.strokeStyle='#0D7A6B';ctx.lineWidth=2.5;
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(tx(p.x),ty(p.y)):ctx.lineTo(tx(p.x),ty(p.y)));
+  ctx.stroke();
+
+  // Etiqueta área
+  ctx.fillStyle='rgba(13,122,107,0.85)';
+  ctx.font='bold 11px IBM Plex Sans,sans-serif';ctx.textAlign='center';
+  ctx.fillText('ÁREA = Acumulación total',pd.l+gW/2,pd.t+gH/2-4);
+  ctx.font='10px IBM Plex Sans,sans-serif';
+  ctx.fillText('en el intervalo [a, b]',pd.l+gW/2,pd.t+gH/2+12);
+
+  // Flecha doble indicando el área
+  ctx.strokeStyle='rgba(13,122,107,0.5)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(tx(0),y0-2);ctx.lineTo(tx(12),y0-2);ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ════════════════════════════════════════
+// BLOQUE 6: EVIDENCIA
+// ════════════════════════════════════════
+function poblarEvidencia(){
+  // Pregunta 1: basada en una situación aleatoria de las que vio
+  if(sitsSel.length===0){
+    // Si saltó, usar primera del banco
+    sitsSel=[BANCO_SITS[rnd(BANCO_SITS.length)]];
+  }
+  evCtxIdx=rnd(sitsSel.length);
+  const sit=sitsSel[evCtxIdx];
+  document.getElementById('ev-pregunta1').innerHTML=`
+    <h4>✏️ Pregunta 1 — Interpretación</h4>
+    <p>En la situación <strong>"${sit.nom}"</strong>, la gráfica tiene en el eje X: <em>${sit.ejeX}</em>, y en el eje Y: <em>${sit.ejeY}</em>.</p>
+    <p style="margin-top:7px;">Explica con tus palabras: ¿por qué el área bajo esa curva representa ${sit.opciones[sit.correcta].toLowerCase()}? Usa el truco de las unidades en tu respuesta.</p>`;
+
+  // Pregunta 2: dato numérico de la visualización
+  document.getElementById('ev-pregunta2').innerHTML=`El valor del área que viste en la visualización del Bloque 3 (contexto: <strong>${evDatoCtx}</strong>) fue:`;
+  document.getElementById('dato-num').textContent=evDatoVal;
+  document.getElementById('dato-txt').textContent='Este número apareció en pantalla durante tu exploración.';
+  document.getElementById('dato-ctx').textContent=evDatoCtx+' · Área = '+evDatoVal;
+  document.getElementById('ev-p2-instruccion').textContent='¿Qué significa ese número? ¿En qué unidades está y qué representa físicamente?';
+}
+
+function chkC(ta,cid,min){
+  const n=ta.value.trim().length;
+  const el=document.getElementById(cid);
+  el.textContent=n+' / mínimo '+min+' caracteres';
+  el.style.color=n>=min?'var(--teal)':'var(--slate)';
+  ta.style.borderColor=n>=min?'var(--teal)':'';
+  // Habilitar botón cuando ambas tienen mínimo
+  const ok1=document.getElementById('ta-ev1').value.trim().length>=40;
+  const ok2=document.getElementById('ta-ev2').value.trim().length>=30;
+  document.getElementById('btn-b6').disabled=!(ok1&&ok2);
+}
+
+// ════════════════════════════════════════
+// BLOQUE 7: RESUMEN
+// ════════════════════════════════════════
+function generarResumen(){
+  const ta1=document.getElementById('ta-ev1')?.value.trim()||'[sin respuesta]';
+  const ta2=document.getElementById('ta-ev2')?.value.trim()||'[sin respuesta]';
+  const sit=sitsSel[evCtxIdx]||BANCO_SITS[0];
+
+  // Situaciones — resultados
+  let htmlSits='';
+  sitsSel.forEach((s,i)=>{
+    const r=sitRespuestas[i];
+    const ok=r===s.correcta;
+    const sin=r===null;
+    htmlSits+=`
+      <div class="res-fila ${sin?'info':ok?'ok':'err'}">
+        <div class="res-ico">${sin?'—':ok?'✅':'❌'}</div>
+        <div class="res-body">
+          <div class="res-q">${s.ico} ${s.nom}</div>
+          <div class="res-alumno"><strong>Elegiste:</strong> ${r!==null?s.opciones[r]:'Sin respuesta'}</div>
+          ${!ok&&!sin?`<div class="res-incorrecto">→ Correcta: ${s.opciones[s.correcta]}</div>`:''}
+          <div class="res-crit">📋 ${s.explicacion}</div>
+        </div>
+      </div>`;
+  });
+
+  const cod=generarCod();
+  const html=`
+    <!-- Situaciones -->
+    <div class="res-sec">
+      <div class="res-sec-tit">Bloque 4 · Situaciones</div>
+      ${htmlSits}
+    </div>
+    <!-- Evidencia -->
+    <div class="res-sec">
+      <div class="res-sec-tit">Bloque 6 · Tus respuestas escritas</div>
+      <div class="res-fila neu">
+        <div class="res-ico">📝</div>
+        <div class="res-body">
+          <div class="res-q">Interpretación — ${sit.nom}</div>
+          <div class="res-texto">${ta1}</div>
+          <div class="res-crit">📋 <strong>Criterio:</strong> Una respuesta completa menciona las unidades (${sit.ejeY.split('(')[1]?.replace(')','').trim()||sit.ejeY} × ${sit.ejeX.split('(')[1]?.replace(')','').trim()||sit.ejeX}) y explica que el resultado representa ${sit.opciones[sit.correcta].toLowerCase()}.</div>
+        </div>
+      </div>
+      <div class="res-fila neu">
+        <div class="res-ico">🔢</div>
+        <div class="res-body">
+          <div class="res-q">Dato de pantalla — ${evDatoCtx} — valor: ${evDatoVal}</div>
+          <div class="res-texto">${ta2}</div>
+          <div class="res-crit">📋 <strong>Criterio:</strong> El número ${evDatoVal} es el área bajo la curva en el contexto "${evDatoCtx}". Representa ${VIS_CTXS[ctxVis]?.area_sig||'la acumulación total en ese intervalo'}.</div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('resumen-contenido').innerHTML=html;
+  document.getElementById('cod-final').innerHTML=`
+    <div class="cod-lb">Código de sesión</div>
+    <div class="cod-num">${cod}</div>
+    <div class="cod-ctx">${evDatoCtx} · dato: ${evDatoVal} · semilla: ${SEED%9999}</div>`;
+}
+
+function generarCod(){
+  const n=sitsSel.reduce((a,s,i)=>a+(sitRespuestas[i]===s.correcta?1:0),0);
+  return String(((SEED%1000)*41+n*17+evDatoVal*3|0)%9000+1000);
+}
+
+// ════════════════════════════════════════
+// CSS DINÁMICO RESUMEN (inyectado aquí para no duplicar)
+// ════════════════════════════════════════
+const resCSS=document.createElement('style');
+resCSS.textContent=`
+.res-sec{margin-bottom:18px;}
+.res-sec-tit{font-size:.63rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--slate);padding-bottom:6px;border-bottom:1.5px solid var(--line);margin-bottom:9px;}
+.res-fila{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border-radius:8px;margin-bottom:6px;}
+.res-fila.ok{background:var(--teal3);}
+.res-fila.err{background:var(--red3);}
+.res-fila.neu{background:var(--amber3);}
+.res-fila.info{background:var(--cream);border:1px solid var(--line);}
+.res-ico{font-size:1rem;flex-shrink:0;margin-top:2px;}
+.res-body{flex:1;font-size:.83rem;line-height:1.65;}
+.res-q{font-weight:700;font-size:.79rem;margin-bottom:3px;}
+.res-alumno{color:var(--ink);margin-bottom:2px;}
+.res-incorrecto{color:var(--red);font-weight:700;font-size:.8rem;}
+.res-crit{font-size:.76rem;color:#7a4a00;background:var(--amber3);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:5px 9px;margin-top:4px;line-height:1.6;}
+.res-texto{background:rgba(0,0,0,.04);border-radius:5px;padding:5px 9px;font-size:.81rem;margin-top:4px;font-style:italic;color:var(--slate);}
+.opt.chosen{border-color:var(--teal)!important;background:var(--teal3)!important;}
+`;
+document.head.appendChild(resCSS);
+
+// ════════════════════════════════════════
+// DOCENTE
+// ════════════════════════════════════════
+function abrirModal(){ document.getElementById('modal-doc').classList.add('show'); setTimeout(()=>document.getElementById('modal-inp').focus(),100); }
+function cerrarModal(){ document.getElementById('modal-doc').classList.remove('show'); document.getElementById('modal-inp').value=''; document.getElementById('modal-err').style.display='none'; }
+document.getElementById('modal-doc').addEventListener('click',function(e){ if(e.target===this) cerrarModal(); });
+
+function confirmarDoc(){
+  if(document.getElementById('modal-inp').value.trim()==='890'){
+    cerrarModal(); DOCENTE=true;
+    document.getElementById('doc-bar').classList.add('show');
+    SEED=99999; rng=mulberry(SEED);
+    avanzar(0,1);
+  } else {
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('modal-inp').value='';
+    document.getElementById('modal-inp').focus();
+  }
+}
+
+function abrirBanco(){
+  let html=`<strong style="font-size:.85rem;">Banco de situaciones (${BANCO_SITS.length} reactivos — se eligen 3 aleatorias por sesión)</strong>
+  <table class="tbl" style="margin-top:10px;">
+    <thead><tr><th>#</th><th>Situación</th><th>Ejes</th><th>Respuesta correcta</th><th>Explicación</th></tr></thead><tbody>`;
+  BANCO_SITS.forEach((s,i)=>{
+    html+=`<tr>
+      <td>${i+1}</td>
+      <td>${s.ico} <strong>${s.nom}</strong></td>
+      <td style="font-size:.71rem;">Y: ${s.ejeY}<br>X: ${s.ejeX}</td>
+      <td class="cor">${s.opciones[s.correcta]}</td>
+      <td style="font-size:.71rem;">${s.explicacion}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>
+  <strong style="font-size:.85rem;display:block;margin-top:16px;">Contextos de visualización (4 disponibles)</strong>
+  <table class="tbl" style="margin-top:8px;">
+    <thead><tr><th>Contexto</th><th>Eje Y</th><th>Eje X</th><th>Área representa</th></tr></thead><tbody>`;
+  VIS_CTXS.forEach(c=>{
+    html+=`<tr><td><strong>${c.nombre}</strong></td><td>${c.eje_y}</td><td>${c.eje_x}</td><td class="cor">${c.area_sig}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('banco-contenido').innerHTML=html;
+  document.getElementById('modal-banco').classList.add('show');
+}
+function cerrarBanco(){ document.getElementById('modal-banco').classList.remove('show'); }
+document.getElementById('modal-banco').addEventListener('click',function(e){ if(e.target===this) cerrarBanco(); });
+</script>
+</body>
+</html>
