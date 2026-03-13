@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TPV II · S08 · Antiderivadas</title>
+<style>
+:root{
+  --bg:#F7F4EF;--paper:#fff;--ink:#1A1207;
+  --rust:#B5451B;--rust2:#D4612A;--rust3:#FAF0EB;
+  --blue:#1B4F72;--blue2:#2E86C1;--blue3:#EBF5FB;
+  --grn:#1E6B3C;--grn3:#EAFAF1;
+  --amb:#9A6B00;--amb3:#FEF9E7;
+  --red:#922B21;--red3:#FDEDEC;
+  --line:#DDD8CE;--slate:#5D6D7E;
+  --r:11px;--sh:0 2px 14px rgba(26,18,7,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);
+  min-height:100vh;padding:14px 11px 80px;
+  -webkit-user-select:none;user-select:none;
+}
+input[type=text],[contenteditable]{-webkit-user-select:text;user-select:text;}
+.wrap{max-width:680px;margin:0 auto;}
+
+/* HEADER */
+.hdr{background:linear-gradient(140deg,#1A1207,#2C1810,#B5451B);
+  border-radius:var(--r);padding:22px 20px 18px;margin-bottom:12px;
+  position:relative;overflow:hidden;}
+.hdr::after{content:'∫';position:absolute;right:12px;bottom:-20px;
+  font-size:9rem;color:rgba(255,255,255,.04);pointer-events:none;line-height:1;}
+.h-tag{font-size:.58rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:6px;}
+.h-tit{font-size:1.5rem;color:#fff;font-weight:700;line-height:1.15;margin-bottom:6px;}
+.h-sub{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6;}
+.h-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.chip{font-size:.6rem;font-weight:700;padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.78);}
+
+/* PROGRESO */
+.prog{background:var(--paper);border-radius:var(--r);padding:9px 15px;
+  margin-bottom:12px;box-shadow:var(--sh);}
+.prog-top{display:flex;justify-content:space-between;
+  font-size:.7rem;font-weight:700;color:var(--slate);margin-bottom:5px;}
+.prog-bar{height:6px;background:var(--line);border-radius:10px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--rust),var(--blue));
+  border-radius:10px;transition:width .5s;}
+
+/* CARDS */
+.card{background:var(--paper);border-radius:var(--r);padding:20px 18px;
+  margin-bottom:12px;box-shadow:var(--sh);display:none;}
+.card.active{display:block;animation:up .25s ease;}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.c-tag{font-size:.58rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--slate);margin-bottom:3px;}
+.c-tit{font-size:1.15rem;font-weight:700;color:var(--rust);margin-bottom:11px;line-height:1.2;}
+
+/* BLOQUES */
+.blq{border-radius:8px;padding:11px 13px;margin-bottom:10px;font-size:.86rem;line-height:1.75;}
+.blq h4{font-size:.88rem;font-weight:700;margin-bottom:5px;}
+.blq p{margin-bottom:4px;}
+.blq.rust{background:var(--rust3);border-left:4px solid var(--rust);}
+.blq.blue{background:var(--blue3);border-left:4px solid var(--blue);}
+.blq.grn {background:var(--grn3);border-left:4px solid var(--grn);}
+.blq.amb {background:var(--amb3);border-left:4px solid var(--amb);}
+.blq.dark{background:var(--ink);color:rgba(255,255,255,.88);}
+
+/* CASO HEADER */
+.caso-hdr{background:var(--ink);border-radius:8px;padding:12px 15px;
+  margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.caso-regla{font-size:1.15rem;color:#FFD699;flex:1;line-height:2.2;}
+
+/* FRACCIONES VISUALES (display only, no interactive) */
+.frac{display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;margin:0 2px;line-height:1.1;}
+.frac .n{border-bottom:2px solid currentColor;padding:0 5px 2px;
+  font-size:.92em;text-align:center;min-width:16px;}
+.frac .d{padding:2px 5px 0;font-size:.92em;text-align:center;min-width:16px;}
+
+/* EJEMPLOS */
+.ejs-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0 14px;}
+.ej-card{background:var(--blue3);border:1.5px solid #aed6f1;border-radius:8px;
+  padding:9px 11px;text-align:center;}
+.ej-q{font-size:1rem;color:var(--blue);margin-bottom:2px;}
+.ej-arr{color:var(--slate);font-size:.78rem;margin:2px 0;}
+.ej-r{font-size:.98rem;color:var(--grn);font-weight:700;}
+
+/* ════════════════════════════════
+   CAMPO DE RESPUESTA — SIMPLE
+   ════════════════════════════════ */
+.campo-resp{background:var(--bg);border:2px solid var(--line);
+  border-radius:10px;padding:13px 14px;margin:10px 0;transition:border .2s;}
+.campo-resp.activo{border-color:var(--blue);}
+.campo-resp.ca-ok{border-color:var(--grn);}
+.campo-resp.ca-err{border-color:var(--red);}
+
+/* Fila de respuesta */
+.resp-fila{display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+  min-height:40px;}
+/* Label de sección */
+.resp-lbl{font-size:.7rem;font-weight:700;color:var(--slate);
+  text-transform:uppercase;letter-spacing:.8px;min-width:28px;}
+/* Inputs del campo */
+.resp-inp{
+  border:1.5px solid var(--line);border-radius:7px;
+  background:var(--paper);padding:6px 10px;
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:1rem;
+  color:var(--ink);outline:none;transition:border .15s;
+  -webkit-user-select:text;user-select:text;
+  /* Evitar zoom en iOS */
+  font-size:16px;
+}
+.resp-inp:focus{border-color:var(--blue);background:#fff;}
+.resp-inp.inp-ok{border-color:var(--grn);background:var(--grn3);}
+.resp-inp.inp-err{border-color:var(--red);background:var(--red3);}
+.resp-inp.inp-num{width:90px;text-align:center;}
+.resp-inp.inp-den{width:90px;text-align:center;}
+.resp-inp.inp-txt{width:120px;}
+.resp-inp.inp-wide{width:180px;}
+/* Línea divisoria de fracción */
+.linea-div{
+  display:flex;flex-direction:column;align-items:center;gap:3px;}
+.linea-div .ld-num{font-size:.65rem;color:var(--slate);}
+.linea-div .ld-bar{width:2px;height:36px;background:var(--line);border-radius:1px;}
+.linea-div .ld-den{font-size:.65rem;color:var(--slate);}
+
+/* Acciones del campo */
+.campo-actions{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;}
+.btn-borrar{background:var(--bg);border:1.5px solid var(--line);
+  border-radius:7px;padding:7px 13px;font-size:.8rem;font-weight:700;
+  color:var(--slate);cursor:pointer;transition:background .13s;}
+.btn-borrar:hover{background:var(--rust3);}
+.btn-ver{background:var(--rust);border:none;border-radius:7px;
+  padding:7px 16px;font-size:.82rem;font-weight:700;
+  color:#fff;cursor:pointer;transition:background .13s;
+  box-shadow:0 2px 8px rgba(181,69,27,.3);}
+.btn-ver:hover{background:var(--rust2);}
+.btn-ver:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+
+/* Labels de los inputs */
+.inp-label{font-size:.68rem;color:var(--slate);font-weight:600;
+  text-align:center;display:block;margin-bottom:2px;}
+
+/* Columna para frac */
+.frac-col{display:inline-flex;flex-direction:column;align-items:center;gap:0;}
+/* La barra de fracción — ancha y visible */
+.frac-linea{height:3px;background:var(--ink);border-radius:2px;
+  width:100%;margin:3px 0;}
+/* Inputs del numerador y denominador — parecen parte de la fracción */
+.resp-inp.inp-num{
+  width:110px;text-align:center;
+  border-bottom:none;border-radius:7px 7px 0 0;
+  background:rgba(27,79,114,.06);
+  font-family:'Georgia',serif;font-size:1.05rem;}
+.resp-inp.inp-num:focus{background:rgba(27,79,114,.13);border-color:var(--blue);}
+.resp-inp.inp-den{
+  width:110px;text-align:center;
+  border-top:none;border-radius:0 0 7px 7px;
+  background:rgba(27,79,114,.06);
+  font-family:'Georgia',serif;font-size:1.05rem;}
+.resp-inp.inp-den:focus{background:rgba(27,79,114,.13);border-color:var(--blue);}
+
+/* FEEDBACK */
+.fb{border-radius:8px;padding:9px 12px;margin-top:8px;
+  font-size:.84rem;line-height:1.65;display:none;}
+.fb.show{display:block;}
+.fb.ok{background:var(--grn3);border-left:4px solid var(--grn);}
+.fb.err{background:var(--red3);border-left:4px solid var(--red);}
+.fb.inf{background:var(--amb3);border-left:4px solid var(--amb);}
+
+/* EJERCICIO ROW */
+.ej-row{display:flex;gap:9px;margin-bottom:7px;align-items:flex-start;}
+.ej-num-badge{width:22px;height:22px;border-radius:50%;
+  background:var(--ink);color:#FFD699;font-size:.7rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;}
+.ej-enunciado{background:var(--ink);color:#FFD699;border-radius:7px;
+  padding:7px 12px;font-size:1.05rem;flex:1;line-height:2;}
+.ej-wrap{margin-bottom:22px;}
+
+/* BOTÓN PRINCIPAL */
+.btn{display:inline-flex;align-items:center;gap:6px;
+  background:var(--rust);color:#fff;border:none;border-radius:9px;
+  padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer;
+  transition:background .13s,transform .1s;margin-top:9px;
+  box-shadow:0 3px 10px rgba(181,69,27,.28);}
+.btn:hover{background:var(--rust2);transform:translateY(-1px);}
+.btn.bl{background:var(--blue);box-shadow:0 3px 10px rgba(27,79,114,.28);}
+.btn.bl:hover{background:var(--blue2);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.div{height:1.5px;background:var(--line);border-radius:2px;margin:13px 0;}
+p{font-size:.88rem;line-height:1.72;margin-bottom:7px;}
+
+/* NOMBRE */
+.nombre-box{background:var(--ink);border-radius:8px;padding:10px 14px;
+  margin-bottom:11px;display:flex;align-items:center;gap:10px;}
+.nb-nom{font-size:1rem;font-weight:700;color:#FFD699;}
+
+/* RESUMEN */
+.res-fila{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;
+  border-radius:7px;margin-bottom:5px;font-size:.82rem;line-height:1.6;}
+.res-fila.ok{background:var(--grn3);}
+.res-fila.err{background:var(--red3);}
+.res-fila.neu{background:var(--amb3);}
+.cal-box{background:var(--ink);border-radius:var(--r);padding:17px;
+  text-align:center;margin:13px 0;}
+.cal-num{font-size:2.8rem;color:#FFD699;font-weight:700;line-height:1;}
+.cal-lbl{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.65);font-weight:700;margin-bottom:4px;}
+.cal-sub{font-size:.76rem;color:rgba(255,255,255,.6);margin-top:5px;}
+.cod-box{background:var(--ink);border-radius:var(--r);padding:14px;
+  text-align:center;margin:11px 0;}
+.cod-num{font-size:2.2rem;letter-spacing:8px;color:#80DEEA;font-weight:700;}
+.cod-lbl{font-size:.57rem;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.65);margin-bottom:4px;}
+.cod-ctx{font-size:.68rem;color:rgba(255,255,255,.55);margin-top:4px;}
+
+/* DOC BAR */
+.doc-bar{display:none;position:fixed;bottom:14px;right:14px;z-index:200;
+  flex-direction:column;gap:6px;align-items:flex-end;}
+.doc-bar.show{display:flex;}
+.db-btn{background:var(--ink);color:#80DEEA;border:1.5px solid rgba(128,222,234,.2);
+  border-radius:8px;padding:7px 13px;font-size:.76rem;font-weight:700;
+  cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.db-btn.skip{background:var(--rust);color:#fff;border-color:transparent;}
+
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,.5);padding:20px 10px;overflow-y:auto;}
+.modal-ov.show{display:block;}
+.modal-box{background:var(--paper);border-radius:var(--r);max-width:380px;
+  margin:80px auto;padding:22px;box-shadow:0 8px 36px rgba(0,0,0,.22);}
+.modal-tit{font-size:1rem;font-weight:700;color:var(--rust);margin-bottom:12px;}
+.modal-inp{width:100%;border:2px solid var(--line);border-radius:7px;
+  padding:9px 12px;font-size:1.15rem;font-weight:700;letter-spacing:4px;
+  text-align:center;background:var(--bg);margin-bottom:6px;
+  -webkit-user-select:text;user-select:text;outline:none;}
+.modal-inp:focus{border-color:var(--rust);}
+.modal-err{font-size:.75rem;color:var(--red);font-weight:700;display:none;margin-bottom:6px;}
+.modal-btns{display:flex;gap:7px;}
+.modal-cancel{background:var(--bg);color:var(--slate);border:none;border-radius:7px;
+  padding:8px 15px;font-size:.83rem;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- MODAL DOCENTE -->
+<div class="modal-ov" id="modal-doc">
+  <div class="modal-box">
+    <div class="modal-tit">🔑 Acceso docente</div>
+    <input class="modal-inp" id="modal-inp" type="password" maxlength="6"
+      placeholder="_ _ _ _"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+      onkeydown="if(event.key==='Enter')confirmarDoc()">
+    <div class="modal-err" id="modal-err">Código incorrecto.</div>
+    <div class="modal-btns">
+      <button class="btn" style="padding:8px 16px;font-size:.84rem;margin-top:0" onclick="confirmarDoc()">Confirmar</button>
+      <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- BARRA DOCENTE -->
+<div class="doc-bar" id="doc-bar">
+  <button class="db-btn skip" onclick="saltarFinal()">⚡ Saltar al resumen</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="h-tag">TPV II · P4 · S08 · Viernes · Prof. Adrián Cruz</div>
+  <div class="h-tit">Antiderivadas — primeros casos</div>
+  <div class="h-sub">Cinco casos con 3 ejercicios cada uno. Retroalimentación inmediata.</div>
+  <div class="h-chips">
+    <span class="chip">∫k dx</span><span class="chip">∫x dx</span>
+    <span class="chip">∫kx dx</span><span class="chip">∫xⁿ dx</span>
+    <span class="chip">∫x⁻ⁿ dx</span><span class="chip">⏱ ~75 min</span>
+  </div>
+</div>
+
+<!-- PROGRESO -->
+<div class="prog">
+  <div class="prog-top"><span id="prog-txt">Inicio</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- B0: NOMBRE -->
+<div class="card active" id="b0">
+  <div class="c-tag">Inicio</div>
+  <div class="c-tit">Antes de comenzar</div>
+  <div class="blq rust">
+    <h4>¿Qué vas a hacer hoy?</h4>
+    <p>El Prof. Cruz ya explicó en el pizarrón los 5 casos de antiderivadas. Esta actividad tiene 3 ejercicios por caso — todos con retroalimentación. <strong>Los números son diferentes para cada alumno.</strong></p>
+  </div>
+  <div class="blq blue">
+    <h4>✏️ Tu nombre (por apellidos)</h4>
+    <input type="text" id="inp-nombre"
+      placeholder="Ej: HERNÁNDEZ TORRES GABRIEL"
+      oninput="chkNombre()"
+      onkeydown="if(event.key==='Enter')iniciarActividad()"
+      style="width:100%;border:2px solid var(--line);border-radius:7px;
+        padding:9px 12px;font-size:1rem;font-weight:600;text-transform:uppercase;
+        background:#fff;color:var(--ink);outline:none;margin-top:4px;
+        -webkit-user-select:text;user-select:text;">
+  </div>
+  <button class="btn" id="btn-ini" onclick="iniciarActividad()" disabled>
+    Comenzar →
+  </button>
+  <div style="margin-top:11px;">
+    <span style="font-size:.65rem;color:var(--slate);cursor:pointer;text-decoration:underline"
+      onclick="abrirModal()">Acceso docente</span>
+  </div>
+</div>
+
+<!-- B1: CASO 1 ∫k dx -->
+<div class="card" id="b1">
+  <div class="c-tag">Caso 1 de 5</div>
+  <div class="c-tit">Integral de una constante · ∫k dx</div>
+  <div class="caso-hdr">
+    <div class="caso-regla">∫k dx &nbsp;=&nbsp; kx + C</div>
+  </div>
+  <div class="blq" style="background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:11px 13px;"><h4>Ejemplos</h4></div>
+  <div class="ejs-grid" id="ejs1"></div>
+  <div class="div"></div>
+  <div id="ejercicios1"></div>
+  <button class="btn" id="btn-b1" onclick="avanzar('b1','b2')" disabled>Caso 2 →</button>
+</div>
+
+<!-- B2: CASO 2 ∫x dx -->
+<div class="card" id="b2">
+  <div class="c-tag">Caso 2 de 5</div>
+  <div class="c-tit">Integral de x · ∫x dx</div>
+  <div class="caso-hdr">
+    <div class="caso-regla">∫x dx &nbsp;=&nbsp;
+      <span class="frac" style="color:#FFD699"><span class="n">x²</span><span class="d">2</span></span>
+      + C</div>
+  </div>
+  <div class="blq" style="background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:11px 13px;"><h4>Ejemplos</h4></div>
+  <div class="ejs-grid" id="ejs2"></div>
+  <div class="div"></div>
+  <div id="ejercicios2"></div>
+  <button class="btn" id="btn-b2" onclick="avanzar('b2','b3')" disabled>Caso 3 →</button>
+</div>
+
+<!-- B3: CASO 3 ∫kx dx -->
+<div class="card" id="b3">
+  <div class="c-tag">Caso 3 de 5</div>
+  <div class="c-tit">Constante por variable · ∫kx dx</div>
+  <div class="caso-hdr">
+    <div class="caso-regla">∫kx dx &nbsp;=&nbsp;
+      <span class="frac" style="color:#FFD699"><span class="n">kx²</span><span class="d">2</span></span>
+      + C</div>
+  </div>
+  <div class="blq" style="background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:11px 13px;"><h4>Ejemplos</h4></div>
+  <div class="ejs-grid" id="ejs3"></div>
+  <div class="div"></div>
+  <div id="ejercicios3"></div>
+  <button class="btn" id="btn-b3" onclick="avanzar('b3','b4')" disabled>Caso 4 →</button>
+</div>
+
+<!-- B4: CASO 4 ∫xⁿ dx -->
+<div class="card" id="b4">
+  <div class="c-tag">Caso 4 de 5</div>
+  <div class="c-tit">Regla de potencia · ∫x<sup>n</sup> dx (n positivo)</div>
+  <div class="caso-hdr">
+    <div class="caso-regla">∫x<sup>n</sup> dx &nbsp;=&nbsp;
+      <span class="frac" style="color:#FFD699"><span class="n">x<sup>n+1</sup></span><span class="d">n+1</span></span>
+      + C</div>
+  </div>
+  <div class="blq" style="background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:11px 13px;"><h4>Ejemplos</h4></div>
+  <div class="ejs-grid" id="ejs4"></div>
+  <div class="div"></div>
+  <div id="ejercicios4"></div>
+  <button class="btn" id="btn-b4" onclick="avanzar('b4','b5')" disabled>Caso 5 →</button>
+</div>
+
+<!-- B5: CASO 5 ∫x⁻ⁿ dx -->
+<div class="card" id="b5">
+  <div class="c-tag">Caso 5 de 5</div>
+  <div class="c-tit">Potencia negativa · ∫x<sup>−n</sup> dx (n ≠ 1)</div>
+  <div class="caso-hdr">
+    <div class="caso-regla">La misma regla con exponente negativo · resultado: fracción con x en denominador</div>
+  </div>
+  <div class="blq amb"><h4>⚠️ El caso n = 1 (∫x<sup>−1</sup> dx) da logaritmo — se ve después</h4></div>
+  <div class="blq" style="background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:11px 13px;"><h4>Ejemplos</h4></div>
+  <div class="ejs-grid" id="ejs5"></div>
+  <div class="div"></div>
+  <div id="ejercicios5"></div>
+  <button class="btn" id="btn-b5" onclick="avanzar('b5','b7')" disabled>Ver mi resumen →</button>
+</div>
+
+<!-- B7: RESUMEN -->
+<div class="card" id="b7">
+  <div class="c-tag">Resumen final</div>
+  <div class="c-tit" style="color:var(--grn)">Tu reporte · S08 · Antiderivadas</div>
+  <div class="nombre-box">
+    <div>👤</div>
+    <div class="nb-nom" id="b7-nombre">—</div>
+  </div>
+  <p>Toma captura y súbela a Google Classroom junto con tus apuntes del cuaderno.</p>
+  <div id="resumen-contenido"></div>
+  <div class="cod-box" id="cod-final"></div>
+  <div style="text-align:center;margin-top:14px;padding:10px;background:var(--bg);
+    border-radius:8px;border:1px solid var(--line);">
+    <p style="font-size:.72rem;color:var(--slate);">TPV II · P4 · S08 · Viernes · Prof. Adrián Cruz · MCCEMS 2025</p>
+  </div>
+  <button class="btn bl" style="margin-top:14px;width:100%;justify-content:center;"
+    onclick="s2_init()">Continuar → Sección 2: Opción múltiple</button>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 2 — OPCIÓN MÚLTIPLE
+══════════════════════════════════════════ -->
+<div class="wrap" id="s2-wrap" style="display:none;">
+
+<!-- Header S2 -->
+<div class="hdr" style="background:linear-gradient(140deg,#0D2137,#1B3A5C,#1B6CA8);margin-top:8px;">
+  <div class="h-tag">TPV II · P4 · S08 · Sección 2 · Prof. Adrián Cruz</div>
+  <div class="h-tit">Antiderivadas — Opción múltiple</div>
+  <div class="h-sub">16 preguntas · Una sola respuesta correcta · Selecciona y confirma cada una.</div>
+  <div class="h-chips">
+    <span class="chip">16 niveles</span>
+    <span class="chip">5 opciones c/u</span>
+    <span class="chip">Retroalimentación inmediata</span>
+  </div>
+</div>
+
+<!-- Progreso S2 -->
+<div class="prog">
+  <div class="prog-top">
+    <span id="s2-prog-txt">Pregunta 1 de 16</span>
+    <span id="s2-prog-pct">0 / 16</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="s2-prog-fill" style="width:0%;background:linear-gradient(90deg,#1B4F72,#1B6CA8);"></div></div>
+</div>
+
+<!-- Contenedor de preguntas S2 -->
+<div id="s2-preguntas"></div>
+
+<!-- Resumen S2 -->
+<div class="card" id="s2-resumen" style="display:none;">
+  <div class="c-tag">Resumen · Sección 2</div>
+  <div class="c-tit" style="color:var(--blue)">Opción múltiple · Resultados</div>
+  <div id="s2-res-contenido"></div>
+</div>
+
+</div><!-- /s2-wrap -->
+
+<script>
+'use strict';
+
+// ════════ RNG ════════
+var SEED = (Date.now() ^ (Math.random()*0xFFFFFF|0)) >>> 0;
+function mulberry(a){ return function(){ a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; }; }
+var rng = mulberry(SEED);
+function rnd(n){ return Math.floor(rng()*n); }
+function rndR(a,b){ return a+rnd(b-a+1); }
+function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(rng()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+function pick(arr,n){ return shuffle(arr).slice(0,n); }
+function mcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b;b=a%b;a=t; } return a; }
+
+// ════════ ESTADO ════════
+var NOMBRE='', DOCENTE=false;
+var RESP={};          // fid -> {ok,intentos,val}
+var CASOS_DATA={1:[],2:[],3:[],4:[],5:[]};
+
+// ════════ SUPERÍNDICES ════════
+var SUPS={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+function sup(n){ return String(n).split('').map(function(c){ return SUPS[c]||c; }).join(''); }
+
+// ════════ GENERADORES ════════
+// Cada ejercicio: { q (HTML enunciado), hasFrac, expNum, expDen, expTxt }
+// expNum/Den/Txt: lo que debe escribir el alumno en cada campo (texto normalizado)
+
+function genC1(){
+  var coefs=shuffle([-9,-7,-5,-4,-3,3,4,5,6,7,8,9,11,12]);
+  var pool=[];
+  coefs.forEach(function(k){
+    var kx = k===1?'x': k===-1?'−x': k+'x';
+    pool.push({ q:'∫ '+k+' dx', hasFrac:false, expTxt:kx+'+C' });
+  });
+  // Fraccionarios simples — sin fracción en respuesta si simplifica
+  var fracs=[[1,2],[1,3],[2,3],[3,4]];
+  fracs.forEach(function(f){
+    var p=f[0],q2=f[1];
+    var neg=rng()>.5; var pv=neg?-p:p;
+    var enun='∫ '+(neg?'−':'')+'<span class="frac"><span class="n">'+p+'</span><span class="d">'+q2+'</span></span> dx';
+    var g=mcd(Math.abs(pv),q2); var nn=pv/g,nd=q2/g;
+    var respTxt = nd===1 ? nn+'x+C' : null;
+    if(nd===1){
+      pool.push({ q:enun, hasFrac:false, expTxt:nn+'x+C' });
+    } else {
+      pool.push({ q:enun, hasFrac:true, expNum:nn+'x', expDen:String(nd), expTxt:'+C' });
+    }
+  });
+  return pick(pool,3);
+}
+
+function genC2(){
+  // ∫x dx = x²/2 + C  — always same answer, vary wording
+  var forms=[
+    '∫ x dx',
+    'Si f(x) = x, encuentra F(x):',
+    'La antiderivada de x es:',
+    '∫ x<sup>1</sup> dx',
+    'Aplica la regla de potencia a ∫ x dx:'
+  ];
+  return pick(forms,3).map(function(q){
+    return { q:q, hasFrac:true, expNum:'x²', expDen:'2', expTxt:'+C' };
+  });
+}
+
+function genC3(){
+  var pool=[];
+  var coefs=shuffle([-8,-6,-5,-4,-3,3,4,5,6,7,8,9,10]);
+  coefs.slice(0,8).forEach(function(k){
+    var g2=mcd(Math.abs(k),2); var nn=k/g2,nd=2/g2;
+    if(nd===1){
+      pool.push({ q:'∫ '+k+'x dx', hasFrac:false, expTxt:nn+'x²+C' });
+    } else {
+      pool.push({ q:'∫ '+k+'x dx', hasFrac:true, expNum:nn+'x²', expDen:String(nd), expTxt:'+C' });
+    }
+  });
+  return pick(pool,3);
+}
+
+function genC4(){
+  var pool=[];
+  var ns=[2,3,4,5,6];
+  var ks=[-5,-4,-3,-2,2,3,4,5,6];
+  ns.forEach(function(n){
+    ks.forEach(function(k){
+      var np1=n+1;
+      var g=mcd(Math.abs(k),np1); var nn=k/g,nd=np1/g;
+      var xpow = nd===1 ? (Math.abs(nn)===1?(nn<0?'−':''):''+nn)+'x'+sup(np1) : (nn<0?'−'+Math.abs(nn):nn)+'x'+sup(np1);
+      if(nd===1){
+        pool.push({ q:'∫ '+(k===1?'':k===-1?'−':k)+'x'+sup(n)+' dx',
+          hasFrac:false, expTxt:xpow+'+C' });
+      } else {
+        pool.push({ q:'∫ '+(k===1?'':k===-1?'−':k)+'x'+sup(n)+' dx',
+          hasFrac:true, expNum:(nn<0?'−'+Math.abs(nn):nn)+'x'+sup(np1), expDen:String(nd), expTxt:'+C' });
+      }
+    });
+  });
+  return pick(shuffle(pool),3);
+}
+
+function genC5(){
+  var pool=[];
+  var ns=[2,3,4,5]; // x^(-n), n>=2
+  var ks=[1,2,3,4,-2,-3];
+  ns.forEach(function(n){
+    ks.forEach(function(k){
+      // ∫kx^{-n}dx = k*x^{-n+1}/(-n+1) = -k/(n-1) * x^{-(n-1)}
+      var newExp=-(n-1);       // negative
+      var denom_coef=n-1;      // always positive
+      var sign=k>0?-1:1;       // result sign
+      var absK=Math.abs(k);
+      var g=mcd(absK,denom_coef); var nn=absK/g,nd=denom_coef/g;
+      var signStr=sign<0?'−':'';
+      var xpart = nd===1 ? 'x'+sup(newExp) : 'x'+sup(newExp);
+      // Express as fraction: signStr nn / (nd * x^(n-1))
+      var denStr = nd===1 ? 'x'+(n-1===1?'':sup(n-1)) : nd+'x'+(n-1===1?'':sup(n-1));
+      pool.push({ q:'∫ '+(k===1?'':k===-1?'−':k)+'x'+sup(-n)+' dx',
+        hasFrac:true, expNum:signStr+(nn===1?'':nn), expDen:denStr, expTxt:'+C' });
+    });
+  });
+  return pick(shuffle(pool),3);
+}
+
+// ════════ EJEMPLOS ════════
+var F=function(n,d){ return '<span class="frac"><span class="n">'+n+'</span><span class="d">'+d+'</span></span>'; };
+
+var EJEMPLOS={
+  1:[
+    {q:'∫ 5 dx', r:'5x + C'},
+    {q:'∫ (−3) dx', r:'−3x + C'},
+    {q:'∫ '+F('1','2')+' dx', r:F('x','2')+' + C'},
+    {q:'∫ 8 dx', r:'8x + C'}
+  ],
+  2:[
+    {q:'∫ x dx', r:F('x²','2')+' + C'},
+    {q:'∫ t dt', r:F('t²','2')+' + C'},
+    {q:'∫ u du', r:F('u²','2')+' + C'},
+    {q:'∫ x¹ dx', r:F('x²','2')+' + C'}
+  ],
+  3:[
+    {q:'∫ 3x dx', r:F('3x²','2')+' + C'},
+    {q:'∫ (−4x) dx', r:'−2x² + C'},
+    {q:'∫ '+F('1','2')+'x dx', r:F('x²','4')+' + C'},
+    {q:'∫ 6x dx', r:'3x² + C'}
+  ],
+  4:[
+    {q:'∫ x² dx', r:F('x³','3')+' + C'},
+    {q:'∫ x⁴ dx', r:F('x⁵','5')+' + C'},
+    {q:'∫ 3x² dx', r:'x³ + C'},
+    {q:'∫ '+F('1','2')+'x⁴ dx', r:F('x⁵','10')+' + C'}
+  ],
+  5:[
+    {q:'∫ x<sup>−2</sup> dx', r:'−'+F('1','x')+' + C'},
+    {q:'∫ x<sup>−3</sup> dx', r:'−'+F('1','2x²')+' + C'},
+    {q:'∫ 2x<sup>−2</sup> dx', r:'−'+F('2','x')+' + C'},
+    {q:'∫ x<sup>−4</sup> dx', r:'−'+F('1','3x³')+' + C'}
+  ]
+};
+
+// ════════ NORMALIZAR ════════
+function norm(s){
+  if(!s) return '';
+  return s.replace(/\s+/g,'')
+    .replace(/×/g,'*')
+    .replace(/−/g,'-')
+    .replace(/\u00B2/g,'2').replace(/\u00B3/g,'3')
+    .replace(/\u2074/g,'4').replace(/\u2075/g,'5')
+    .replace(/\u2076/g,'6').replace(/\u2077/g,'7')
+    .replace(/\u00B9/g,'1').replace(/\u2070/g,'0')
+    .replace(/\u207B/g,'-')
+    .replace(/\u2212/g,'-')
+    .toLowerCase();
+}
+
+function checkEj(ej, numV, denV, txtV){
+  if(ej.hasFrac){
+    var on=norm(numV)===norm(ej.expNum);
+    var od=norm(denV)===norm(ej.expDen);
+    var ot=norm(txtV)===norm(ej.expTxt);
+    return { ok:on&&od&&ot, okNum:on, okDen:od, okTxt:ot };
+  } else {
+    var ot2=norm(txtV)===norm(ej.expTxt);
+    return { ok:ot2, okNum:true, okDen:true, okTxt:ot2 };
+  }
+}
+
+// ════════ RENDER EJERCICIOS ════════
+function renderEjemplos(casoId){
+  var el=document.getElementById('ejs'+casoId);
+  if(!el) return;
+  el.innerHTML=EJEMPLOS[casoId].map(function(e){
+    return '<div class="ej-card"><div class="ej-q">'+e.q+'</div>'
+      +'<div class="ej-arr">↓</div>'
+      +'<div class="ej-r">'+e.r+'</div></div>';
+  }).join('');
+}
+
+function renderEjercicios(casoId){
+  var container=document.getElementById('ejercicios'+casoId);
+  if(!container) return;
+  container.innerHTML='';
+  var ejs=CASOS_DATA[casoId];
+  ejs.forEach(function(ej,idx){
+    var fid='c'+casoId+'_'+idx;
+    RESP[fid]={ok:false,intentos:0,val:''};
+    var div=document.createElement('div');
+    div.className='ej-wrap';
+
+    // Enunciado
+    var rowDiv=document.createElement('div');
+    rowDiv.className='ej-row';
+    rowDiv.innerHTML='<div class="ej-num-badge">'+(idx+1)+'</div>'
+      +'<div class="ej-enunciado">'+ej.q+'</div>';
+    div.appendChild(rowDiv);
+
+    // Campo de respuesta
+    var campo=document.createElement('div');
+    campo.className='campo-resp';
+    campo.id='campo-'+fid;
+
+    if(ej.hasFrac){
+      // Instrucción
+      var inst=document.createElement('div');
+      inst.style.cssText='font-size:.75rem;color:var(--slate);margin-bottom:10px;font-weight:600;line-height:1.5;';
+      inst.innerHTML='Escribe tu respuesta como fracción vertical + constante:<br>'
+        +'<span style="font-size:.68rem;color:var(--blue);">Usa Tab para pasar del numerador al denominador.</span>';
+      campo.appendChild(inst);
+
+      var fila=document.createElement('div');
+      fila.className='resp-fila';
+      fila.style.cssText='display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:40px;';
+
+      // Columna fracción
+      var fracCol=document.createElement('div');
+      fracCol.className='frac-col';
+
+      var lblN=document.createElement('span');
+      lblN.style.cssText='font-size:.62rem;color:var(--slate);font-weight:700;letter-spacing:.5px;margin-bottom:2px;';
+      lblN.textContent='↑ numerador';
+      var inpN=document.createElement('input');
+      inpN.type='text'; inpN.className='resp-inp inp-num';
+      inpN.id='num-'+fid; inpN.placeholder='ej: x²';
+      inpN.autocomplete='off'; inpN.spellcheck=false;
+      inpN.onpaste=function(e){e.preventDefault();};
+
+      var barraDiv=document.createElement('div');
+      barraDiv.className='frac-linea';
+      barraDiv.style.cssText='height:3.5px;background:var(--ink);border-radius:2px;width:114px;margin:2px 0;';
+      // Separador visual de fracción
+      var fracLabel=document.createElement('div');
+      fracLabel.style.cssText='font-size:.58rem;color:var(--slate);text-align:center;'
+        +'letter-spacing:.8px;font-weight:700;margin:-1px 0 2px;text-transform:uppercase;';
+      fracLabel.textContent='— fracción —';
+
+      var lblD=document.createElement('span');
+      lblD.style.cssText='font-size:.62rem;color:var(--slate);font-weight:700;letter-spacing:.5px;margin-top:2px;';
+      lblD.textContent='↓ denominador';
+      var inpD=document.createElement('input');
+      inpD.type='text'; inpD.className='resp-inp inp-den';
+      inpD.id='den-'+fid; inpD.placeholder='ej: 3';
+      inpD.autocomplete='off'; inpD.spellcheck=false;
+      inpD.onpaste=function(e){e.preventDefault();};
+
+      // Tab del numerador al denominador
+      inpN.onkeydown=function(e){
+        if(e.key==='Tab'||e.key==='ArrowDown'){e.preventDefault();inpD.focus();}
+      };
+
+      fracCol.appendChild(lblN);
+      fracCol.appendChild(inpN);
+      fracCol.appendChild(barraDiv);
+      fracCol.appendChild(lblD);
+      fracCol.appendChild(inpD);
+      // Pequeño hint debajo
+      var fracHint=document.createElement('div');
+      fracHint.style.cssText='font-size:.6rem;color:var(--blue);margin-top:4px;text-align:center;font-weight:600;';
+      fracHint.innerHTML='Tab: num&#8594;den';
+      fracCol.appendChild(fracHint);
+
+      // Separador +
+      var plus=document.createElement('span');
+      plus.style.cssText='font-size:1.5rem;font-weight:400;padding:0 8px;color:var(--slate);align-self:center;line-height:1;';
+      plus.textContent='+';
+
+      // Input constante
+      var cteCol=document.createElement('div');
+      cteCol.style.cssText='display:inline-flex;flex-direction:column;align-items:center;gap:2px;';
+      var lblC=document.createElement('span');
+      lblC.style.cssText='font-size:.62rem;color:var(--slate);font-weight:700;letter-spacing:.5px;margin-bottom:2px;';
+      lblC.textContent='constante';
+      var inpC=document.createElement('input');
+      inpC.type='text'; inpC.className='resp-inp inp-txt';
+      inpC.id='txt-'+fid; inpC.placeholder='+ C';
+      inpC.autocomplete='off'; inpC.spellcheck=false;
+      inpC.onpaste=function(e){e.preventDefault();};
+      cteCol.appendChild(lblC);
+      cteCol.appendChild(inpC);
+
+      fila.appendChild(fracCol);
+      fila.appendChild(plus);
+      fila.appendChild(cteCol);
+      campo.appendChild(fila);
+    } else {
+      // Sin fracción — un solo input
+      var inst2=document.createElement('div');
+      inst2.style.cssText='font-size:.75rem;color:var(--slate);margin-bottom:8px;font-weight:600;';
+      inst2.textContent='Escribe la respuesta completa — incluye + C al final:';
+      campo.appendChild(inst2);
+
+      var fila2=document.createElement('div');
+      fila2.className='resp-fila';
+      var inpW=document.createElement('input');
+      inpW.type='text'; inpW.className='resp-inp inp-wide';
+      inpW.id='txt-'+fid; inpW.placeholder='ej: 5x + C';
+      inpW.autocomplete='off'; inpW.spellcheck=false;
+      inpW.onpaste=function(e){e.preventDefault();};
+      fila2.appendChild(inpW);
+      campo.appendChild(fila2);
+    }
+
+    // Acciones
+    var actions=document.createElement('div');
+    actions.className='campo-actions';
+    var btnB=document.createElement('button');
+    btnB.className='btn-borrar'; btnB.textContent='↺ Borrar';
+    (function(fid2){ btnB.onclick=function(){ borrarCampo(fid2); }; })(fid);
+    var btnV=document.createElement('button');
+    btnV.className='btn-ver'; btnV.textContent='Verificar →';
+    btnV.id='vbtn-'+fid;
+    (function(fid2,c2,i2){ btnV.onclick=function(){ verificar(fid2,c2,i2); }; })(fid,casoId,idx);
+    actions.appendChild(btnB);
+    actions.appendChild(btnV);
+    campo.appendChild(actions);
+    div.appendChild(campo);
+
+    // Feedback
+    var fb=document.createElement('div');
+    fb.className='fb'; fb.id='fb-'+fid;
+    div.appendChild(fb);
+
+    container.appendChild(div);
+  });
+}
+
+function borrarCampo(fid){
+  var n=document.getElementById('num-'+fid);
+  var d=document.getElementById('den-'+fid);
+  var t=document.getElementById('txt-'+fid);
+  if(n){n.value='';n.className='resp-inp inp-num';}
+  if(d){d.value='';d.className='resp-inp inp-den';}
+  if(t){t.value='';t.className='resp-inp inp-wide';}
+  var fb=document.getElementById('fb-'+fid);
+  if(fb){fb.className='fb';fb.innerHTML='';}
+  var campo=document.getElementById('campo-'+fid);
+  if(campo){campo.className='campo-resp';}
+  var vbtn=document.getElementById('vbtn-'+fid);
+  if(vbtn) vbtn.disabled=false;
+  if(n) n.focus(); else if(t) t.focus();
+}
+
+// ════════ VERIFICAR ════════
+function verificar(fid, casoId, ejIdx){
+  var ej=CASOS_DATA[casoId][ejIdx];
+  var numV=( document.getElementById('num-'+fid)||{value:''}).value;
+  var denV=( document.getElementById('den-'+fid)||{value:''}).value;
+  var txtV=( document.getElementById('txt-'+fid)||{value:''}).value;
+
+  // Validar que hay algo escrito
+  var hayAlgo = ej.hasFrac ? (numV.trim()||denV.trim()||txtV.trim()) : txtV.trim();
+  if(!hayAlgo){
+    mostrarFb(fid,'inf','⚠️ Escribe una respuesta primero.');
+    return;
+  }
+
+  // Para caso con fracción: validar que ambos campos tienen algo
+  if(ej.hasFrac && (!numV.trim()||!denV.trim())){
+    mostrarFb(fid,'inf','⚠️ Escribe el <strong>numerador</strong> y el <strong>denominador</strong> de la fracción.');
+    return;
+  }
+
+  // Validar +C en el campo de texto
+  var txtNorm=norm(txtV);
+  if(!txtNorm.includes('+c')&&!txtNorm.includes('c')){
+    mostrarFb(fid,'err','⚠️ Falta la <strong>constante de integración C</strong>. Todas las antiderivadas incluyen + C.');
+    return;
+  }
+
+  RESP[fid].intentos++;
+  var result=checkEj(ej, numV, denV, txtV);
+  RESP[fid].ok=result.ok;
+  RESP[fid].val=(ej.hasFrac?'('+numV+')/('+denV+') '+txtV:txtV);
+  ej.intentos=RESP[fid].intentos;
+  ej.ok=result.ok;
+  ej.respAlumno=RESP[fid].val;
+
+  var campo=document.getElementById('campo-'+fid);
+  if(result.ok){
+    if(campo) campo.className='campo-resp ca-ok';
+    if(document.getElementById('num-'+fid)) document.getElementById('num-'+fid).className='resp-inp inp-num inp-ok';
+    if(document.getElementById('den-'+fid)) document.getElementById('den-'+fid).className='resp-inp inp-den inp-ok';
+    if(document.getElementById('txt-'+fid)) document.getElementById('txt-'+fid).className='resp-inp inp-wide inp-ok';
+    document.getElementById('vbtn-'+fid).disabled=true;
+    mostrarFb(fid,'ok','✅ <strong>Correcto.</strong>');
+    // Deshabilitar inputs
+    ['num-','den-','txt-'].forEach(function(p){
+      var el=document.getElementById(p+fid);
+      if(el) el.readOnly=true;
+    });
+  } else {
+    if(campo) campo.className='campo-resp ca-err';
+    // Marcar cada campo
+    if(ej.hasFrac){
+      if(document.getElementById('num-'+fid))
+        document.getElementById('num-'+fid).className='resp-inp inp-num '+(result.okNum?'inp-ok':'inp-err');
+      if(document.getElementById('den-'+fid))
+        document.getElementById('den-'+fid).className='resp-inp inp-den '+(result.okDen?'inp-ok':'inp-err');
+      if(document.getElementById('txt-'+fid))
+        document.getElementById('txt-'+fid).className='resp-inp inp-wide '+(result.okTxt?'inp-ok':'inp-err');
+    }
+    var fb_msg=diagnosticar(result, ej);
+    mostrarFb(fid,'err','❌ '+fb_msg+'<br><span style="font-size:.77rem;color:var(--slate)">Corrige y vuelve a intentar.</span>');
+    // Reenfocar el primer campo con error
+    if(!result.okNum && document.getElementById('num-'+fid)) document.getElementById('num-'+fid).focus();
+    else if(!result.okDen && document.getElementById('den-'+fid)) document.getElementById('den-'+fid).focus();
+    else if(!result.okTxt && document.getElementById('txt-'+fid)) document.getElementById('txt-'+fid).focus();
+  }
+  checarCasoCompleto(casoId);
+}
+
+function diagnosticar(result, ej){
+  if(!result.okNum&&result.okDen&&result.okTxt) return 'El <strong>numerador</strong> no es correcto. Revisa el exponente (sube en 1) y el coeficiente.';
+  if(result.okNum&&!result.okDen&&result.okTxt) return 'El <strong>denominador</strong> no es correcto. Recuerda: es el nuevo exponente (n+1).';
+  if(!result.okTxt) return 'Revisa la <strong>constante</strong>. Escribe <em>+ C</em> exactamente.';
+  return 'Revisa numerador y denominador. Recuerda la regla: sube el exponente en 1 y divide entre ese nuevo número.';
+}
+
+function mostrarFb(fid, tipo, msg){
+  var fb=document.getElementById('fb-'+fid);
+  if(!fb) return;
+  fb.className='fb show '+tipo;
+  fb.innerHTML=msg;
+}
+
+function checarCasoCompleto(casoId){
+  var ejs=CASOS_DATA[casoId];
+  var todos=true;
+  for(var i=0;i<ejs.length;i++){
+    var fid='c'+casoId+'_'+i;
+    if(!RESP[fid]||RESP[fid].intentos===0){ todos=false; break; }
+  }
+  if(todos){ var btn=document.getElementById('btn-b'+casoId); if(btn) btn.disabled=false; }
+}
+
+// ════════ NOMBRE ════════
+function chkNombre(){
+  var v=document.getElementById('inp-nombre').value.trim();
+  document.getElementById('inp-nombre').value=
+    document.getElementById('inp-nombre').value.toUpperCase();
+  document.getElementById('btn-ini').disabled=(v.length<4);
+}
+
+function iniciarActividad(){
+  var v=document.getElementById('inp-nombre').value.trim();
+  if(v.length<4) return;
+  NOMBRE=v.toUpperCase();
+  generarEjercicios();
+  avanzar('b0','b1');
+}
+
+function generarEjercicios(){
+  CASOS_DATA[1]=genC1();
+  CASOS_DATA[2]=genC2();
+  CASOS_DATA[3]=genC3();
+  CASOS_DATA[4]=genC4();
+  CASOS_DATA[5]=genC5();
+  for(var c=1;c<=5;c++){
+    renderEjemplos(c);
+    renderEjercicios(c);
+  }
+}
+
+// ════════ NAVEGACIÓN ════════
+var PROG_MAP={b0:0,btut:10,b1:20,b2:36,b3:52,b4:68,b5:84,b7:100};
+var PROG_LBL={b0:'Inicio',b1:'Caso 1',b2:'Caso 2',b3:'Caso 3',b4:'Caso 4',b5:'Caso 5',b7:'Finalizado'};
+
+function avanzar(de, a){
+  var elDe=document.getElementById(de);
+  var elA=document.getElementById(a);
+  if(elDe) elDe.classList.remove('active');
+  if(elA) elA.classList.add('active');
+  var p=PROG_MAP[a]||0;
+  document.getElementById('prog-fill').style.width=p+'%';
+  document.getElementById('prog-pct').textContent=p+'%';
+  document.getElementById('prog-txt').textContent=PROG_LBL[a]||'';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(a==='b7') generarResumen();
+}
+
+function saltarFinal(){
+  var act=document.querySelector('.card.active');
+  if(act) act.classList.remove('active');
+  if(!NOMBRE) NOMBRE='DOCENTE (demo)';
+  document.getElementById('b7').classList.add('active');
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  document.getElementById('prog-txt').textContent='Finalizado';
+  window.scrollTo({top:0,behavior:'smooth'});
+  generarResumen();
+}
+
+// ════════ RESUMEN ════════
+var CASO_NOMBRES={1:'∫k dx',2:'∫x dx',3:'∫kx dx',4:'∫x<sup>n</sup> dx',5:'∫x<sup>−n</sup> dx'};
+
+function generarResumen(){
+  document.getElementById('b7-nombre').textContent=NOMBRE||'—';
+  var pts=0, maxPts=0, html='';
+  for(var c=1;c<=5;c++){
+    html+='<div style="margin-bottom:14px;">'
+      +'<div style="font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
+      +'color:var(--slate);padding-bottom:5px;border-bottom:1.5px solid var(--line);margin-bottom:8px;">'
+      +'Caso '+c+' · '+CASO_NOMBRES[c]+'</div>';
+    var ejs=CASOS_DATA[c]||[];
+    ejs.forEach(function(ej,i){
+      var fid='c'+c+'_'+i;
+      var r=RESP[fid]||{ok:false,intentos:0,val:''};
+      maxPts+=1;
+      if(r.ok) pts+=1; else if(r.intentos>0) pts+=0.3;
+      var cls=r.intentos===0?'neu':r.ok?'ok':'err';
+      var ico=r.intentos===0?'—':r.ok?'✅':'❌';
+      html+='<div class="res-fila '+cls+'">'
+        +'<div style="font-size:1rem;flex-shrink:0;margin-top:1px;">'+ico+'</div>'
+        +'<div style="flex:1;">'
+        +'<div style="font-weight:700;font-size:.8rem;margin-bottom:2px;">Ej. '+(i+1)+': '+ej.q+'</div>'
+        +'<div style="font-size:.78rem;">Tu respuesta: <em>'+( r.val||'Sin respuesta')+'</em>'
+        +(r.intentos>1?' <span style="color:var(--slate)">('+r.intentos+' intentos)</span>':'')+'</div>'
+        +(r.ok?'<div style="color:var(--grn);font-weight:700;font-size:.77rem;">✓ Correcto</div>':
+          (r.intentos>0&&!r.ok?'<div style="color:var(--red);font-size:.77rem;">Correcta: '
+            +(ej.hasFrac?'('+ej.expNum+')/('+ej.expDen+') '+ej.expTxt:ej.expTxt)+'</div>':''))
+        +'</div></div>';
+    });
+    html+='</div>';
+  }
+  var pct=Math.round(pts/maxPts*100);
+  var letra=pct>=90?'Excelente':pct>=75?'Bien':pct>=60?'Suficiente':'En proceso';
+  document.getElementById('resumen-contenido').innerHTML=
+    '<div class="cal-box"><div class="cal-lbl">Calificación estimada</div>'
+    +'<div class="cal-num">'+pct+'<span style="font-size:1.4rem;color:rgba(255,255,255,.4)">%</span></div>'
+    +'<div class="cal-sub">'+letra+' · '+pts.toFixed(1)+' / '+maxPts+' puntos</div></div>'
+    +html;
+  var cod=String(((SEED%1000)*43+Math.round(pts*10)+7)%9000+1000);
+  document.getElementById('cod-final').innerHTML=
+    '<div class="cod-lbl">Código de sesión</div>'
+    +'<div class="cod-num">'+cod+'</div>'
+    +'<div class="cod-ctx">'+NOMBRE+' · S08 · '+pct+'%</div>';
+}
+
+// ════════ DOCENTE ════════
+function abrirModal(){
+  document.getElementById('modal-doc').classList.add('show');
+  setTimeout(function(){ document.getElementById('modal-inp').focus(); },100);
+}
+function cerrarModal(){
+  document.getElementById('modal-doc').classList.remove('show');
+  document.getElementById('modal-inp').value='';
+  document.getElementById('modal-err').style.display='none';
+}
+document.getElementById('modal-doc').addEventListener('click',function(e){
+  if(e.target===this) cerrarModal();
+});
+function confirmarDoc(){
+  if(document.getElementById('modal-inp').value.trim()==='890'){
+    cerrarModal(); DOCENTE=true; NOMBRE='DOCENTE (demo)';
+    document.getElementById('doc-bar').classList.add('show');
+    SEED=55555; rng=mulberry(SEED);
+    generarEjercicios();
+    avanzar('b0','b1');
+  } else {
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('modal-inp').value='';
+    document.getElementById('modal-inp').focus();
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// SECCIÓN 2 — OPCIÓN MÚLTIPLE
+// Prefijo s2_ en todas las funciones/variables para aislar de S1
+// ══════════════════════════════════════════════════════════
+
+// ── Helpers de fracción visual (solo para display, no interactivos) ──
+function s2F(n,d){ return '<span class="frac"><span class="n">'+n+'</span><span class="d">'+d+'</span></span>'; }
+
+// ── BANCO DE PROBLEMAS ──
+// 16 niveles, 3 variantes cada uno
+// Cada variante: { q, correcta (HTML), opciones_error (array 4 HTML) }
+// Las opciones se mezclan con la correcta al mostrar
+
+var S2_BANCO = [
+  // Nivel 1: ∫k dv (constante pura)
+  [
+    { q:'∫ 7 dw', c:'7w + C',
+      e:['7w² + C', s2F('7w²','2')+' + C', s2F('7','w')+' + C', '7 + C'] },
+    { q:'∫ 5 dt', c:'5t + C',
+      e:['5t² + C', s2F('5t²','2')+' + C', s2F('5','t')+' + C', '5 + C'] },
+    { q:'∫ 11 dp', c:'11p + C',
+      e:['11p² + C', s2F('11p²','2')+' + C', s2F('11','p')+' + C', '11p² + C'] }
+  ],
+  // Nivel 2: ∫−3s⁴ ds (coef negativo, exponente 4)
+  [
+    { q:'∫ −3s<sup>4</sup> ds', c:s2F('−3s<sup>5</sup>','5')+' + C',
+      e:[s2F('−3s<sup>4</sup>','4')+' + C', '−12s<sup>3</sup> + C', s2F('−s<sup>5</sup>','5')+' + C', s2F('3s<sup>5</sup>','5')+' + C'] },
+    { q:'∫ −2t<sup>4</sup> dt', c:s2F('−2t<sup>5</sup>','5')+' + C',
+      e:[s2F('−2t<sup>4</sup>','4')+' + C', '−8t<sup>3</sup> + C', s2F('−t<sup>5</sup>','5')+' + C', s2F('2t<sup>5</sup>','5')+' + C'] },
+    { q:'∫ −4u<sup>4</sup> du', c:s2F('−4u<sup>5</sup>','5')+' + C',
+      e:[s2F('−4u<sup>4</sup>','4')+' + C', '−16u<sup>3</sup> + C', s2F('−u<sup>5</sup>','5')+' + C', s2F('4u<sup>5</sup>','5')+' + C'] }
+  ],
+  // Nivel 3: ∫2x⁻⁶ dx
+  [
+    { q:'∫ 2x<sup>−6</sup> dx', c:s2F('−2','5x<sup>5</sup>')+' + C',
+      e:[s2F('2x<sup>−5</sup>','−5')+' + C', s2F('2','5x<sup>5</sup>')+' + C', s2F('−2x<sup>−5</sup>','5')+' + C', s2F('2','6x<sup>6</sup>')+' + C'] },
+    { q:'∫ 3t<sup>−6</sup> dt', c:s2F('−3','5t<sup>5</sup>')+' + C',
+      e:[s2F('3t<sup>−5</sup>','−5')+' + C', s2F('3','5t<sup>5</sup>')+' + C', s2F('−3t<sup>−5</sup>','5')+' + C', s2F('3','6t<sup>6</sup>')+' + C'] },
+    { q:'∫ 5z<sup>−6</sup> dz', c:s2F('−5','5z<sup>5</sup>')+' + C',
+      e:[s2F('5z<sup>−5</sup>','−5')+' + C', s2F('5','5z<sup>5</sup>')+' + C', s2F('−5z<sup>−5</sup>','5')+' + C', s2F('5','6z<sup>6</sup>')+' + C'] }
+  ],
+  // Nivel 4: ∫e dt (constante e)
+  [
+    { q:'∫ e dt', c:'et + C',
+      e:['e<sup>t</sup> + C', s2F('et²','2')+' + C', 'e + C', s2F('e','t')+' + C'] },
+    { q:'∫ e ds', c:'es + C',
+      e:['e<sup>s</sup> + C', s2F('es²','2')+' + C', 'e + C', s2F('e','s')+' + C'] },
+    { q:'∫ e du', c:'eu + C',
+      e:['e<sup>u</sup> + C', s2F('eu²','2')+' + C', 'e + C', s2F('e','u')+' + C'] }
+  ],
+  // Nivel 5: ∫y³ dy
+  [
+    { q:'∫ y<sup>3</sup> dy', c:s2F('y<sup>4</sup>','4')+' + C',
+      e:[s2F('y<sup>3</sup>','3')+' + C', '3y² + C', s2F('y<sup>4</sup>','3')+' + C', 'y<sup>4</sup> + C'] },
+    { q:'∫ t<sup>3</sup> dt', c:s2F('t<sup>4</sup>','4')+' + C',
+      e:[s2F('t<sup>3</sup>','3')+' + C', '3t² + C', s2F('t<sup>4</sup>','3')+' + C', 't<sup>4</sup> + C'] },
+    { q:'∫ p<sup>3</sup> dp', c:s2F('p<sup>4</sup>','4')+' + C',
+      e:[s2F('p<sup>3</sup>','3')+' + C', '3p² + C', s2F('p<sup>4</sup>','3')+' + C', 'p<sup>4</sup> + C'] }
+  ],
+  // Nivel 6: ∫−5k⁻² dk
+  [
+    { q:'∫ −5k<sup>−2</sup> dk', c:s2F('5','k')+' + C',
+      e:[s2F('−5','k')+' + C', s2F('5k<sup>−1</sup>','−1')+' + C', s2F('5','2k²')+' + C', '−5k<sup>−1</sup> + C'] },
+    { q:'∫ −3m<sup>−2</sup> dm', c:s2F('3','m')+' + C',
+      e:[s2F('−3','m')+' + C', s2F('3m<sup>−1</sup>','−1')+' + C', s2F('3','2m²')+' + C', '−3m<sup>−1</sup> + C'] },
+    { q:'∫ −7p<sup>−2</sup> dp', c:s2F('7','p')+' + C',
+      e:[s2F('−7','p')+' + C', s2F('7p<sup>−1</sup>','−1')+' + C', s2F('7','2p²')+' + C', '−7p<sup>−1</sup> + C'] }
+  ],
+  // Nivel 7: ∫9y dy (kx)
+  [
+    { q:'∫ 9y dy', c:s2F('9y²','2')+' + C',
+      e:['9y² + C', s2F('9y²','9')+' + C', s2F('y²','2')+' + C', '18y + C'] },
+    { q:'∫ 5z dz', c:s2F('5z²','2')+' + C',
+      e:['5z² + C', s2F('5z²','5')+' + C', s2F('z²','2')+' + C', '10z + C'] },
+    { q:'∫ 7s ds', c:s2F('7s²','2')+' + C',
+      e:['7s² + C', s2F('7s²','7')+' + C', s2F('s²','2')+' + C', '14s + C'] }
+  ],
+  // Nivel 8: ∫z⁻⁴ dz
+  [
+    { q:'∫ z<sup>−4</sup> dz', c:s2F('−1','3z<sup>3</sup>')+' + C',
+      e:[s2F('1','3z<sup>3</sup>')+' + C', s2F('−1','4z<sup>4</sup>')+' + C', s2F('z<sup>−3</sup>','−3')+' + C', s2F('1','4z<sup>4</sup>')+' + C'] },
+    { q:'∫ t<sup>−4</sup> dt', c:s2F('−1','3t<sup>3</sup>')+' + C',
+      e:[s2F('1','3t<sup>3</sup>')+' + C', s2F('−1','4t<sup>4</sup>')+' + C', s2F('t<sup>−3</sup>','−3')+' + C', s2F('1','4t<sup>4</sup>')+' + C'] },
+    { q:'∫ u<sup>−4</sup> du', c:s2F('−1','3u<sup>3</sup>')+' + C',
+      e:[s2F('1','3u<sup>3</sup>')+' + C', s2F('−1','4u<sup>4</sup>')+' + C', s2F('u<sup>−3</sup>','−3')+' + C', s2F('1','4u<sup>4</sup>')+' + C'] }
+  ],
+  // Nivel 9: ∫12 dv
+  [
+    { q:'∫ 12 dv', c:'12v + C',
+      e:['12v² + C', s2F('12v²','2')+' + C', s2F('12','v')+' + C', '12 + C'] },
+    { q:'∫ 9 dq', c:'9q + C',
+      e:['9q² + C', s2F('9q²','2')+' + C', s2F('9','q')+' + C', '9 + C'] },
+    { q:'∫ 15 dn', c:'15n + C',
+      e:['15n² + C', s2F('15n²','2')+' + C', s2F('15','n')+' + C', '15 + C'] }
+  ],
+  // Nivel 10: ∫−x⁵ dx
+  [
+    { q:'∫ −x<sup>5</sup> dx', c:s2F('−x<sup>6</sup>','6')+' + C',
+      e:[s2F('−x<sup>5</sup>','5')+' + C', '−5x<sup>4</sup> + C', s2F('x<sup>6</sup>','6')+' + C', s2F('−x<sup>6</sup>','5')+' + C'] },
+    { q:'∫ −y<sup>5</sup> dy', c:s2F('−y<sup>6</sup>','6')+' + C',
+      e:[s2F('−y<sup>5</sup>','5')+' + C', '−5y<sup>4</sup> + C', s2F('y<sup>6</sup>','6')+' + C', s2F('−y<sup>6</sup>','5')+' + C'] },
+    { q:'∫ −s<sup>5</sup> ds', c:s2F('−s<sup>6</sup>','6')+' + C',
+      e:[s2F('−s<sup>5</sup>','5')+' + C', '−5s<sup>4</sup> + C', s2F('s<sup>6</sup>','6')+' + C', s2F('−s<sup>6</sup>','5')+' + C'] }
+  ],
+  // Nivel 11: ∫4t² dt
+  [
+    { q:'∫ 4t<sup>2</sup> dt', c:s2F('4t<sup>3</sup>','3')+' + C',
+      e:['8t + C', s2F('4t<sup>2</sup>','2')+' + C', s2F('4t<sup>3</sup>','4')+' + C', '12t² + C'] },
+    { q:'∫ 6s<sup>2</sup> ds', c:'2s<sup>3</sup> + C',
+      e:['12s + C', s2F('6s<sup>2</sup>','2')+' + C', s2F('6s<sup>3</sup>','4')+' + C', s2F('6s<sup>3</sup>','3')+' + C'] },
+    { q:'∫ 9u<sup>2</sup> du', c:'3u<sup>3</sup> + C',
+      e:['18u + C', s2F('9u<sup>2</sup>','2')+' + C', s2F('9u<sup>3</sup>','4')+' + C', s2F('9u<sup>3</sup>','3')+' + C'] }
+  ],
+  // Nivel 12: ∫−8m⁻³ dm
+  [
+    { q:'∫ −8m<sup>−3</sup> dm', c:s2F('4','m<sup>2</sup>')+' + C',
+      e:[s2F('−4','m<sup>2</sup>')+' + C', s2F('8','3m<sup>3</sup>')+' + C', s2F('4m<sup>−2</sup>','−2')+' + C', s2F('8','2m<sup>2</sup>')+' + C'] },
+    { q:'∫ −6p<sup>−3</sup> dp', c:s2F('3','p<sup>2</sup>')+' + C',
+      e:[s2F('−3','p<sup>2</sup>')+' + C', s2F('6','3p<sup>3</sup>')+' + C', s2F('3p<sup>−2</sup>','−2')+' + C', s2F('6','2p<sup>2</sup>')+' + C'] },
+    { q:'∫ −10n<sup>−3</sup> dn', c:s2F('5','n<sup>2</sup>')+' + C',
+      e:[s2F('−5','n<sup>2</sup>')+' + C', s2F('10','3n<sup>3</sup>')+' + C', s2F('5n<sup>−2</sup>','−2')+' + C', s2F('10','2n<sup>2</sup>')+' + C'] }
+  ],
+  // Nivel 13: ∫6p dp
+  [
+    { q:'∫ 6p dp', c:'3p<sup>2</sup> + C',
+      e:[s2F('6p<sup>2</sup>','2')+' + C', '6p + C', s2F('6p²','6')+' + C', '6p² + C'] },
+    { q:'∫ 8q dq', c:'4q<sup>2</sup> + C',
+      e:[s2F('8q<sup>2</sup>','2')+' + C', '8q + C', s2F('8q²','8')+' + C', '8q² + C'] },
+    { q:'∫ 10r dr', c:'5r<sup>2</sup> + C',
+      e:[s2F('10r<sup>2</sup>','2')+' + C', '10r + C', s2F('10r²','10')+' + C', '10r² + C'] }
+  ],
+  // Nivel 14: ∫v⁻¹ dv = ln|v| + C  — CASO TRAMPA (no visto en clase)
+  // Respuesta correcta: ln|v| + C
+  // Errores plausibles: aplicar la regla de potencia (resultado "incorrecto" pero lógico para quien no sabe)
+  [
+    { q:'∫ w<sup>−1</sup> dw',
+      c:'ln|w| + C',
+      e:[s2F('w<sup>0</sup>','0')+' + C', s2F('−1','w<sup>2</sup>')+' + C', s2F('1','2w<sup>2</sup>')+' + C', s2F('w<sup>0</sup>','1')+' + C'] },
+    { q:'∫ x<sup>−1</sup> dx',
+      c:'ln|x| + C',
+      e:[s2F('x<sup>0</sup>','0')+' + C', s2F('−1','x<sup>2</sup>')+' + C', s2F('1','2x<sup>2</sup>')+' + C', '0 + C'] },
+    { q:'∫ t<sup>−1</sup> dt',
+      c:'ln|t| + C',
+      e:[s2F('t<sup>0</sup>','0')+' + C', s2F('−1','t<sup>2</sup>')+' + C', s2F('1','2t<sup>2</sup>')+' + C', s2F('t<sup>0</sup>','1')+' + C'] }
+  ],
+  // Nivel 15: ∫−10n⁷ dn
+  [
+    { q:'∫ −10n<sup>7</sup> dn', c:s2F('−10n<sup>8</sup>','8')+' + C',
+      e:[s2F('−10n<sup>7</sup>','7')+' + C', '−70n<sup>6</sup> + C', s2F('10n<sup>8</sup>','8')+' + C', s2F('−10n<sup>8</sup>','7')+' + C'] },
+    { q:'∫ −6s<sup>7</sup> ds', c:s2F('−6s<sup>8</sup>','8')+' + C',
+      e:[s2F('−6s<sup>7</sup>','7')+' + C', '−42s<sup>6</sup> + C', s2F('6s<sup>8</sup>','8')+' + C', s2F('−6s<sup>8</sup>','7')+' + C'] },
+    { q:'∫ −4p<sup>7</sup> dp', c:s2F('−4p<sup>8</sup>','8')+' + C',
+      e:[s2F('−4p<sup>7</sup>','7')+' + C', '−28p<sup>6</sup> + C', s2F('4p<sup>8</sup>','8')+' + C', s2F('−4p<sup>8</sup>','7')+' + C'] }
+  ],
+  // Nivel 16: ∫3r⁻⁵ dr
+  [
+    { q:'∫ 3r<sup>−5</sup> dr', c:s2F('−3','4r<sup>4</sup>')+' + C',
+      e:[s2F('3','4r<sup>4</sup>')+' + C', s2F('−3','5r<sup>5</sup>')+' + C', s2F('3r<sup>−4</sup>','−4')+' + C', s2F('3','r<sup>4</sup>')+' + C'] },
+    { q:'∫ 5t<sup>−5</sup> dt', c:s2F('−5','4t<sup>4</sup>')+' + C',
+      e:[s2F('5','4t<sup>4</sup>')+' + C', s2F('−5','5t<sup>5</sup>')+' + C', s2F('5t<sup>−4</sup>','−4')+' + C', s2F('5','t<sup>4</sup>')+' + C'] },
+    { q:'∫ 2z<sup>−5</sup> dz', c:s2F('−2','4z<sup>4</sup>')+' + C',
+      e:[s2F('2','4z<sup>4</sup>')+' + C', s2F('−2','5z<sup>5</sup>')+' + C', s2F('2z<sup>−4</sup>','−4')+' + C', s2F('2','z<sup>4</sup>')+' + C'] }
+  ]
+];
+
+// ── ESTADO S2 ──
+var s2_pregs = [];       // 16 preguntas seleccionadas para este alumno
+var s2_resp  = {};       // idx -> {sel, ok, confirmada}
+var s2_respondidas = 0;
+
+// ── INICIALIZAR S2 ──
+function s2_init(){
+  s2_pregs = [];
+  s2_resp  = {};
+  s2_respondidas = 0;
+  // Seleccionar 1 variante aleatoria por nivel
+  for(var i=0;i<16;i++){
+    var niv = S2_BANCO[i];
+    var v   = niv[rnd(niv.length)];
+    s2_pregs.push(v);
+  }
+  s2_render();
+  document.getElementById('s2-wrap').style.display='block';
+  document.getElementById('s2-prog-fill').style.width='0%';
+  document.getElementById('s2-prog-pct').textContent='0 / 16';
+  document.getElementById('s2-prog-txt').textContent='Pregunta 1 de 16';
+  document.getElementById('s2-resumen').style.display='none';
+}
+
+// ── RENDER S2 ──
+function s2_render(){
+  var container = document.getElementById('s2-preguntas');
+  container.innerHTML='';
+  s2_pregs.forEach(function(preg, idx){
+    // Mezclar opciones (correcta + 4 errores) con RNG
+    var opts = shuffle([preg.c].concat(preg.e));
+    var card = document.createElement('div');
+    card.className='card active';
+    card.id='s2-card-'+idx;
+    card.style.marginBottom='12px';
+
+    // Encabezado
+    var header = '<div class="c-tag">Nivel '+(idx+1)+'</div>'
+      +'<div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:12px;">'
+      +'<div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;'
+      +'font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">'+(idx+1)+'</div>'
+      +'<div style="background:var(--ink);color:#FFD699;border-radius:7px;padding:8px 13px;'
+      +'font-size:1.1rem;flex:1;">'+preg.q+'</div></div>';
+
+    // Opciones
+    var optsHtml='<div id="s2-opts-'+idx+'" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">';
+    opts.forEach(function(opt, oi){
+      optsHtml+='<div class="s2-opt" id="s2-opt-'+idx+'-'+oi+'"'
+        +' onclick="s2_seleccionar('+idx+','+oi+',this)"'
+        +' style="display:flex;align-items:center;gap:10px;padding:9px 13px;'
+        +'background:var(--bg);border:2px solid var(--line);border-radius:9px;cursor:pointer;transition:all .15s;">'
+        +'<div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--line);'
+        +'flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;" id="s2-radio-'+idx+'-'+oi+'"></div>'
+        +'<div style="font-size:1rem;">'+opt+'</div>'
+        +'</div>';
+    });
+    optsHtml+='</div>';
+
+    // Guardar el índice de la correcta en este orden mezclado
+    var corrIdx = opts.indexOf(preg.c);
+
+    // Botón verificar
+    var btnHtml='<button class="btn bl" id="s2-vbtn-'+idx+'"'
+      +' onclick="s2_verificar('+idx+','+corrIdx+')"'
+      +' disabled style="margin-top:2px;font-size:.85rem;padding:9px 18px;">Confirmar →</button>'
+      +'<div class="fb" id="s2-fb-'+idx+'"></div>';
+
+    card.innerHTML=header+optsHtml+btnHtml;
+    container.appendChild(card);
+
+    // Guardar referencia a opciones para poder bloquearlas
+    s2_resp[idx]={sel:null, corrIdx:corrIdx, ok:false, confirmada:false};
+  });
+}
+
+// ── SELECCIONAR OPCIÓN ──
+function s2_seleccionar(pregIdx, optIdx, el){
+  if(s2_resp[pregIdx].confirmada) return;
+  // Deseleccionar todas las opciones de esta pregunta
+  var container=document.getElementById('s2-opts-'+pregIdx);
+  var allOpts=container.querySelectorAll('.s2-opt');
+  allOpts.forEach(function(o,i){
+    o.style.borderColor='var(--line)';
+    o.style.background='var(--bg)';
+    var radio=document.getElementById('s2-radio-'+pregIdx+'-'+i);
+    if(radio){radio.style.borderColor='var(--line)';radio.style.background='';radio.textContent='';}
+  });
+  // Marcar seleccionada
+  el.style.borderColor='var(--blue)';
+  el.style.background='var(--blue3)';
+  var radio=document.getElementById('s2-radio-'+pregIdx+'-'+optIdx);
+  if(radio){radio.style.borderColor='var(--blue)';radio.style.background='var(--blue)';radio.style.color='#fff';radio.textContent='●';}
+  s2_resp[pregIdx].sel=optIdx;
+  // Habilitar botón confirmar
+  var btn=document.getElementById('s2-vbtn-'+pregIdx);
+  if(btn) btn.disabled=false;
+}
+
+// ── VERIFICAR ──
+function s2_verificar(pregIdx, corrIdx){
+  var r=s2_resp[pregIdx];
+  if(r.confirmada) return;
+  if(r.sel===null) return;
+  r.confirmada=true;
+  r.ok=(r.sel===corrIdx);
+  // Bloquear todas las opciones
+  var container=document.getElementById('s2-opts-'+pregIdx);
+  var allOpts=container.querySelectorAll('.s2-opt');
+  allOpts.forEach(function(o){ o.style.cursor='default'; o.onclick=null; });
+  // Colorear correcta e incorrecta
+  var corrEl=document.getElementById('s2-opt-'+pregIdx+'-'+corrIdx);
+  if(corrEl){
+    corrEl.style.borderColor='var(--grn)';
+    corrEl.style.background='var(--grn3)';
+    var radioC=document.getElementById('s2-radio-'+pregIdx+'-'+corrIdx);
+    if(radioC){radioC.style.borderColor='var(--grn)';radioC.style.background='var(--grn)';radioC.textContent='✓';}
+  }
+  if(!r.ok){
+    var selEl=document.getElementById('s2-opt-'+pregIdx+'-'+r.sel);
+    if(selEl){
+      selEl.style.borderColor='var(--red)';
+      selEl.style.background='var(--red3)';
+      var radioS=document.getElementById('s2-radio-'+pregIdx+'-'+r.sel);
+      if(radioS){radioS.style.borderColor='var(--red)';radioS.style.background='var(--red)';radioS.style.color='#fff';radioS.textContent='✗';}
+    }
+  }
+  // Feedback
+  var fb=document.getElementById('s2-fb-'+pregIdx);
+  if(fb){
+    fb.className='fb show '+(r.ok?'ok':'err');
+    fb.innerHTML=r.ok?'✅ <strong>Correcto.</strong>':'❌ <strong>Incorrecto.</strong> La respuesta correcta aparece marcada en verde.';
+  }
+  // Deshabilitar botón
+  var btn=document.getElementById('s2-vbtn-'+pregIdx);
+  if(btn) btn.disabled=true;
+  // Actualizar progreso
+  s2_respondidas++;
+  var pct=Math.round(s2_respondidas/16*100);
+  document.getElementById('s2-prog-fill').style.width=pct+'%';
+  document.getElementById('s2-prog-pct').textContent=s2_respondidas+' / 16';
+  document.getElementById('s2-prog-txt').textContent=
+    s2_respondidas<16?'Respondidas: '+s2_respondidas+' de 16':'¡Completado!';
+  if(s2_respondidas===16) s2_mostrarResumen();
+}
+
+// ── RESUMEN S2 ──
+function s2_mostrarResumen(){
+  var ok=0;
+  for(var i=0;i<16;i++) if(s2_resp[i]&&s2_resp[i].ok) ok++;
+  var pct=Math.round(ok/16*100);
+  var letra=pct>=90?'Excelente':pct>=75?'Bien':pct>=60?'Suficiente':'En proceso';
+
+  // ── Bloque nombre ──
+  var html='<div style="background:var(--ink);border-radius:9px;padding:11px 15px;'
+    +'margin-bottom:12px;display:flex;align-items:center;gap:11px;">'
+    +'<div style="font-size:1.35rem;">👤</div>'
+    +'<div><div style="font-size:.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;'
+    +'color:rgba(255,255,255,.55);margin-bottom:2px;">Alumno</div>'
+    +'<div style="font-size:1rem;font-weight:700;color:#FFD699;font-family:Georgia,serif;">'
+    +(NOMBRE||'—')+'</div></div></div>';
+
+  // ── Cal box S2 ──
+  html+='<div class="cal-box" style="background:linear-gradient(135deg,#0D2137,#1B4F72);">'
+    +'<div class="cal-lbl">Calificación · Sección 2 · Opción múltiple</div>'
+    +'<div class="cal-num">'+pct+'<span style="font-size:1.4rem;color:rgba(255,255,255,.4)">%</span></div>'
+    +'<div class="cal-sub">'+letra+' · '+ok+' / 16 correctas</div>'    +'</div>';
+
+
+  // ── Detalle por pregunta ──
+  html+='<div style="margin-top:10px;">';
+  for(var j=0;j<16;j++){
+    var r=s2_resp[j]||{ok:false,confirmada:false};
+    var cls=!r.confirmada?'neu':r.ok?'ok':'err';
+    var ico=!r.confirmada?'—':r.ok?'✅':'❌';
+    html+='<div class="res-fila '+cls+'">'
+      +'<div style="font-size:1rem;flex-shrink:0;">'+ico+'</div>'
+      +'<div style="flex:1;font-size:.81rem;">'
+      +'<strong>Niv. '+(j+1)+':</strong> '+s2_pregs[j].q
+      +(r.ok?'':' <span style="color:var(--grn);font-weight:700;">→ '+s2_pregs[j].c+'</span>')
+      +'</div></div>';
+  }
+  html+='</div>';
+
+  // ── Código S2 ──
+  var cod2=String(((SEED%999)*57+ok*13+31)%9000+1000);
+  html+='<div class="cod-box" style="margin-top:12px;">'
+    +'<div class="cod-lbl">Código S2</div>'
+    +'<div class="cod-num">'+cod2+'</div>'
+    +'<div style="font-size:.68rem;color:rgba(255,255,255,.55);margin-top:4px;">'
+    +(NOMBRE||'—')+' · S08·S2 · '+pct+'%</div></div>';
+
+  // ══════════════════════════════════════════
+  // RESUMEN UNIFICADO S1 + S2 (para captura única)
+  // ══════════════════════════════════════════
+  // Recuperar calificación S1 del DOM
+  var s1PctEl=document.querySelector('#resumen-contenido .cal-num');
+  var s1Pct=s1PctEl?s1PctEl.textContent.replace('%','').trim():'—';
+
+  var n14ok = s2_resp[13] && s2_resp[13].confirmada && s2_resp[13].ok;
+  html+='<div id="resumen-unificado" style="margin-top:16px;background:var(--ink);'
+    +'border-radius:var(--r);padding:18px 16px;">'
+    // Título
+    +'<div style="font-size:.58rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;'
+    +'color:rgba(255,255,255,.45);margin-bottom:12px;text-align:center;">Reporte completo · S08 · Antiderivadas</div>'
+    // Nombre grande
+    +'<div style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:3px;">Alumno</div>'
+    +'<div style="font-size:1.2rem;font-weight:700;color:#FFD699;font-family:Georgia,serif;">'+(NOMBRE||'—')+'</div>'
+    +'</div>'
+    // Dos cajas de calificación en fila
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+    // S1
+    +'<div style="background:rgba(255,255,255,.06);border-radius:9px;padding:13px 10px;text-align:center;">'
+    +'<div style="font-size:.55rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
+    +'color:rgba(255,255,255,.45);margin-bottom:5px;">S1 · Escritura</div>'
+    +'<div style="font-size:2.4rem;font-weight:700;color:#FFD699;line-height:1;">'+s1Pct
+    +'<span style="font-size:1.1rem;color:rgba(255,255,255,.35)">%</span></div>'
+    +'<div style="font-size:.68rem;color:rgba(255,255,255,.5);margin-top:3px;">Antiderivadas</div>'
+    +'</div>'
+    // S2
+    +'<div style="background:rgba(255,255,255,.06);border-radius:9px;padding:13px 10px;text-align:center;">'
+    +'<div style="font-size:.55rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
+    +'color:rgba(255,255,255,.45);margin-bottom:5px;">S2 · Opción múltiple</div>'
+    +'<div style="font-size:2.4rem;font-weight:700;color:#80DEEA;line-height:1;">'+pct
+    +'<span style="font-size:1.1rem;color:rgba(255,255,255,.35)">%</span></div>'
+    +'<div style="font-size:.68rem;color:rgba(255,255,255,.5);margin-top:3px;">16 niveles</div>'    +(n14ok?'<div style="font-size:.95rem;font-weight:900;color:#fff;margin-top:5px;letter-spacing:2px;">**</div>':'')    +'</div>'
+    +'</div>'
+    // Fecha y datos
+    +'<div style="text-align:center;font-size:.65rem;color:rgba(255,255,255,.35);border-top:1px solid rgba(255,255,255,.08);'
+    +'padding-top:9px;">TPV II · P4 · S08 · Prof. Adrián Cruz · MCCEMS 2025</div>'
+    +'</div>';
+
+  // ══════════════════════════════════════════
+  // INSTRUCCIONES PDF
+  // ══════════════════════════════════════════
+  html+='<div style="background:var(--amb3);border:1.5px solid var(--amb);border-radius:9px;'
+    +'padding:14px 15px;margin-top:14px;">'
+    +'<div style="font-size:.8rem;font-weight:700;color:var(--amb);margin-bottom:8px;">📄 Cómo guardar tu reporte como PDF</div>'
+    +'<div style="font-size:.8rem;line-height:1.8;color:#5a3e00;">'
+    +'<strong>En Android (Chrome):</strong><br>'
+    +'1. Toca los tres puntos ⋮ (esquina superior derecha)<br>'
+    +'2. Selecciona <em>Compartir</em><br>'
+    +'3. Elige <em>Imprimir</em><br>'
+    +'4. En la parte superior cambia la impresora a <em>"Guardar como PDF"</em><br>'
+    +'5. Toca el botón de descarga o guardar<br><br>'
+    +'<strong>Alternativa rápida:</strong><br>'
+    +'Toma una captura de pantalla del <strong>Reporte completo</strong> de arriba (el recuadro oscuro con tus dos calificaciones). '
+    +'Asegúrate de que se vea tu nombre y los dos porcentajes. Esa captura es suficiente para la revisión.'
+    +'</div></div>';
+
+  document.getElementById('s2-res-contenido').innerHTML=html;
+  var resDiv=document.getElementById('s2-resumen');
+  resDiv.style.display='block';
+  resDiv.classList.add('active');
+  setTimeout(function(){ resDiv.scrollIntoView({behavior:'smooth'}); },300);
+}
+
+</script>
+</body>
+</html>
