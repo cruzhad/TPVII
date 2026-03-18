@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TPV II · S09 · Exponentes Fraccionarios</title>
+<style>
+:root{
+  --bg:#F7F4EF;--paper:#fff;--ink:#1A1207;
+  --rust:#B5451B;--rust2:#D4612A;--rust3:#FAF0EB;
+  --blue:#1B4F72;--blue2:#2E86C1;--blue3:#EBF5FB;
+  --grn:#1E6B3C;--grn3:#EAFAF1;
+  --amb:#9A6B00;--amb3:#FEF9E7;
+  --red:#922B21;--red3:#FDEDEC;
+  --pur:#6C3483;--pur3:#F5EEF8;
+  --line:#DDD8CE;--slate:#5D6D7E;
+  --r:11px;--sh:0 2px 14px rgba(26,18,7,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);
+  min-height:100vh;padding:14px 11px 80px;
+  -webkit-user-select:none;user-select:none;
+}
+input,select,textarea{-webkit-user-select:text;user-select:text;}
+.wrap{max-width:680px;margin:0 auto;}
+
+/* HEADER */
+.hdr{background:linear-gradient(140deg,#0D1B2A,#1B3A5C,#6C3483);
+  border-radius:var(--r);padding:22px 20px 18px;margin-bottom:12px;
+  position:relative;overflow:hidden;}
+.hdr::after{content:'∫';position:absolute;right:12px;bottom:-20px;
+  font-size:9rem;color:rgba(255,255,255,.04);pointer-events:none;line-height:1;}
+.h-tag{font-size:.58rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:6px;}
+.h-tit{font-size:1.5rem;color:#fff;font-weight:700;line-height:1.15;margin-bottom:6px;}
+.h-sub{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6;}
+.h-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.chip{font-size:.6rem;font-weight:700;padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.78);}
+
+/* PROGRESO */
+.prog{background:var(--paper);border-radius:var(--r);padding:9px 15px;
+  margin-bottom:12px;box-shadow:var(--sh);}
+.prog-top{display:flex;justify-content:space-between;
+  font-size:.7rem;font-weight:700;color:var(--slate);margin-bottom:5px;}
+.prog-bar{height:6px;background:var(--line);border-radius:10px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--pur),var(--blue));
+  border-radius:10px;transition:width .5s;}
+
+/* CARDS */
+.card{background:var(--paper);border-radius:var(--r);padding:20px 18px;
+  margin-bottom:12px;box-shadow:var(--sh);display:none;}
+.card.active{display:block;animation:up .25s ease;}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.c-tag{font-size:.58rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--slate);margin-bottom:3px;}
+.c-tit{font-size:1.15rem;font-weight:700;color:var(--pur);margin-bottom:11px;line-height:1.2;}
+
+/* BLOQUES */
+.blq{border-radius:8px;padding:11px 13px;margin-bottom:10px;font-size:.86rem;line-height:1.75;}
+.blq h4{font-size:.88rem;font-weight:700;margin-bottom:5px;}
+.blq p{margin-bottom:4px;}
+.blq.pur{background:var(--pur3);border-left:4px solid var(--pur);}
+.blq.blue{background:var(--blue3);border-left:4px solid var(--blue);}
+.blq.grn{background:var(--grn3);border-left:4px solid var(--grn);}
+.blq.amb{background:var(--amb3);border-left:4px solid var(--amb);}
+.blq.rust{background:var(--rust3);border-left:4px solid var(--rust);}
+.blq.dark{background:var(--ink);color:rgba(255,255,255,.88);}
+p{font-size:.88rem;line-height:1.72;margin-bottom:7px;}
+.div{height:1.5px;background:var(--line);border-radius:2px;margin:13px 0;}
+
+/* FRACCIONES DISPLAY */
+.frac{display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;margin:0 2px;line-height:1.1;}
+.frac .n{border-bottom:2px solid currentColor;padding:0 4px 2px;
+  font-size:.92em;text-align:center;min-width:14px;}
+.frac .d{padding:2px 4px 0;font-size:.92em;text-align:center;min-width:14px;}
+
+/* ══════════════════════════════════════
+   SIMULACIÓN
+══════════════════════════════════════ */
+.sim-box{background:var(--ink);border-radius:10px;padding:18px 16px;margin:12px 0;}
+.sim-paso{display:none;}
+.sim-paso.active{display:block;animation:up .3s ease;}
+.sim-enun{font-size:1.3rem;color:#FFD699;text-align:center;padding:14px;
+  background:rgba(255,255,255,.06);border-radius:8px;margin-bottom:14px;line-height:2.2;}
+.sim-linea{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.sim-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:rgba(255,255,255,.45);min-width:90px;}
+.sim-expr{font-size:1.05rem;color:#fff;flex:1;line-height:2.2;}
+.sim-nota{font-size:.78rem;color:#80DEEA;line-height:1.65;padding:8px 11px;
+  background:rgba(128,222,234,.1);border-radius:6px;border-left:3px solid #80DEEA;}
+.sim-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+.sim-dot-row{display:flex;gap:5px;}
+.sim-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);transition:.2s;}
+.sim-dot.active{background:#FFD699;transform:scale(1.3);}
+.btn-sim{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);
+  color:#fff;border-radius:7px;padding:7px 16px;font-size:.82rem;font-weight:700;
+  cursor:pointer;transition:background .13s;}
+.btn-sim:hover{background:rgba(255,255,255,.18);}
+.btn-sim.pri{background:var(--pur);border-color:var(--pur);}
+.btn-sim.pri:hover{background:#7D3C98;}
+
+/* SLIDERS */
+.slider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0;}
+.slider-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.slider-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:rgba(255,255,255,.55);}
+.slider-val{font-size:1.3rem;font-weight:700;color:#FFD699;line-height:1;}
+.slider-inp{width:100%;accent-color:#FFD699;cursor:pointer;}
+.sim-resultado{text-align:center;background:rgba(255,255,255,.06);border-radius:8px;
+  padding:14px;margin-top:10px;}
+.sim-res-q{font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:6px;}
+.sim-res-r{font-size:1.25rem;color:#FFD699;font-weight:700;line-height:2.2;}
+
+/* ══════════════════════════════════════
+   CAMPO POR PIEZAS
+══════════════════════════════════════ */
+.ej-enun{background:var(--ink);color:#FFD699;border-radius:8px;
+  padding:10px 14px;font-size:1.15rem;text-align:center;
+  margin-bottom:14px;line-height:2.4;}
+.piezas-wrap{background:var(--bg);border:2px solid var(--line);border-radius:10px;
+  padding:14px;margin-bottom:10px;transition:border .2s;}
+.piezas-wrap.activo{border-color:var(--blue);}
+.piezas-wrap.p-ok{border-color:var(--grn);}
+.piezas-wrap.p-err{border-color:var(--red);}
+.piezas-inst{font-size:.72rem;font-weight:700;color:var(--slate);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+
+/* Respuesta visual */
+.resp-visual{display:flex;align-items:center;justify-content:center;
+  gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:60px;
+  background:var(--paper);border-radius:8px;padding:10px 8px;
+  border:1.5px solid var(--line);}
+.rv-frac{display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;line-height:1.1;}
+.rv-n{border-bottom:2.5px solid var(--ink);padding:1px 6px 2px;
+  font-size:1rem;text-align:center;min-width:28px;color:var(--ink);font-weight:700;}
+.rv-d{padding:2px 6px 0;font-size:1rem;text-align:center;min-width:28px;
+  color:var(--ink);font-weight:700;}
+.rv-tok{font-size:1.1rem;color:var(--ink);font-weight:700;padding:0 2px;}
+.rv-sup{font-size:.75rem;vertical-align:super;color:var(--ink);font-weight:700;}
+.rv-placeholder{font-size:.85rem;color:var(--line);font-style:italic;}
+
+/* Selectores */
+.sel-grid{display:grid;gap:8px;}
+.sel-fila{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sel-lbl{font-size:.7rem;font-weight:700;color:var(--slate);
+  text-transform:uppercase;letter-spacing:.6px;min-width:85px;}
+.sel-group{display:flex;align-items:center;gap:5px;}
+.sel-sep{font-size:1rem;color:var(--slate);font-weight:700;padding:0 2px;}
+
+select.sel{
+  border:2px solid var(--line);border-radius:7px;
+  background:var(--paper);padding:7px 10px;
+  font-family:'Segoe UI',system-ui,sans-serif;
+  font-size:.95rem;color:var(--ink);outline:none;
+  transition:border .15s;cursor:pointer;min-width:58px;
+  -webkit-appearance:auto;
+}
+select.sel:focus{border-color:var(--blue);}
+select.sel.ok{border-color:var(--grn);background:var(--grn3);}
+select.sel.err{border-color:var(--red);background:var(--red3);}
+
+/* Acciones */
+.campo-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;}
+.btn-borrar{background:var(--bg);border:1.5px solid var(--line);
+  border-radius:7px;padding:7px 13px;font-size:.8rem;font-weight:700;
+  color:var(--slate);cursor:pointer;}
+.btn-ver{background:var(--pur);border:none;border-radius:7px;
+  padding:7px 16px;font-size:.82rem;font-weight:700;
+  color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(108,52,131,.3);}
+.btn-ver:disabled{opacity:.35;cursor:not-allowed;}
+
+/* FEEDBACK */
+.fb{border-radius:8px;padding:9px 12px;margin-top:8px;
+  font-size:.84rem;line-height:1.65;display:none;}
+.fb.show{display:block;}
+.fb.ok{background:var(--grn3);border-left:4px solid var(--grn);}
+.fb.err{background:var(--red3);border-left:4px solid var(--red);}
+.fb.inf{background:var(--amb3);border-left:4px solid var(--amb);}
+
+/* OMC fallback */
+.omc-wrap{display:none;margin-top:10px;}
+.omc-wrap.show{display:block;}
+.omc-tit{font-size:.72rem;font-weight:700;color:var(--slate);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.omc-opts{display:flex;flex-direction:column;gap:6px;}
+.omc-opt{display:flex;align-items:center;gap:9px;padding:9px 13px;
+  background:var(--bg);border:2px solid var(--line);border-radius:9px;
+  cursor:pointer;transition:all .13s;}
+.omc-opt:hover{border-color:var(--pur);}
+.omc-opt.sel-omc{border-color:var(--pur);background:var(--pur3);}
+.omc-opt.omc-ok{border-color:var(--grn);background:var(--grn3);cursor:default;}
+.omc-opt.omc-err{border-color:var(--red);background:var(--red3);cursor:default;}
+.omc-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;}
+.omc-txt{font-size:.95rem;line-height:2;}
+.btn-omc-ver{background:var(--blue);border:none;border-radius:7px;
+  padding:7px 16px;font-size:.82rem;font-weight:700;color:#fff;cursor:pointer;
+  margin-top:8px;box-shadow:0 2px 8px rgba(27,79,114,.3);}
+.btn-omc-ver:disabled{opacity:.35;cursor:not-allowed;}
+
+/* BOTÓN PRINCIPAL */
+.btn{display:inline-flex;align-items:center;gap:6px;
+  background:var(--pur);color:#fff;border:none;border-radius:9px;
+  padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer;
+  transition:background .13s;margin-top:9px;
+  box-shadow:0 3px 10px rgba(108,52,131,.28);}
+.btn:hover{background:#7D3C98;}
+.btn.bl{background:var(--blue);box-shadow:0 3px 10px rgba(27,79,114,.28);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* NOMBRE */
+.nombre-box{background:var(--ink);border-radius:8px;padding:10px 14px;
+  margin-bottom:11px;display:flex;align-items:center;gap:10px;}
+.nb-nom{font-size:1rem;font-weight:700;color:#FFD699;}
+
+/* RESUMEN */
+.cal-box{background:var(--ink);border-radius:var(--r);padding:17px;
+  text-align:center;margin:13px 0;}
+.cal-num{font-size:2.8rem;color:#FFD699;font-weight:700;line-height:1;}
+.cal-lbl{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.65);font-weight:700;margin-bottom:4px;}
+.cal-sub{font-size:.76rem;color:rgba(255,255,255,.6);margin-top:5px;}
+.cod-box{background:var(--ink);border-radius:var(--r);padding:14px;
+  text-align:center;margin:11px 0;}
+.cod-num{font-size:2.2rem;letter-spacing:8px;color:#80DEEA;font-weight:700;}
+.cod-lbl{font-size:.57rem;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.65);margin-bottom:4px;}
+.res-fila{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;
+  border-radius:7px;margin-bottom:5px;font-size:.82rem;line-height:1.6;}
+.res-fila.ok{background:var(--grn3);}
+.res-fila.err{background:var(--red3);}
+.res-fila.neu{background:var(--amb3);}
+
+/* MODAL DOCENTE */
+.modal-ov{display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,.5);padding:20px 10px;overflow-y:auto;}
+.modal-ov.show{display:block;}
+.modal-box{background:var(--paper);border-radius:var(--r);max-width:360px;
+  margin:80px auto;padding:22px;box-shadow:0 8px 36px rgba(0,0,0,.22);}
+.modal-tit{font-size:1rem;font-weight:700;color:var(--pur);margin-bottom:12px;}
+.modal-inp{width:100%;border:2px solid var(--line);border-radius:7px;
+  padding:9px 12px;font-size:1.15rem;font-weight:700;letter-spacing:4px;
+  text-align:center;background:var(--bg);margin-bottom:6px;outline:none;}
+.modal-inp:focus{border-color:var(--pur);}
+.modal-err{font-size:.75rem;color:var(--red);font-weight:700;display:none;margin-bottom:6px;}
+.modal-btns{display:flex;gap:7px;}
+.modal-cancel{background:var(--bg);color:var(--slate);border:none;border-radius:7px;
+  padding:8px 15px;font-size:.83rem;font-weight:700;cursor:pointer;}
+.doc-bar{display:none;position:fixed;bottom:14px;right:14px;z-index:200;}
+.doc-bar.show{display:flex;}
+.db-btn{background:var(--ink);color:#80DEEA;border:1.5px solid rgba(128,222,234,.2);
+  border-radius:8px;padding:7px 13px;font-size:.76rem;font-weight:700;cursor:pointer;}
+.db-btn.skip{background:var(--pur);color:#fff;border-color:transparent;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- MODAL DOCENTE -->
+<div class="modal-ov" id="modal-doc">
+  <div class="modal-box">
+    <div class="modal-tit">🔑 Acceso docente</div>
+    <input class="modal-inp" id="modal-inp" type="password" maxlength="6"
+      placeholder="_ _ _ _"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+      onkeydown="if(event.key==='Enter')confirmarDoc()">
+    <div class="modal-err" id="modal-err">Código incorrecto.</div>
+    <div class="modal-btns">
+      <button class="btn" style="padding:8px 16px;font-size:.84rem;margin-top:0" onclick="confirmarDoc()">Confirmar</button>
+      <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+<div class="doc-bar" id="doc-bar">
+  <button class="db-btn skip" onclick="saltarFinal()">⚡ Saltar al resumen</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="h-tag">TPV II · P4 · S09 · Prof. Adrián Cruz</div>
+  <div class="h-tit">Antiderivadas con exponentes fraccionarios</div>
+  <div class="h-sub">Simulación interactiva · Ejercicios por piezas · Opción múltiple de respaldo</div>
+  <div class="h-chips">
+    <span class="chip">∫ k·x^(p/q) dx</span>
+    <span class="chip">Positivos y negativos</span>
+    <span class="chip">Fracciones verticales</span>
+    <span class="chip">⏱ ~35 min</span>
+  </div>
+</div>
+
+<!-- PROGRESO -->
+<div class="prog">
+  <div class="prog-top"><span id="prog-txt">Inicio</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- B0: NOMBRE -->
+<div class="card active" id="b0">
+  <div class="c-tag">Inicio</div>
+  <div class="c-tit">Antes de comenzar</div>
+  <div class="blq pur">
+    <h4>¿Qué vas a hacer hoy?</h4>
+    <p>El Prof. Cruz ya explicó la regla. Esta actividad tiene dos partes: primero una simulación para repasar, luego 8 ejercicios donde tú construyes la respuesta seleccionando cada pieza.</p>
+  </div>
+  <div class="blq blue">
+    <h4>✏️ Tu nombre (por apellidos)</h4>
+    <input type="text" id="inp-nombre"
+      placeholder="Ej: HERNÁNDEZ TORRES GABRIEL"
+      oninput="chkNombre()"
+      onkeydown="if(event.key==='Enter')iniciarActividad()"
+      style="width:100%;border:2px solid var(--line);border-radius:7px;
+        padding:9px 12px;font-size:1rem;font-weight:600;text-transform:uppercase;
+        background:#fff;color:var(--ink);outline:none;margin-top:4px;
+        -webkit-user-select:text;user-select:text;">
+  </div>
+  <button class="btn" id="btn-ini" onclick="iniciarActividad()" disabled>Comenzar →</button>
+  <div style="margin-top:11px;">
+    <span style="font-size:.65rem;color:var(--slate);cursor:pointer;text-decoration:underline"
+      onclick="abrirModal()">Acceso docente</span>
+  </div>
+</div>
+
+<!-- B1: SIMULACIÓN -->
+<div class="card" id="b1">
+  <div class="c-tag">Simulación · Repaso</div>
+  <div class="c-tit">¿Cómo se integra k·x<sup>p/q</sup>?</div>
+
+  <div class="blq pur">
+    <h4>La regla de potencia — caso fraccionario</h4>
+    <p>Es exactamente la misma regla que ya conoces: sube el exponente en 1 y divide entre el nuevo exponente. La única diferencia es que el exponente es una fracción.</p>
+  </div>
+
+  <!-- Animación guiada -->
+  <div class="sim-box" id="sim-guiada">
+    <div style="font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      color:rgba(255,255,255,.4);margin-bottom:12px;">Ejemplo paso a paso · ∫ 3x<sup>1/2</sup> dx</div>
+
+    <!-- Paso 1 -->
+    <div class="sim-paso active" id="sp1">
+      <div class="sim-enun">∫ 3 · x<sup style="font-size:.7em">1/2</sup> dx</div>
+      <div class="sim-nota">Identifica las partes: coeficiente k = 3, exponente p/q = 1/2</div>
+    </div>
+    <!-- Paso 2 -->
+    <div class="sim-paso" id="sp2">
+      <div class="sim-enun">Exponente nuevo = <span style="color:#80DEEA">p/q + 1</span> = 1/2 + 1 = <span style="color:#80DEEA">3/2</span></div>
+      <div class="sim-linea">
+        <span class="sim-lbl">Suma 1 a 1/2:</span>
+        <span class="sim-expr">
+          <span class="frac" style="color:#80DEEA"><span class="n">1</span><span class="d">2</span></span>
+          + 1 =
+          <span class="frac" style="color:#80DEEA"><span class="n">1</span><span class="d">2</span></span>
+          +
+          <span class="frac" style="color:#80DEEA"><span class="n">2</span><span class="d">2</span></span>
+          =
+          <span class="frac" style="color:#FFD699"><span class="n">3</span><span class="d">2</span></span>
+        </span>
+      </div>
+      <div class="sim-nota">El nuevo exponente es 3/2. Eso va arriba de x.</div>
+    </div>
+    <!-- Paso 3 -->
+    <div class="sim-paso" id="sp3">
+      <div class="sim-enun">Divide entre el nuevo exponente: k ÷ (p/q+1) = 3 ÷ <span style="color:#80DEEA">3/2</span></div>
+      <div class="sim-linea">
+        <span class="sim-lbl">3 ÷ 3/2 =</span>
+        <span class="sim-expr">
+          3 ×
+          <span class="frac" style="color:#80DEEA"><span class="n">2</span><span class="d">3</span></span>
+          =
+          <span class="frac" style="color:#FFD699"><span class="n">6</span><span class="d">3</span></span>
+          =
+          <span style="color:#FFD699;font-weight:700;">2</span>
+        </span>
+      </div>
+      <div class="sim-nota">Dividir entre una fracción = multiplicar por su inverso.</div>
+    </div>
+    <!-- Paso 4 -->
+    <div class="sim-paso" id="sp4">
+      <div class="sim-enun">
+        Resultado: 2 · x<sup style="font-size:.7em">3/2</sup> + C
+      </div>
+      <div class="sim-linea">
+        <span class="sim-lbl">Completo:</span>
+        <span class="sim-expr">
+          ∫ 3x<sup style="font-size:.7em">1/2</sup> dx =
+          <span style="color:#FFD699;font-weight:700;">2 · x</span>
+          <sup style="color:#FFD699;font-size:.75em;font-weight:700;">3/2</sup>
+          <span style="color:#FFD699;font-weight:700;">+ C</span>
+        </span>
+      </div>
+      <div class="sim-nota" style="border-color:#FFD699;background:rgba(255,214,153,.1);">
+        También se puede escribir como 2x√x + C porque x<sup>3/2</sup> = x · x<sup>1/2</sup> = x√x
+      </div>
+    </div>
+    <!-- Paso 5: exponente negativo -->
+    <div class="sim-paso" id="sp5">
+      <div class="sim-enun">¿Y si el exponente es negativo? · ∫ x<sup style="font-size:.7em">−1/2</sup> dx</div>
+      <div class="sim-linea">
+        <span class="sim-lbl">Exp. nuevo:</span>
+        <span class="sim-expr">
+          <span class="frac" style="color:#FF8A80"><span class="n">−1</span><span class="d">2</span></span>
+          + 1 =
+          <span class="frac" style="color:#FF8A80"><span class="n">−1</span><span class="d">2</span></span>
+          +
+          <span class="frac" style="color:#FF8A80"><span class="n">2</span><span class="d">2</span></span>
+          =
+          <span class="frac" style="color:#FFD699"><span class="n">1</span><span class="d">2</span></span>
+        </span>
+      </div>
+      <div class="sim-linea">
+        <span class="sim-lbl">Coef:</span>
+        <span class="sim-expr">
+          1 ÷
+          <span class="frac" style="color:#FF8A80"><span class="n">1</span><span class="d">2</span></span>
+          = 1 × 2 =
+          <span style="color:#FFD699;font-weight:700;">2</span>
+        </span>
+      </div>
+      <div class="sim-nota" style="border-color:#FF8A80;background:rgba(255,138,128,.1);">
+        ∫ x<sup>−1/2</sup> dx = 2x<sup>1/2</sup> + C = 2√x + C · El negativo desaparece si −p/q + 1 &gt; 0
+      </div>
+    </div>
+
+    <!-- Controles animación -->
+    <div class="sim-nav">
+      <button class="btn-sim" id="btn-ant" onclick="simNav(-1)" style="opacity:.4;" disabled>← Anterior</button>
+      <div class="sim-dot-row" id="dots"></div>
+      <button class="btn-sim pri" id="btn-sig" onclick="simNav(1)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Sliders libres -->
+  <div id="sim-sliders" style="display:none;">
+    <div style="font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      color:var(--slate);margin:14px 0 8px;">Explorar libremente</div>
+    <div class="sim-box">
+      <div class="slider-grid">
+        <div class="slider-item">
+          <span class="slider-lbl">k (coef.)</span>
+          <span class="slider-val" id="sv-k">1</span>
+          <input type="range" class="slider-inp" id="sl-k" min="1" max="6" value="1" oninput="actualizarSim()">
+        </div>
+        <div class="slider-item">
+          <span class="slider-lbl">p (num.)</span>
+          <span class="slider-val" id="sv-p">1</span>
+          <input type="range" class="slider-inp" id="sl-p" min="1" max="5" value="1" oninput="actualizarSim()">
+        </div>
+        <div class="slider-item">
+          <span class="slider-lbl">q (den.)</span>
+          <span class="slider-val" id="sv-q">2</span>
+          <input type="range" class="slider-inp" id="sl-q" min="2" max="5" value="2" oninput="actualizarSim()">
+        </div>
+      </div>
+      <div class="sim-resultado">
+        <div class="sim-res-q" id="sim-q">∫ 1·x<sup style="font-size:.8em">1/2</sup> dx =</div>
+        <div class="sim-res-r" id="sim-r">—</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="btn-b1" onclick="avanzar('b1','b2')" disabled>Ir a los ejercicios →</button>
+</div>
+
+<!-- B2: EJERCICIOS -->
+<div class="card" id="b2">
+  <div class="c-tag">Ejercicios · Construye tu respuesta</div>
+  <div class="c-tit">Selecciona cada pieza de la respuesta</div>
+  <div class="blq blue">
+    <h4>¿Cómo funciona?</h4>
+    <p>Para cada integral verás los menús para elegir el <strong>coeficiente</strong> (como fracción) y el <strong>exponente</strong> (como fracción). La respuesta se forma visualmente arriba. Si te equivocas dos veces aparece la versión de opción múltiple.</p>
+  </div>
+  <div class="div"></div>
+  <div id="ejercicios-wrap"></div>
+  <button class="btn" id="btn-b2" onclick="avanzar('b2','b3')" disabled>Ver mi resumen →</button>
+</div>
+
+<!-- B3: RESUMEN -->
+<div class="card" id="b3">
+  <div class="c-tag">Resumen final</div>
+  <div class="c-tit" style="color:var(--grn)">Tu reporte · S09 · Exponentes fraccionarios</div>
+  <div class="nombre-box">
+    <div>👤</div>
+    <div class="nb-nom" id="b3-nombre">—</div>
+  </div>
+  <p>Toma captura y súbela a Google Classroom junto con tus apuntes del cuaderno.</p>
+  <div id="res-contenido"></div>
+  <div class="cod-box" id="cod-final"></div>
+  <div style="text-align:center;margin-top:14px;padding:10px;background:var(--bg);
+    border-radius:8px;border:1px solid var(--line);">
+    <p style="font-size:.72rem;color:var(--slate);">TPV II · P4 · S09 · Prof. Adrián Cruz · MCCEMS 2025</p>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+'use strict';
+
+// ════════ RNG ════════
+var SEED = (Date.now() ^ (Math.random()*0xFFFFFF|0)) >>> 0;
+function mulberry(s){ return function(){ s=s+0x6D2B79F5|0; var t=Math.imul(s^s>>>15,1|s); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; }; }
+var rng = mulberry(SEED);
+function rnd(n){ return Math.floor(rng()*n); }
+function mcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b;b=a%b;a=t; } return a||1; }
+
+// ════════ ESTADO ════════
+var NOMBRE='', DOCENTE=false;
+var RESP={};  // fid -> {ok, intentos, omcActiva, omcSel, omcOk}
+
+// ════════ EJERCICIOS ════════
+// Estructura fija (el SEED aleatoriza el orden y los distractores de OMC)
+// Trampa: E4 tiene 2/4 sin simplificar — igual al E1 si se simplifica
+var EJS = [
+  { k:1,  p:1,  q:2, trampa:false },  // ∫ x^(1/2) dx
+  { k:3,  p:1,  q:3, trampa:false },  // ∫ 3x^(1/3) dx
+  { k:2,  p:3,  q:2, trampa:false },  // ∫ 2x^(3/2) dx
+  { k:1,  p:2,  q:4, trampa:true  },  // ∫ x^(2/4) dx — TRAMPA
+  { k:4,  p:1,  q:4, trampa:false },  // ∫ 4x^(1/4) dx
+  { k:3,  p:2,  q:3, trampa:false },  // ∫ 3x^(2/3) dx
+  { k:1,  p:-1, q:2, trampa:false },  // ∫ x^(-1/2) dx
+  { k:2,  p:-1, q:3, trampa:false }   // ∫ 2x^(-1/3) dx
+];
+
+// Calcular respuesta correcta
+function calcResp(k, p, q) {
+  var numExp = p + q;
+  var denExp = q;
+  var g1 = mcd(Math.abs(numExp), Math.abs(denExp));
+  if(g1>0){ numExp=numExp/g1; denExp=denExp/g1; }
+  if(denExp<0){ numExp=-numExp; denExp=-denExp; }
+
+  var numCoef = k * q;
+  var denCoef = p + q;
+  if(denCoef<0){ numCoef=-numCoef; denCoef=-denCoef; }
+  var g2 = mcd(Math.abs(numCoef), Math.abs(denCoef));
+  if(g2>0){ numCoef=numCoef/g2; denCoef=denCoef/g2; }
+
+  return { numCoef:numCoef, denCoef:denCoef, numExp:numExp, denExp:denExp };
+}
+
+// Generar opciones OMC: 1 correcta + 4 errores plausibles
+function genOpciones(k, p, q) {
+  var r = calcResp(k, p, q);
+  var correcta = fracHTML(r.numCoef, r.denCoef) + ' &middot; x'
+    + expFracHTML(r.numExp, r.denExp) + ' + C';
+
+  // Errores plausibles
+  var errores = [];
+  // Error 1: no divide entre el nuevo exponente (solo sube)
+  errores.push(fracHTML(k,1) + ' &middot; x' + expFracHTML(r.numExp, r.denExp) + ' + C');
+  // Error 2: exponente incorrecto (no suma 1, deja igual)
+  errores.push(fracHTML(r.numCoef, r.denCoef) + ' &middot; x' + expFracHTML(p, q) + ' + C');
+  // Error 3: signo incorrecto en coeficiente
+  errores.push(fracHTML(-r.numCoef, r.denCoef) + ' &middot; x' + expFracHTML(r.numExp, r.denExp) + ' + C');
+  // Error 4: denominador del exponente mal (usa p en lugar de p+q)
+  var wrongDen = Math.abs(p)!==1 ? Math.abs(p) : q+1;
+  errores.push(fracHTML(r.numCoef, r.denCoef) + ' &middot; x' + expFracHTML(r.numExp, wrongDen) + ' + C');
+
+  // Mezclar
+  var all = [correcta].concat(errores);
+  for(var i=all.length-1;i>0;i--){
+    var j=Math.floor(rng()*(i+1));
+    var tmp=all[i];all[i]=all[j];all[j]=tmp;
+  }
+  return { opts: all, corrIdx: all.indexOf(correcta) };
+}
+
+function fracHTML(num, den) {
+  if(den===1 || den===0) return String(num);
+  return '<span class="frac"><span class="n">'+num+'</span><span class="d">'+den+'</span></span>';
+}
+function expFracHTML(num, den) {
+  if(den===1 || den===0) return '<sup>'+num+'</sup>';
+  return '<sup><span class="frac" style="font-size:.7em"><span class="n">'+num+'</span><span class="d">'+den+'</span></span></sup>';
+}
+
+// Opciones para los selectores de cada ejercicio
+function generarOpcionesSel(correcto, tipo) {
+  // tipo: 'coefNum','coefDen','expNum','expDen'
+  var vals = [correcto];
+  var intentos = 0;
+  while(vals.length < 5 && intentos < 30) {
+    intentos++;
+    var v = correcto + (rnd(7)-3);
+    if(v===0) v=1;
+    if(vals.indexOf(v)<0) vals.push(v);
+  }
+  // Ordenar numéricamente
+  vals.sort(function(a,b){return a-b;});
+  return vals;
+}
+
+// ════════ RENDER EJERCICIOS ════════
+function renderEjercicios() {
+  var wrap = document.getElementById('ejercicios-wrap');
+  wrap.innerHTML='';
+  EJS.forEach(function(ej, idx) {
+    var fid = 'ej'+idx;
+    var r = calcResp(ej.k, ej.p, ej.q);
+    RESP[fid] = {ok:false, intentos:0, omcActiva:false, omcSel:null, omcOk:false, corrIdx:-1};
+
+    // Enunciado HTML
+    var kStr = ej.k===1?'':String(ej.k);
+    var enunHTML = '∫ ' + kStr + 'x' + expFracHTML(ej.p, ej.q) + ' dx';
+
+    var div = document.createElement('div');
+    div.style.marginBottom='22px';
+
+    // Número + enunciado
+    var enunDiv = document.createElement('div');
+    enunDiv.style.cssText='display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;';
+    enunDiv.innerHTML='<div style="width:24px;height:24px;border-radius:50%;background:var(--pur);color:#fff;'
+      +'font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;">'+(idx+1)+'</div>'
+      +'<div class="ej-enun" style="flex:1;">'+enunHTML+'</div>';
+    div.appendChild(enunDiv);
+
+    // Campo por piezas
+    var campo = document.createElement('div');
+    campo.className='piezas-wrap';
+    campo.id='campo-'+fid;
+
+    // Instrucción
+    var inst = document.createElement('div');
+    inst.className='piezas-inst';
+    inst.textContent='Selecciona cada parte de la respuesta:';
+    campo.appendChild(inst);
+
+    // Visualización de la respuesta en construcción
+    var visual = document.createElement('div');
+    visual.className='resp-visual';
+    visual.id='visual-'+fid;
+    visual.innerHTML='<span class="rv-placeholder">La respuesta aparece aquí mientras seleccionas</span>';
+    campo.appendChild(visual);
+
+    // Selectores
+    var selGrid = document.createElement('div');
+    selGrid.className='sel-grid';
+
+    // Generar opciones para cada selector
+    var optsCoefN = generarOpcionesSel(r.numCoef, 'coefNum');
+    var optsCoefD = generarOpcionesSel(r.denCoef, 'coefDen');
+    var optsExpN  = generarOpcionesSel(r.numExp,  'expNum');
+    var optsExpD  = generarOpcionesSel(r.denExp,  'expDen');
+
+    // Fila coeficiente
+    var filaCoef = document.createElement('div');
+    filaCoef.className='sel-fila';
+    filaCoef.innerHTML='<span class="sel-lbl">Coeficiente:</span>';
+    var grpCoef = document.createElement('div');
+    grpCoef.className='sel-group';
+    // Si coefDen es 1, solo mostramos numerador
+    var selCN = buildSelect('scn-'+fid, optsCoefN, r.numCoef, fid);
+    if(r.denCoef !== 1) {
+      var selCD = buildSelect('scd-'+fid, optsCoefD, r.denCoef, fid);
+      grpCoef.innerHTML='<span style="font-size:.78rem;color:var(--slate);margin-right:3px;">num:</span>';
+      grpCoef.appendChild(selCN);
+      grpCoef.innerHTML+='';
+      var sep = document.createElement('span');
+      sep.className='sel-sep'; sep.textContent='/';
+      grpCoef.appendChild(sep);
+      grpCoef.innerHTML+='<span style="font-size:.78rem;color:var(--slate);margin-left:3px;">den:</span>';
+      grpCoef.appendChild(selCD);
+    } else {
+      grpCoef.appendChild(selCN);
+    }
+    filaCoef.appendChild(grpCoef);
+    selGrid.appendChild(filaCoef);
+
+    // Fila exponente
+    var filaExp = document.createElement('div');
+    filaExp.className='sel-fila';
+    filaExp.innerHTML='<span class="sel-lbl">Exponente:</span>';
+    var grpExp = document.createElement('div');
+    grpExp.className='sel-group';
+    var selEN = buildSelect('sen-'+fid, optsExpN, r.numExp, fid);
+    var selED = buildSelect('sed-'+fid, optsExpD, r.denExp, fid);
+    grpExp.innerHTML='<span style="font-size:.78rem;color:var(--slate);margin-right:3px;">num:</span>';
+    grpExp.appendChild(selEN);
+    var sep2 = document.createElement('span');
+    sep2.className='sel-sep'; sep2.textContent='/';
+    grpExp.appendChild(sep2);
+    grpExp.innerHTML+='<span style="font-size:.78rem;color:var(--slate);margin-left:3px;">den:</span>';
+    grpExp.appendChild(selED);
+    filaExp.appendChild(grpExp);
+    selGrid.appendChild(filaExp);
+
+    campo.appendChild(selGrid);
+
+    // Acciones
+    var actions = document.createElement('div');
+    actions.className='campo-actions';
+    var btnB = document.createElement('button');
+    btnB.className='btn-borrar'; btnB.textContent='↺ Limpiar';
+    (function(f){ btnB.onclick=function(){ resetCampo(f); }; })(fid);
+    var btnV = document.createElement('button');
+    btnV.className='btn-ver'; btnV.textContent='Verificar →';
+    btnV.id='vbtn-'+fid;
+    (function(f, ejData, resp){ btnV.onclick=function(){ verificarPiezas(f, ejData, resp); }; })(fid, ej, r);
+    actions.appendChild(btnB);
+    actions.appendChild(btnV);
+    campo.appendChild(actions);
+    div.appendChild(campo);
+
+    // Feedback
+    var fb = document.createElement('div');
+    fb.className='fb'; fb.id='fb-'+fid;
+    div.appendChild(fb);
+
+    // OMC fallback (oculto al inicio)
+    var omcDiv = document.createElement('div');
+    omcDiv.className='omc-wrap'; omcDiv.id='omc-'+fid;
+    var omcData = genOpciones(ej.k, ej.p, ej.q);
+    RESP[fid].corrIdx = omcData.corrIdx;
+    omcDiv.innerHTML='<div class="omc-tit">💡 Modo opción múltiple — selecciona la respuesta correcta:</div>'
+      +'<div class="omc-opts" id="omc-opts-'+fid+'"></div>';
+    var btnOMC = document.createElement('button');
+    btnOMC.className='btn-omc-ver'; btnOMC.id='omc-vbtn-'+fid;
+    btnOMC.textContent='Confirmar opción →'; btnOMC.disabled=true;
+    (function(f, ci){ btnOMC.onclick=function(){ verificarOMC(f,ci); }; })(fid, omcData.corrIdx);
+    omcDiv.appendChild(btnOMC);
+    div.appendChild(omcDiv);
+
+    // Llenar opciones OMC
+    var omcOpts = omcDiv.querySelector('.omc-opts');
+    omcData.opts.forEach(function(opt, oi) {
+      var optEl = document.createElement('div');
+      optEl.className='omc-opt'; optEl.id='omc-opt-'+fid+'-'+oi;
+      optEl.innerHTML='<div class="omc-radio" id="omc-radio-'+fid+'-'+oi+'"></div>'
+        +'<div class="omc-txt">'+opt+'</div>';
+      (function(f2, oi2){ optEl.onclick=function(){ seleccionarOMC(f2,oi2); }; })(fid, oi);
+      omcOpts.appendChild(optEl);
+    });
+
+    wrap.appendChild(div);
+    // Actualizar visual inicial
+    actualizarVisual(fid, r);
+  });
+}
+
+function buildSelect(id, opts, correcto, fid) {
+  var sel = document.createElement('select');
+  sel.className='sel'; sel.id=id;
+  opts.forEach(function(v) {
+    var op = document.createElement('option');
+    op.value=String(v); op.textContent=String(v);
+    if(v===correcto) { /* no pre-select */ }
+    sel.appendChild(op);
+  });
+  // Seleccionar valor neutral (primero)
+  sel.value=String(opts[0]);
+  (function(f, r_correcto){
+    sel.onchange=function(){
+      var r2=calcResp(EJS[parseInt(f.replace('ej',''))].k,
+                      EJS[parseInt(f.replace('ej',''))].p,
+                      EJS[parseInt(f.replace('ej',''))].q);
+      actualizarVisual(f, r2);
+    };
+  })(fid, correcto);
+  return sel;
+}
+
+function actualizarVisual(fid, r) {
+  var visual = document.getElementById('visual-'+fid);
+  if(!visual) return;
+  var idx = parseInt(fid.replace('ej',''));
+  var ej = EJS[idx];
+
+  var scn = document.getElementById('scn-'+fid);
+  var scd = document.getElementById('scd-'+fid);
+  var sen = document.getElementById('sen-'+fid);
+  var sed = document.getElementById('sed-'+fid);
+
+  var cn = scn ? parseInt(scn.value)||0 : r.numCoef;
+  var cd = scd ? parseInt(scd.value)||1 : r.denCoef;
+  var en = sen ? parseInt(sen.value)||0 : r.numExp;
+  var ed = sed ? parseInt(sed.value)||1 : r.denExp;
+
+  var coefStr = cd===1 ? '<span class="rv-tok">'+cn+'</span>'
+    : '<span class="rv-frac"><span class="rv-n">'+cn+'</span><span class="rv-d">'+cd+'</span></span>';
+  var expStr = ed===1 ? '<span class="rv-sup">'+en+'</span>'
+    : '<span class="rv-sup"><span class="rv-frac" style="font-size:.6em"><span class="rv-n">'+en+'</span><span class="rv-d">'+ed+'</span></span></span>';
+
+  visual.innerHTML = coefStr
+    +'<span class="rv-tok">&middot; x</span>'
+    +expStr
+    +'<span class="rv-tok">+ C</span>';
+}
+
+// ════════ VERIFICAR PIEZAS ════════
+function verificarPiezas(fid, ej, r) {
+  var scn = document.getElementById('scn-'+fid);
+  var scd = document.getElementById('scd-'+fid);
+  var sen = document.getElementById('sen-'+fid);
+  var sed = document.getElementById('sed-'+fid);
+
+  var cn = scn ? parseInt(scn.value) : r.numCoef;
+  var cd = scd ? parseInt(scd.value) : r.denCoef;
+  var en = sen ? parseInt(sen.value) : r.numExp;
+  var ed = sed ? parseInt(sed.value) : r.denExp;
+
+  var okCN = cn===r.numCoef;
+  var okCD = cd===r.denCoef;
+  var okEN = en===r.numExp;
+  var okED = ed===r.denExp;
+  var ok = okCN && okCD && okEN && okED;
+
+  RESP[fid].intentos++;
+  RESP[fid].ok = ok;
+
+  var campo = document.getElementById('campo-'+fid);
+
+  if(ok) {
+    if(campo) campo.className='piezas-wrap p-ok';
+    if(scn) scn.className='sel ok';
+    if(scd) scd.className='sel ok';
+    if(sen) sen.className='sel ok';
+    if(sed) sed.className='sel ok';
+    document.getElementById('vbtn-'+fid).disabled=true;
+    if(scn) scn.disabled=true;
+    if(scd) scd.disabled=true;
+    if(sen) sen.disabled=true;
+    if(sed) sed.disabled=true;
+    mostrarFb(fid,'ok','✅ <strong>Correcto.</strong>');
+  } else {
+    if(campo) campo.className='piezas-wrap p-err';
+    if(scn) scn.className='sel '+(okCN?'ok':'err');
+    if(scd) scd.className='sel '+(okCD?'ok':'err');
+    if(sen) sen.className='sel '+(okEN?'ok':'err');
+    if(sed) sed.className='sel '+(okED?'ok':'err');
+
+    var msg = diagnosticarPiezas(okCN, okCD, okEN, okED);
+    mostrarFb(fid,'err','❌ '+msg);
+
+    // Activar OMC si lleva 2 intentos fallidos
+    if(RESP[fid].intentos >= 2) {
+      var omcDiv = document.getElementById('omc-'+fid);
+      if(omcDiv) {
+        omcDiv.classList.add('show');
+        RESP[fid].omcActiva=true;
+        mostrarFb(fid,'inf','💡 Aparece la versión de opción múltiple. Selecciona la respuesta completa.');
+      }
+    }
+  }
+  checarCompleto();
+}
+
+function diagnosticarPiezas(okCN, okCD, okEN, okED) {
+  if(!okEN && okED) return 'El <strong>numerador del exponente</strong> no es correcto. Recuerda: sumas 1 al exponente original — suma los numeradores con denominador común.';
+  if(okEN && !okED) return 'El <strong>denominador del exponente</strong> no es correcto. El denominador no cambia al sumar 1.';
+  if(!okEN && !okED) return 'El <strong>exponente</strong> no es correcto. Revisa cómo sumar 1 a una fracción: busca denominador común.';
+  if(!okCN || !okCD) return 'El <strong>coeficiente</strong> no es correcto. Recuerda: dividir k entre la fracción = multiplicar k por el inverso.';
+  return 'Revisa el coeficiente y el exponente. Aplica la regla paso a paso.';
+}
+
+// ════════ OMC ════════
+function seleccionarOMC(fid, optIdx) {
+  if(RESP[fid].omcOk) return;
+  var container = document.getElementById('omc-opts-'+fid);
+  var allOpts = container.querySelectorAll('.omc-opt');
+  allOpts.forEach(function(o,i){
+    o.className='omc-opt'+(i===optIdx?' sel-omc':'');
+    var radio = document.getElementById('omc-radio-'+fid+'-'+i);
+    if(radio){ radio.style.background=i===optIdx?'var(--pur)':''; radio.textContent=i===optIdx?'●':''; }
+  });
+  RESP[fid].omcSel=optIdx;
+  var btnV = document.getElementById('omc-vbtn-'+fid);
+  if(btnV) btnV.disabled=false;
+}
+
+function verificarOMC(fid, corrIdx) {
+  var r = RESP[fid];
+  if(r.omcOk) return;
+  if(r.omcSel===null) return;
+  r.omcOk = (r.omcSel===corrIdx);
+  r.ok = r.omcOk;
+
+  var container = document.getElementById('omc-opts-'+fid);
+  var allOpts = container.querySelectorAll('.omc-opt');
+  allOpts.forEach(function(o){ o.onclick=null; });
+
+  var corrEl = document.getElementById('omc-opt-'+fid+'-'+corrIdx);
+  if(corrEl){ corrEl.className='omc-opt omc-ok'; var rc=document.getElementById('omc-radio-'+fid+'-'+corrIdx); if(rc){rc.textContent='✓';rc.style.background='var(--grn)';} }
+  if(!r.omcOk){
+    var selEl = document.getElementById('omc-opt-'+fid+'-'+r.omcSel);
+    if(selEl){ selEl.className='omc-opt omc-err'; var rs=document.getElementById('omc-radio-'+fid+'-'+r.omcSel); if(rs){rs.textContent='✗';rs.style.background='var(--red)';} }
+  }
+  var btnV = document.getElementById('omc-vbtn-'+fid);
+  if(btnV) btnV.disabled=true;
+  var fb = document.getElementById('fb-'+fid);
+  if(fb){fb.className='fb show '+(r.omcOk?'ok':'err'); fb.innerHTML=r.omcOk?'✅ <strong>Correcto.</strong>':'❌ <strong>Incorrecto.</strong> La correcta aparece en verde.';}
+  checarCompleto();
+}
+
+function mostrarFb(fid, tipo, msg) {
+  var fb = document.getElementById('fb-'+fid);
+  if(!fb) return;
+  fb.className='fb show '+tipo;
+  fb.innerHTML=msg;
+}
+
+function resetCampo(fid) {
+  var idx = parseInt(fid.replace('ej',''));
+  var r = calcResp(EJS[idx].k, EJS[idx].p, EJS[idx].q);
+  ['scn-','scd-','sen-','sed-'].forEach(function(p2){
+    var el=document.getElementById(p2+fid);
+    if(el){el.className='sel';el.disabled=false;el.selectedIndex=0;}
+  });
+  var fb=document.getElementById('fb-'+fid);
+  if(fb){fb.className='fb';fb.innerHTML='';}
+  var campo=document.getElementById('campo-'+fid);
+  if(campo) campo.className='piezas-wrap';
+  var vbtn=document.getElementById('vbtn-'+fid);
+  if(vbtn) vbtn.disabled=false;
+  actualizarVisual(fid, r);
+}
+
+function checarCompleto() {
+  var todos = true;
+  for(var i=0;i<EJS.length;i++){
+    var f='ej'+i;
+    if(!RESP[f]||RESP[f].intentos===0){todos=false;break;}
+  }
+  var btn=document.getElementById('btn-b2');
+  if(btn) btn.disabled=!todos;
+}
+
+// ════════ SIMULACIÓN ════════
+var simPasoActual = 1;
+var simTotal = 5;
+
+function simNav(dir) {
+  var el = document.getElementById('sp'+simPasoActual);
+  if(el) el.classList.remove('active');
+  simPasoActual += dir;
+  if(simPasoActual<1) simPasoActual=1;
+  if(simPasoActual>simTotal) simPasoActual=simTotal;
+  var nel = document.getElementById('sp'+simPasoActual);
+  if(nel) nel.classList.add('active');
+  actualizarDots();
+  document.getElementById('btn-ant').disabled=(simPasoActual===1);
+  document.getElementById('btn-ant').style.opacity=(simPasoActual===1)?'.4':'1';
+
+  if(simPasoActual===simTotal){
+    document.getElementById('btn-sig').textContent='Explorar →';
+    document.getElementById('btn-sig').onclick=function(){ mostrarSliders(); };
+  } else {
+    document.getElementById('btn-sig').textContent='Siguiente →';
+    document.getElementById('btn-sig').onclick=function(){ simNav(1); };
+  }
+}
+
+function mostrarSliders() {
+  document.getElementById('sim-sliders').style.display='block';
+  document.getElementById('btn-b1').disabled=false;
+  actualizarSim();
+  document.getElementById('sim-sliders').scrollIntoView({behavior:'smooth'});
+}
+
+function actualizarDots() {
+  var dots = document.getElementById('dots');
+  if(!dots) return;
+  var html='';
+  for(var i=1;i<=simTotal;i++) html+='<div class="sim-dot'+(i===simPasoActual?' active':'')+'"></div>';
+  dots.innerHTML=html;
+}
+
+function actualizarSim() {
+  var k = parseInt(document.getElementById('sl-k').value);
+  var p = parseInt(document.getElementById('sl-p').value);
+  var q = parseInt(document.getElementById('sl-q').value);
+  document.getElementById('sv-k').textContent=k;
+  document.getElementById('sv-p').textContent=p;
+  document.getElementById('sv-q').textContent=q;
+
+  var r = calcResp(k,p,q);
+  var kStr = k===1?'':String(k);
+  document.getElementById('sim-q').innerHTML='∫ '+kStr+'x'+expFracHTML(p,q)+' dx =';
+
+  var coefStr = r.denCoef===1 ? String(r.numCoef) : fracHTML(r.numCoef,r.denCoef);
+  document.getElementById('sim-r').innerHTML=coefStr+' &middot; x'+expFracHTML(r.numExp,r.denExp)+' + C';
+}
+
+// ════════ PROGRESO ════════
+var PROG = {b0:0,b1:20,b2:60,b3:100};
+var PROG_LBL = {b0:'Inicio',b1:'Simulación',b2:'Ejercicios',b3:'Finalizado'};
+
+function avanzar(de, a) {
+  var elDe=document.getElementById(de);
+  var elA=document.getElementById(a);
+  if(elDe) elDe.classList.remove('active');
+  if(elA) elA.classList.add('active');
+  var p=PROG[a]||0;
+  document.getElementById('prog-fill').style.width=p+'%';
+  document.getElementById('prog-pct').textContent=p+'%';
+  document.getElementById('prog-txt').textContent=PROG_LBL[a]||'';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(a==='b3') generarResumen();
+}
+
+// ════════ NOMBRE ════════
+function chkNombre(){
+  var v=document.getElementById('inp-nombre').value.trim();
+  document.getElementById('inp-nombre').value=document.getElementById('inp-nombre').value.toUpperCase();
+  document.getElementById('btn-ini').disabled=(v.length<4);
+}
+
+function iniciarActividad(){
+  var v=document.getElementById('inp-nombre').value.trim();
+  if(v.length<4) return;
+  NOMBRE=v.toUpperCase();
+  actualizarDots();
+  renderEjercicios();
+  avanzar('b0','b1');
+}
+
+// ════════ RESUMEN ════════
+function generarResumen(){
+  document.getElementById('b3-nombre').textContent=NOMBRE||'—';
+  var pts=0; var max=EJS.length;
+  var html='';
+  EJS.forEach(function(ej,i){
+    var fid='ej'+i;
+    var r=RESP[fid]||{ok:false,intentos:0};
+    if(r.ok) pts += r.intentos<=1?1:0.6;
+    var cls=r.intentos===0?'neu':r.ok?'ok':'err';
+    var ico=r.intentos===0?'—':r.ok?'✅':'❌';
+    var resp=calcResp(ej.k,ej.p,ej.q);
+    var kStr=ej.k===1?'':String(ej.k);
+    html+='<div class="res-fila '+cls+'">'
+      +'<div style="font-size:1rem;flex-shrink:0;">'+ico+'</div>'
+      +'<div style="flex:1;font-size:.8rem;">'
+      +'<strong>E'+(i+1)+(ej.trampa?' ★':'')+':</strong> ∫ '+kStr+'x'+expFracHTML(ej.p,ej.q)+' dx<br>'
+      +(r.ok?'<span style="color:var(--grn);font-weight:700;">✓ Correcto</span>'
+        +(r.intentos>1?' · vía opción múltiple':'')
+        :'<span style="color:var(--slate);">Correcta: '
+        +fracHTML(resp.numCoef,resp.denCoef)+' · x'+expFracHTML(resp.numExp,resp.denExp)+' + C</span>')
+      +'</div></div>';
+  });
+  var pct=Math.round(pts/max*100);
+  var letra=pct>=90?'Excelente':pct>=75?'Bien':pct>=60?'Suficiente':'En proceso';
+  document.getElementById('res-contenido').innerHTML=
+    '<div class="cal-box"><div class="cal-lbl">Calificación estimada · S09</div>'
+    +'<div class="cal-num">'+pct+'<span style="font-size:1.4rem;color:rgba(255,255,255,.4)">%</span></div>'
+    +'<div class="cal-sub">'+letra+' · '+pts.toFixed(1)+' / '+max+' pts</div>'
+    // Indicador trampa — discreto, solo visible para el Prof.
+    +(RESP['ej3']&&RESP['ej3'].ok?'<div style="margin-top:8px;font-size:.75rem;font-weight:900;color:#fff;letter-spacing:1px;">**</div>':'')
+    +'</div>'+html;
+  var cod=String(((SEED%1000)*43+Math.round(pts*10)+9)%9000+1000);
+  document.getElementById('cod-final').innerHTML=
+    '<div class="cod-lbl">Código de sesión</div>'
+    +'<div class="cod-num">'+cod+'</div>'
+    +'<div style="font-size:.68rem;color:rgba(255,255,255,.55);margin-top:4px;">'+NOMBRE+' · S09 · '+pct+'%</div>';
+}
+
+// ════════ DOCENTE ════════
+function saltarFinal(){
+  var act=document.querySelector('.card.active');
+  if(act) act.classList.remove('active');
+  if(!NOMBRE) NOMBRE='DOCENTE (demo)';
+  renderEjercicios();
+  document.getElementById('b3').classList.add('active');
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  document.getElementById('prog-txt').textContent='Finalizado';
+  window.scrollTo({top:0,behavior:'smooth'});
+  generarResumen();
+}
+function abrirModal(){
+  document.getElementById('modal-doc').classList.add('show');
+  setTimeout(function(){ document.getElementById('modal-inp').focus(); },100);
+}
+function cerrarModal(){
+  document.getElementById('modal-doc').classList.remove('show');
+  document.getElementById('modal-inp').value='';
+  document.getElementById('modal-err').style.display='none';
+}
+document.getElementById('modal-doc').addEventListener('click',function(e){
+  if(e.target===this) cerrarModal();
+});
+function confirmarDoc(){
+  if(document.getElementById('modal-inp').value.trim()==='890'){
+    cerrarModal(); DOCENTE=true; NOMBRE='DOCENTE (demo)';
+    document.getElementById('doc-bar').classList.add('show');
+    SEED=55555; rng=mulberry(SEED);
+    renderEjercicios();
+    avanzar('b0','b1');
+  } else {
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('modal-inp').value='';
+    document.getElementById('modal-inp').focus();
+  }
+}
+</script>
+</body>
+</html>
