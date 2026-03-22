@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller de Pensamiento Variacional II · 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --acento:#7B1FA2; --acento2:#AB47BC; --acento3:#CE93D8; --acento-f:#f0faf5;
+  --cr:#fdfffe; --tie:#0a1a10;
+  --gris:#e8f0ec; --gris2:#c8d8cf;
+  --som:0 4px 24px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cr);font-family:'Nunito',sans-serif;color:var(--tie);min-height:100vh;}
+.nav-bar{position:sticky;top:0;z-index:999;background:var(--acento);display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+.nav-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:.83rem;padding:6px 14px;background:rgba(255,255,255,.13);border-radius:20px;border:1.5px solid rgba(255,255,255,.22);}
+.nav-bar a:hover{background:rgba(255,255,255,.23);}
+.nav-bar .nav-gh{background:transparent;border:1px solid rgba(255,255,255,.2);font-size:.78rem;font-weight:700;color:rgba(255,255,255,.8);}
+.hero{background:linear-gradient(135deg,#7B1FA2 0%,#3d0a54 60%,#150520 100%);padding:40px 20px 48px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);pointer-events:none;}
+.materia-pill{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.9);border-radius:20px;padding:5px 18px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,7vw,3.2rem);color:#fff;letter-spacing:2px;line-height:1.05;margin-bottom:8px;}
+.hero-sub{color:rgba(255,255,255,.7);font-size:.9rem;font-weight:600;margin-bottom:6px;}
+.hero-clave{color:rgba(255,255,255,.45);font-size:.78rem;font-weight:700;letter-spacing:.5px;}
+.stats-bar{background:#fff;border-bottom:2px solid var(--gris);display:flex;justify-content:center;}
+.stat-item{flex:1;max-width:160px;text-align:center;padding:13px 8px;border-right:1px solid var(--gris);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--acento);line-height:1;}
+.stat-lbl{font-size:.68rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.toolbar{max-width:860px;margin:0 auto;padding:18px 16px 8px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.search-wrap{flex:1;min-width:180px;position:relative;}
+.search-wrap input{width:100%;padding:9px 14px 9px 36px;border:2px solid var(--gris2);border-radius:24px;font-family:'Nunito',sans-serif;font-size:.88rem;background:#fff;color:var(--tie);outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--acento2);}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#aaa;pointer-events:none;}
+.count-lbl{font-size:.8rem;font-weight:700;color:#999;white-space:nowrap;}
+.acts-grid{max-width:860px;margin:0 auto;padding:8px 16px 48px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.act-card{background:#fff;border-radius:16px;border:2px solid var(--gris);padding:16px 16px 13px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden;}
+.act-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--card-ac,var(--acento2));border-radius:16px 16px 0 0;}
+.act-card:hover{transform:translateY(-4px);box-shadow:var(--som);border-color:var(--acento3);}
+.act-num{font-family:'Bebas Neue',sans-serif;font-size:.8rem;color:var(--acento3);letter-spacing:1px;}
+.act-name{font-family:'Bebas Neue',sans-serif;font-size:1.08rem;color:var(--acento);line-height:1.2;word-break:break-word;}
+.act-hint{font-size:.75rem;color:var(--acento2);font-weight:700;margin-top:auto;}
+.skel{background:#fff;border-radius:16px;border:2px solid var(--gris);padding:16px;overflow:hidden;}
+.skel-line{background:linear-gradient(90deg,var(--gris) 25%,var(--gris2) 50%,var(--gris) 75%);background-size:200% 100%;border-radius:6px;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{to{background-position:-200% 0}}
+.error-msg{grid-column:1/-1;background:#fdecea;border:2px solid #e57373;border-radius:12px;padding:20px;text-align:center;color:#b71c1c;font-weight:700;font-size:.88rem;display:none;}
+.empty-msg{grid-column:1/-1;text-align:center;padding:40px;color:#bbb;font-size:.88rem;display:none;}
+.footer{background:#0a1a10;color:rgba(255,255,255,.45);text-align:center;padding:18px;font-size:.75rem;font-weight:600;}
+.footer a{color:var(--acento3);text-decoration:none;}
+.c0{--card-ac:#7B1FA2} .c1{--card-ac:#AB47BC} .c2{--card-ac:#E85D04}
+.c3{--card-ac:#023E8A} .c4{--card-ac:#7B1FA2} .c5{--card-ac:#AB47BC}
+.c6{--card-ac:#F9A53A} .c7{--card-ac:#1565C0} .c8{--card-ac:#C1121F}
+.c9{--card-ac:#0f766e} .c10{--card-ac:#9333ea} .c11{--card-ac:#0369a1}
+@media(max-width:520px){.acts-grid{grid-template-columns:1fr;padding:8px 10px 40px;}}
+</style>
+</head>
+<body>
+<div class="nav-bar">
+  <a href="https://cruzhad.github.io/">← Inicio</a>
+  <a class="nav-gh" href="https://github.com/cruzhad/TPVII" target="_blank">GitHub</a>
+</div>
+<div class="hero">
+  <div class="materia-pill">📈 Taller</div>
+  <h1>Taller de Pensamiento Variacional II</h1>
+  <p class="hero-sub">Prof. Adrián Cruz · CEB 4/2 &amp; Bachilleres 17</p>
+  <p class="hero-clave">TPVII · 2026</p>
+</div>
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Actividades</div></div>
+  <div class="stat-item"><div class="stat-num" id="stat-repo">TPVII</div><div class="stat-lbl">Repositorio</div></div>
+  <div class="stat-item"><div class="stat-num" id="stat-año">2026</div><div class="stat-lbl">Ciclo</div></div>
+</div>
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input type="text" id="search-inp" placeholder="Buscar actividad..." oninput="filtrar()">
+  </div>
+  <span class="count-lbl" id="count-lbl"></span>
+</div>
+<div class="acts-grid" id="acts-grid">
+  <div class="skel"><div class="skel-line" style="height:18px;width:40%;margin-bottom:10px;"></div><div class="skel-line" style="height:14px;width:70%;"></div></div>
+  <div class="skel"><div class="skel-line" style="height:18px;width:55%;margin-bottom:10px;"></div><div class="skel-line" style="height:14px;width:80%;"></div></div>
+  <div class="skel"><div class="skel-line" style="height:18px;width:45%;margin-bottom:10px;"></div><div class="skel-line" style="height:14px;width:60%;"></div></div>
+  <div class="error-msg" id="error-msg"></div>
+  <div class="empty-msg" id="empty-msg">No se encontraron actividades.</div>
+</div>
+<div class="footer">
+  <a href="https://cruzhad.github.io/">← Volver al inicio</a> ·
+  <a href="https://github.com/cruzhad/TPVII" target="_blank">Ver en GitHub</a>
+</div>
+<script>
+var USER = 'cruzhad';
+var REPO = 'TPVII';
+var BASE = 'https://' + USER + '.github.io/' + REPO + '/';
+var allActs = [];
+function el(id){{ return document.getElementById(id); }}
+function nombreBonito(filename){{
+  return filename
+    .replace(/\.html$/i,'')
+    .replace(/\s*\(\d+\)\s*/g,' ')
+    .replace(/_v\d+/gi,'')
+    .replace(/[-_]+/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}}
+function cargarActividades(){{ cargarConRama('master'); }}
+function cargarConRama(rama){{
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET','https://api.github.com/repos/'+USER+'/'+REPO+'/git/trees/'+rama+'?recursive=1',true);
+  xhr.setRequestHeader('Accept','application/vnd.github.v3+json');
+  xhr.onreadystatechange=function(){{
+    if(xhr.readyState!==4)return;
+    if(xhr.status===200){{
+      var data=JSON.parse(xhr.responseText);
+      var htmlFiles=[];
+      for(var i=0;i<data.tree.length;i++){{
+        var item=data.tree[i];
+        if(item.type==='blob'&&/\.html$/i.test(item.path)&&!/^index\.html$/i.test(item.path))
+          htmlFiles.push(item.path);
+      }}
+      htmlFiles.sort();
+      allActs=htmlFiles;
+      var st=el('stat-total');
+      if(st)st.textContent=allActs.length||'0';
+      filtrar();
+    }} else if(xhr.status===404&&rama==='master'){{
+      cargarConRama('main');
+    }} else if(xhr.status===403){{
+      mostrarError('Límite de API alcanzado. Intenta en unos minutos.');
+    }} else {{
+      mostrarError('No se encontraron actividades en este repositorio.');
+    }}
+  }};
+  xhr.send();
+}}
+function filtrar(){{
+  var sinp=el('search-inp');
+  var q=sinp?sinp.value.trim().toLowerCase():'';
+  var lista=allActs.filter(function(f){{
+    return !q||f.toLowerCase().indexOf(q)!==-1||nombreBonito(f).toLowerCase().indexOf(q)!==-1;
+  }});
+  var grid=el('acts-grid');
+  var emptyMsg=el('empty-msg');
+  if(!grid)return;
+  if(lista.length===0){{
+    grid.innerHTML='';
+    if(emptyMsg){{emptyMsg.style.display='block';grid.appendChild(emptyMsg);}}
+  }} else {{
+    var html='';
+    for(var i=0;i<lista.length;i++){{
+      var f=lista[i];var nom=nombreBonito(f);
+      html+='<a class="act-card c'+(i%12)+'" href="'+BASE+encodeURIComponent(f)+'" target="_blank">'
+        +'<div class="act-num">Actividad '+(i+1)+'</div>'
+        +'<div class="act-name">'+nom+'</div>'
+        +'<div class="act-hint">Abrir actividad →</div>'
+        +'</a>';
+    }}
+    grid.innerHTML=html;
+    if(emptyMsg){{grid.appendChild(emptyMsg);emptyMsg.style.display='none';}}
+  }}
+  var lbl=el('count-lbl');
+  if(lbl)lbl.textContent=lista.length+' actividad'+(lista.length!==1?'es':'');
+}}
+function mostrarError(msg){{
+  var grid=el('acts-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  var err=el('error-msg');
+  if(err){{err.textContent='⚠️ '+msg;err.style.display='block';grid.appendChild(err);}}
+}}
+document.addEventListener('DOMContentLoaded',function(){{cargarActividades();}});
+</script>
+</body>
+</html>
